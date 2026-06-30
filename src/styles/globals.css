@@ -1,0 +1,278 @@
+@import "tailwindcss";
+
+@theme {
+  --color-surface-tint: #0053db;
+  --color-primary-container: #2563eb;
+  --color-inverse-primary: #b4c5ff;
+  --color-primary: #004ac6;
+  --color-on-secondary-fixed-variant: #38485d;
+  --color-on-primary-fixed-variant: #003ea8;
+  --color-tertiary-fixed: #e0e3e5;
+  --color-surface-container: #e9edff;
+  --color-on-surface-variant: #434655;
+  --color-surface-container-lowest: #ffffff;
+  --color-secondary-fixed: #d3e4fe;
+  --color-on-secondary-fixed: #0b1c30;
+  --color-on-error-container: #93000a;
+  --color-surface-container-high: #e1e8fd;
+  --color-secondary-container: #d0e1fb;
+  --color-tertiary-fixed-dim: #c4c7c9;
+  --color-on-tertiary: #ffffff;
+  --color-on-surface: #141b2b;
+  --color-surface-bright: #f9f9ff;
+  --color-outline-variant: #c3c6d7;
+  --color-surface-container-highest: #dce2f7;
+  --color-background: #f9f9ff;
+  --color-on-tertiary-fixed-variant: #444749;
+  --color-primary-fixed: #dbe1ff;
+  --color-on-tertiary-container: #eff1f3;
+  --color-secondary: #505f76;
+  --color-error-container: #ffdad6;
+  --color-on-secondary-container: #54647a;
+  --color-on-secondary: #ffffff;
+  --color-on-error: #ffffff;
+  --color-on-primary-fixed: #00174b;
+  --color-error: #ba1a1a;
+  --color-on-tertiary-fixed: #191c1e;
+  --color-outline: #737686;
+  --color-surface: #f9f9ff;
+  --color-inverse-on-surface: #edf0ff;
+  --color-surface-dim: #d3daef;
+  --color-on-primary: #ffffff;
+  --color-tertiary-container: #6b6e70;
+  --color-surface-container-low: #f1f3ff;
+  --color-on-background: #141b2b;
+  --color-inverse-surface: #293040;
+  --color-tertiary: #525657;
+  --color-on-primary-container: #eeefff;
+  --color-secondary-fixed-dim: #b7c8e1;
+  --color-primary-fixed-dim: #b4c5ff;
+  --color-surface-variant: #dce2f7;
+
+  /* Custom Spacing Tokens */
+  --spacing-xs: 4px;
+  --spacing-base: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 48px;
+  --spacing-layout-margin: 32px;
+  --spacing-gutter: 20px;
+
+  /* Custom Border Radius Tokens */
+  --radius-sm: 0.25rem;
+  --radius-default: 0.5rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1.0rem;
+  --radius-xl: 1.5rem;
+  --radius-full: 9999px;
+
+  /* Custom Typography Font Families */
+  --font-card-title: "Plus Jakarta Sans", sans-serif;
+  --font-label-uppercase: "Inter", sans-serif;
+  --font-section-heading: "Plus Jakarta Sans", sans-serif;
+  --font-body-md: "Inter", sans-serif;
+  --font-page-title: "Plus Jakarta Sans", sans-serif;
+  --font-body-sm: "Inter", sans-serif;
+  --font-data-mono: "Geist", monospace;
+
+  /* Custom Typography Font Sizes */
+  --text-card-title: 18px;
+  --text-label-uppercase: 12px;
+  --text-section-heading: 24px;
+  --text-body-md: 15px;
+  --text-page-title: 34px;
+  --text-body-sm: 13px;
+  --text-data-mono: 14px;
+}
+
+/* ── Design System CSS Variables ─────────────────────────────── */
+:root {
+  /* Light theme palette matching QuotaFlow Dashboard */
+  --color-bg-primary: #f9f9ff;
+  --color-bg-secondary: #e9edff;
+  --color-bg-card: #ffffff;
+  --color-bg-card-hover: #f1f3ff;
+  --color-bg-elevated: #ffffff;
+
+  /* Accent colors */
+  --color-accent-primary: #004ac6;
+  --color-accent-primary-hover: #003ea8;
+  --color-accent-secondary: #505f76;
+  --color-accent-secondary-hover: #38485d;
+
+  /* Text colors */
+  --color-text-primary: #141b2b;
+  --color-text-secondary: #434655;
+  --color-text-muted: #737686;
+
+  /* Border colors */
+  --color-border: #c3c6d7;
+  --color-border-hover: #737686;
+
+  /* Status colors */
+  --color-success: #15803d;
+  --color-warning: #ea580c;
+  --color-error: #ba1a1a;
+  --color-info: #2563eb;
+
+  /* Glassmorphism */
+  --glass-bg: rgba(255, 255, 255, 0.8);
+  --glass-border: rgba(195, 198, 215, 0.5);
+  --glass-blur: 8px;
+
+  /* Shadows */
+  --shadow-glow-emerald: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  --shadow-glow-violet: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+
+  /* Font */
+  --font-family: 'Inter', system-ui, -apple-system, sans-serif;
+
+  /* Transitions */
+  --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-base: 200ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ── Base Styles ─────────────────────────────────────────────── */
+html {
+  font-family: var(--font-family);
+  background-color: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  min-height: 100vh;
+  background-color: var(--color-bg-primary);
+}
+
+#root {
+  min-height: 100vh;
+}
+
+/* ── Smooth transitions on interactive elements ──────────────── */
+button,
+a,
+input,
+select,
+textarea {
+  transition: all var(--transition-base);
+}
+
+/* ── Custom Scrollbar ────────────────────────────────────────── */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #c3c6d7 transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: #c3c6d7;
+  border-radius: 9999px;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background-color: #737686;
+}
+
+/* ── Selection ───────────────────────────────────────────────── */
+::selection {
+  background-color: rgba(0, 74, 198, 0.2);
+  color: #141b2b;
+}
+
+/* ── Focus Styles ────────────────────────────────────────────── */
+*:focus-visible {
+  outline: 2px solid var(--color-accent-primary);
+  outline-offset: 2px;
+}
+
+/* ── Glassmorphism Utility ───────────────────────────────────── */
+@utility glass {
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border);
+}
+
+@utility glass-strong {
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(195, 198, 215, 0.8);
+}
+
+/* ── Gradient Utilities ──────────────────────────────────────── */
+@utility gradient-emerald {
+  background: linear-gradient(135deg, #004ac6, #2563eb);
+}
+
+@utility gradient-violet {
+  background: linear-gradient(135deg, #505f76, #38485d);
+}
+
+@utility gradient-dark {
+  background: linear-gradient(180deg, #f9f9ff, #e9edff);
+}
+
+@utility gradient-mesh {
+  background:
+    radial-gradient(at 20% 20%, rgba(0, 83, 219, 0.05) 0px, transparent 50%),
+    radial-gradient(at 80% 80%, rgba(84, 100, 122, 0.05) 0px, transparent 50%),
+    radial-gradient(at 50% 50%, rgba(233, 237, 255, 0.5) 0px, transparent 80%);
+}
+
+/* ── Glow Effects ────────────────────────────────────────────── */
+@utility glow-emerald {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+@utility glow-violet {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+@utility glow-emerald-lg {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+}
+
+/* ── Text Gradient ───────────────────────────────────────────── */
+@utility text-gradient-emerald {
+  background: linear-gradient(135deg, #004ac6, #2563eb);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+@utility text-gradient-violet {
+  background: linear-gradient(135deg, #505f76, #38485d);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ── Shimmer Animation for Skeleton ──────────────────────────── */
+@utility shimmer {
+  background: linear-gradient(
+    90deg,
+    rgba(225, 232, 253, 0.3) 25%,
+    rgba(208, 225, 251, 0.5) 50%,
+    rgba(225, 232, 253, 0.3) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+}
+
+/* ── Pulse dot ───────────────────────────────────────────────── */
+@utility animate-pulse-dot {
+  animation: pulse-dot 2s ease-in-out infinite;
+}

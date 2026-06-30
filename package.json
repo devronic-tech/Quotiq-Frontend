@@ -1,0 +1,40 @@
+{
+  "name": "@quotation/web",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --port 5173",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview",
+    "type-check": "tsc --noEmit",
+    "clean": "rimraf dist"
+  },
+  "dependencies": {
+    "@hookform/resolvers": "^5.0.0",
+    "@tanstack/react-query": "^5.80.0",
+    "axios": "^1.9.0",
+    "clsx": "^2.1.0",
+    "framer-motion": "^12.15.0",
+    "lucide-react": "^0.513.0",
+    "quotation-generator": "file:..",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "react-hook-form": "^7.56.0",
+    "react-hot-toast": "^2.5.0",
+    "react-router-dom": "^7.6.0",
+    "recharts": "^2.15.0",
+    "zod": "^3.25.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.1.0",
+    "@types/react": "^19.1.0",
+    "@types/react-dom": "^19.1.0",
+    "@vitejs/plugin-react-swc": "^4.3.0",
+    "autoprefixer": "^10.4.0",
+    "rimraf": "^6.0.0",
+    "tailwindcss": "^4.1.0",
+    "typescript": "^5.8.0",
+    "vite": "^6.3.0"
+  }
+}
