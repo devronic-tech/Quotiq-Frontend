@@ -4,7 +4,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: '/api',
+  baseURL: import.meta.env.VITE_API_URL || '/api',
   headers: { 'Content-Type': 'application/json' },
   timeout: 30000,
 });
@@ -64,8 +64,12 @@ api.interceptors.response.use(
         if (!tokens) throw new Error('No tokens');
 
         const { refreshToken } = JSON.parse(tokens) as { refreshToken: string };
-        // Use basic axios instance to prevent loop
-        const { data } = await axios.post('/api/auth/refresh-token', { refreshToken });
+        
+        // Resolve dynamic refresh URL to prevent routing issues in production
+        const baseURL = import.meta.env.VITE_API_URL || '/api';
+        const refreshUrl = `${baseURL.replace(/\/$/, '')}/auth/refresh-token`;
+        
+        const { data } = await axios.post(refreshUrl, { refreshToken });
 
         const newTokens = data.data;
         localStorage.setItem('qt_tokens', JSON.stringify(newTokens));

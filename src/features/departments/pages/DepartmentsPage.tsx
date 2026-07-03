@@ -103,8 +103,8 @@ export default function DepartmentsPage() {
     <div className="space-y-6 max-w-7xl mx-auto">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-xl font-bold text-slate-100">Departments</h2>
-          <p className="text-xs text-slate-500 mt-1">Manage organization departments for quotations</p>
+          <h2 className="text-xl font-bold text-on-surface">Departments</h2>
+          <p className="text-xs text-on-surface-variant mt-1">Manage organization departments for quotations</p>
         </div>
         <Button variant="primary" size="sm" icon={<Plus size={14} />} onClick={() => setIsOpen(true)}>
           New Department
@@ -113,15 +113,15 @@ export default function DepartmentsPage() {
 
       {isLoading ? (
         <div className="flex items-center justify-center py-20">
-          <Loader2 className="h-8 w-8 animate-spin text-emerald-500" />
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
       ) : departments.length === 0 ? (
-        <Card className="flex flex-col items-center justify-center py-20 text-center border border-dashed border-slate-800 bg-transparent">
-          <div className="h-14 w-14 rounded-2xl bg-slate-900 border border-slate-800 flex items-center justify-center mb-4 text-slate-400">
+        <Card className="flex flex-col items-center justify-center py-20 text-center border border-dashed border-slate-200 bg-white">
+          <div className="h-14 w-14 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-center mb-4 text-slate-500">
             <Building size={24} />
           </div>
-          <h3 className="text-sm font-bold text-slate-200">No departments found</h3>
-          <p className="text-xs text-slate-500 max-w-xs leading-relaxed mt-1">
+          <h3 className="text-sm font-bold text-on-surface">No departments found</h3>
+          <p className="text-xs text-on-surface-variant max-w-xs leading-relaxed mt-1">
             Create departments to categorize quotations and manage team permissions.
           </p>
           <Button variant="outline" size="sm" className="mt-6" icon={<Plus size={14} />} onClick={() => setIsOpen(true)}>
@@ -131,15 +131,15 @@ export default function DepartmentsPage() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {departments.map((dept) => (
-            <Card key={dept.id} className="relative group overflow-hidden border border-slate-800/80 hover:border-slate-700/80 hover:bg-slate-900/40 hover:shadow-glow-emerald">
+            <Card key={dept.id} className="relative group overflow-hidden border border-slate-200 bg-white hover:border-slate-350 shadow-soft hover:shadow-md transition-all duration-200 p-5">
               <div className="flex items-start justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-400">
+                  <div className="h-10 w-10 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-center text-slate-550">
                     <Building size={18} />
                   </div>
                   <div>
-                    <h4 className="text-sm font-bold text-slate-200">{dept.name}</h4>
-                    <p className="text-[10px] text-slate-500 mt-0.5">
+                    <h4 className="text-sm font-bold text-on-surface">{dept.name}</h4>
+                    <p className="text-[10px] text-on-surface-variant mt-0.5">
                       Created: {new Date(dept.createdAt).toLocaleDateString()}
                     </p>
                   </div>
@@ -148,7 +148,7 @@ export default function DepartmentsPage() {
                 <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                   <button
                     onClick={() => handleOpenEdit(dept)}
-                    className="p-1.5 rounded-lg text-slate-400 hover:bg-slate-800 hover:text-slate-200 transition-all duration-200"
+                    className="p-1.5 rounded-lg text-slate-400 hover:bg-slate-150 hover:text-slate-700 transition-all duration-200 cursor-pointer"
                   >
                     <Edit2 size={14} />
                   </button>
@@ -158,7 +158,7 @@ export default function DepartmentsPage() {
                         deleteMutation.mutate(dept.id);
                       }
                     }}
-                    className="p-1.5 rounded-lg text-slate-400 hover:bg-slate-850 hover:text-red-400 transition-all duration-200"
+                    className="p-1.5 rounded-lg text-slate-400 hover:bg-red-50 hover:text-red-500 transition-all duration-200 cursor-pointer"
                   >
                     <Trash2 size={14} />
                   </button>

@@ -178,55 +178,187 @@ export default function QuotationDetailPage() {
     <div className="space-y-lg max-w-4xl mx-auto pb-xl">
       {/* Print Style Injections */}
       <style>{`
-        @media print {
-          @page {
-            margin-top: 20px;
+        /* =====================================================
+           GLOBAL PAGE PROPERTIES (Must be at top-level)
+           ===================================================== */
+        @page {
+          size: A4 portrait;
+          margin: 0;
+        }
+
+        /* =====================================================
+           SCREEN STYLES: Fixed A4 page preview boxes
+           ===================================================== */
+        @media screen {
+          .contract-body {
+            width: 210mm;
+            height: 297mm;
+            overflow: hidden;
+            padding: 40px !important;
+            background-image: url(/back.png) !important;
+            background-size: 100% 100% !important;
+            background-repeat: no-repeat !important;
+            background-position: center !important;
+            background-color: white;
+            box-sizing: border-box;
             margin-bottom: 20px;
-            margin-left: 2cm;
-            margin-right: 2cm;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.13);
           }
-          aside, header, nav, .no-print, button, .chat-widget, [class*="chat"], [id*="chat"], [class*="floating"] {
-            display: none !important;
+          
+          .contract-body p, .contract-body li {
+            font-family: "Times New Roman", Times, serif;
+            line-height: 1.6;
+            color: #333333;
           }
-          div[style*="paddingLeft"], div[style*="padding-left"] {
-            padding-left: 0 !important;
-          }
-          body {
-            background-color: white !important;
-            color: #1a1a1a !important;
-            font-family: "Times New Roman", Times, serif !important;
+        }
+
+        /* =====================================================
+           PRINT STYLES: Flowing document with tiling background
+           ===================================================== */
+        @media print {
+          html, body {
+            width: 210mm !important;
+            height: auto !important;
             margin: 0 !important;
-            padding-top: 20px !important;
-            padding-bottom: 20px !important;
+            padding: 0 !important;
+            background: white !important;
           }
-          .print-card {
-            border: none !important;
-            box-shadow: none !important;
+
+          /* ── 1. Nuke header completely (sticky header is 64px tall) ── */
+          header,
+          [class*="sticky"],
+          [class*="h-16"],
+          nav,
+          aside {
+            display: none !important;
+            visibility: hidden !important;
+            height: 0 !important;
+            min-height: 0 !important;
+            max-height: 0 !important;
+            overflow: hidden !important;
             padding: 0 !important;
             margin: 0 !important;
-            background: transparent !important;
           }
+
+          /* ── 2. Hide all UI chrome ── */
+          body > :not(#root),
+          .no-print, button,
+          .chat-widget,
+          [class*="chat"], [id*="chat"],
+          [class*="floating"],
+          iframe {
+            display: none !important;
+            visibility: hidden !important;
+          }
+
+          /* ── 3. Flatten and nuke positioning of all ancestors ── */
+          #root, #root > div, main, main > div,
+          .min-h-screen,
+          .flex-col,
+          .space-y-lg,
+          .max-w-4xl,
+          .mx-auto,
+          .flex,
+          [class*="p-layout"],
+          [class*="layout"],
+          div[style*="paddingLeft"],
+          div[style*="padding-left"],
+          div[style*="paddingTop"],
+          div[style*="padding-top"] {
+            display: block !important;
+            position: static !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            max-width: none !important;
+            width: 100% !important;
+            height: auto !important;
+            min-height: 0 !important;
+            border: none !important;
+            box-shadow: none !important;
+            background: transparent !important;
+            transform: none !important;
+            filter: none !important;
+          }
+
+          /* ── 4. Kill Tailwind space-y-* child margin-top ── */
+          [class*="space-y-"] > * + * {
+            margin-top: 0 !important;
+          }
+          [class*="space-y-"] > * {
+            margin-top: 0 !important;
+            margin-bottom: 0 !important;
+          }
+
+          /* ── 5. Kill any remaining padding utility classes ── */
+          [class*="pb-"], [class*="pt-"], [class*="py-"],
+          [class*="px-"], [class*="pl-"], [class*="pr-"] {
+            padding-top: 0 !important;
+            padding-bottom: 0 !important;
+          }
+
+          body {
+            background: white !important;
+            color: #1a1a1a !important;
+            font-family: "Times New Roman", Times, serif !important;
+          }
+
+          /*
+           * ── 6. THE PRINT DOCUMENT ROOT ──
+           * Positioned absolutely at top:0, left:0 relative to the body
+           * so the background image starts exactly at the physical page top/left.
+           */
+          .print-doc-root {
+            display: block !important;
+            position: absolute !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 210mm !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            background-image: url(/back.png) !important;
+            background-size: 210mm 297mm !important;
+            background-repeat: repeat-y !important;
+            background-position: 0 0 !important;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+            box-sizing: border-box !important;
+          }
+
+          /*
+           * ── 7. Each contract-body: transparent flowing block ──
+           * 40px inner padding per page section.
+           */
+          .print-doc-root .contract-body {
+            display: block !important;
+            width: auto !important;
+            height: auto !important;
+            min-height: 0 !important;
+            overflow: visible !important;
+            background: none !important;
+            border: none !important;
+            box-shadow: none !important;
+            margin: 0 !important;
+            padding: 40px 40px !important;
+            box-sizing: border-box !important;
+          }
+
+          /* Force each logical section to start on its own physical A4 page */
+          .print-doc-root .contract-body + .contract-body {
+            page-break-before: always !important;
+            break-before: page !important;
+          }
+
           .table-header {
             background-color: #f1f5f9 !important;
             color: black !important;
             -webkit-print-color-adjust: exact;
             print-color-adjust: exact;
           }
-          .print-page-break {
-            page-break-before: always !important;
-            break-before: page !important;
-            margin-top: 2.5cm !important; /* Spacious margin at the top of the new page */
-          }
+
           .print-avoid-break {
             page-break-inside: avoid !important;
             break-inside: avoid !important;
           }
-        }
-        
-        .contract-body p, .contract-body li {
-          font-family: "Times New Roman", Times, serif;
-          line-height: 1.6;
-          color: #333333;
         }
       `}</style>
 
@@ -252,502 +384,344 @@ export default function QuotationDetailPage() {
       </div>
 
       {/* DOCUMENT PAGE SHEET */}
-      <Card className="print-card border border-outline-variant bg-white p-12 rounded-xl shadow-soft space-y-xl text-on-surface contract-body">
-        
+      <div className="flex flex-col items-center print-doc-root">
         {isSocialMedia ? (
           /* ============================================================
              TEMPLATE A: SOCIAL MEDIA DEPARTMENT INVOICE
              ============================================================ */
-          <div className="space-y-lg">
-            {/* Centered Brand Header block */}
-            <div className="text-center space-y-1">
-              <img src="/devronic.png" alt="Devronic Logo" className="h-16 mx-auto object-contain mb-2" />
-              <h1 className="text-xl font-bold uppercase tracking-wide" style={{ color: '#101010', fontFamily: 'Times New Roman' }}>
-                DEVRONIC TECHNOLOGIES
-              </h1>
-              <p className="text-xs font-bold font-serif uppercase tracking-tight" style={{ color: '#202020' }}>
-                SADAR AZAD CHOWK, NAGPUR-440001.
-              </p>
-              <div className="flex justify-center items-center gap-2 text-xs font-sans text-on-surface-variant pt-0.5">
-                <span><strong>Phone:</strong> 8530025346, 9158441435</span>
-                <span>•</span>
-                <span><strong>Website:</strong> <a href="https://www.devronic.com" className="underline text-blue-600">www.devronic.com</a></span>
-              </div>
-              <p className="text-xs font-sans text-on-surface-variant">
-                <strong>Email:</strong> devronic.org@gmail.com
-              </p>
-              {/* Centered thick divider line */}
-              <div className="border-b-2 border-black mt-3 mx-auto" />
-            </div>
-
-            {/* Document details */}
-            <div className="space-y-md pt-sm">
-              <h2 className="text-sm font-bold uppercase tracking-wider" style={{ fontFamily: 'Times New Roman' }}>
-                INVOICE
-              </h2>
-
-              <div className="space-y-1 text-xs" style={{ fontFamily: 'Times New Roman' }}>
-                <p><strong>Client:</strong> {quotation.customer.name}</p>
-                <p className="pt-2"><strong>Invoice Date:</strong> {executionDate}</p>
-                <p><strong>Due Date:</strong> {dueDate}</p>
-              </div>
-            </div>
-
-            {/* Structured double-column simple table */}
-            <table className="w-full border-collapse border border-black text-xs" style={{ fontFamily: 'Times New Roman' }}>
-              <thead>
-                <tr className="border-b border-black bg-slate-50">
-                  <th className="py-2.5 px-md border-r border-black font-bold text-left w-[35%]">Service Description</th>
-                  <th className="py-2.5 px-md font-bold text-left"></th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-black text-on-surface">
-                {quotation.sections.map((sec, secIdx) => (
-                  <tr key={sec.id || secIdx} className="border-b border-black">
-                    <td className="py-3 px-md border-r border-black font-bold">{sec.name}</td>
-                    <td className="py-3 px-md space-y-1">
-                      {sec.items.map((item, itemIdx) => {
-                        const descParts = item.description.split(' - ');
-                        const title = descParts[0] || 'Deliverable';
-                        const details = descParts[1] || '';
-                        return (
-                          <div key={item.id || itemIdx}>
-                            <span>{title}</span>
-                            {details && <span className="text-on-surface-variant font-sans font-medium text-[10px]"> ({details})</span>}
-                          </div>
-                        );
-                      })}
-                    </td>
-                  </tr>
-                ))}
-                <tr className="bg-slate-50 font-bold border-t border-black">
-                  <td className="py-2.5 px-md border-r border-black font-bold text-[11px]">TOTAL AMOUNT PAYABLE</td>
-                  <td className="py-2.5 px-md font-bold font-sans text-sm">
-                    {Number(quotation.grandTotal).toLocaleString('en-IN')}/-
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-
-            {/* Dynamic Banking details block and footer */}
-            <div className="space-y-md text-xs pt-md" style={{ fontFamily: 'Times New Roman' }}>
-              <p>Kindly process the payment using the bank details provided below:</p>
-              
-              <div className="pl-md space-y-0.5 text-on-surface-variant font-medium">
-                <p>Account Name: Sheikh Arbab Munir Sheikh</p>
-                <p>Bank Name: State Bank of India</p>
-                <p>Account Number: 41463051431</p>
-                <p>IFSC Code: SBIN0011519</p>
-                <p>Branch: Civil Lines Nagpur</p>
-              </div>
-
-              <p className="pt-sm">Once the payment has been completed, kindly share the transaction reference/UTR number for our records.</p>
-              <p>Thank you for your trust and continued support. We look forward to continuing our association.</p>
-              
-              <p className="pt-xs">Best Regards,</p>
-              
-              <div className="space-y-1">
-                <p className="font-bold">Devronic Technologies</p>
-                <p className="flex items-center gap-xs text-[11px] font-sans">
-                  <span className="text-red-500">📞</span> 8530025346, 9158441435
+          <div className="print-card contract-body shadow-soft">
+            <div className="space-y-lg">
+              {/* Centered Brand Header block */}
+              <div className="text-center space-y-1">
+                <img src="/devronic.png" alt="Devronic Logo" className="h-16 mx-auto object-contain mb-2" />
+                <h1 className="text-xl font-bold uppercase tracking-wide" style={{ color: '#101010', fontFamily: 'Times New Roman' }}>
+                  DEVRONIC TECHNOLOGIES
+                </h1>
+                <p className="text-xs font-bold font-serif uppercase tracking-tight" style={{ color: '#202020' }}>
+                  SADAR AZAD CHOWK, NAGPUR-440001.
                 </p>
-                <p className="flex items-center gap-xs text-[11px] font-sans">
-                  <span className="text-blue-500">✉</span> devronic.org@gmail.com
+                <div className="flex justify-center items-center gap-2 text-xs font-sans text-on-surface-variant pt-0.5">
+                  <span><strong>Phone:</strong> 8530025346, 9158441435</span>
+                  <span>â€¢</span>
+                  <span><strong>Website:</strong> <a href="https://www.devronic.com" className="underline text-blue-600">www.devronic.com</a></span>
+                </div>
+                <p className="text-xs font-sans text-on-surface-variant">
+                  <strong>Email:</strong> devronic.org@gmail.com
                 </p>
+                {/* Centered thick divider line */}
+                <div className="border-b-2 border-black mt-3 mx-auto" />
               </div>
-            </div>
-          </div>
-        ) : (
-          /* ============================================================
-             TEMPLATE B: TECHNICAL DEPARTMENT SOFTWARE DEVELOPMENT CONTRACT
-             ============================================================ */
-          <div className="space-y-lg">
-            {/* Top Header Block - centered logo and details */}
-            <div className="pb-sm space-y-md text-center font-sans">
-              <div className="flex flex-col items-center justify-center space-y-2">
-                <img src="/devronic.png" alt="Devronic Logo" className="h-16 object-contain" />
-                <h2 className="text-xl font-extrabold tracking-wide text-slate-900" style={{ fontFamily: '"Times New Roman", Times, serif' }}>
-                  Devronic Technologies
+
+              {/* Document details */}
+              <div className="space-y-md pt-sm">
+                <h2 className="text-sm font-bold uppercase tracking-wider" style={{ fontFamily: 'Times New Roman' }}>
+                  INVOICE
                 </h2>
-              </div>
-              <div className="space-y-1 text-xs text-slate-700 leading-normal font-sans">
-                <p>
-                  <strong>Phone:</strong> Aqtab Zafar : +91 85300 25346 | Sheikh Arbab : +91 91584 41435
-                </p>
-                <p>
-                  <strong>Email:</strong> <a href="mailto:devronic.org@gmail.com" className="text-blue-600 underline">devronic.org@gmail.com</a> | <strong>Website:</strong> <a href="https://www.devronic.com" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">www.devronic.com</a>
-                </p>
-                <p>
-                  <strong>Address:</strong> Sadar Azad Chowk, Nagpur
-                </p>
-              </div>
-            </div>
 
-            {/* Contract Main Title */}
-            <div className="text-center py-sm space-y-2">
-              <h1 className="text-lg font-bold tracking-wider text-on-surface uppercase border-y border-outline-variant/80 py-2 leading-snug">
-                SOFTWARE DEVELOPMENT AGREEMENT
-              </h1>
-              {quotation.projectName && (
-                <h2 className="text-sm font-bold text-primary font-sans uppercase tracking-wide">
-                  ({quotation.projectName})
-                </h2>
-              )}
-              <p className="text-xs text-on-surface-variant font-medium">
-                Agreement Number: <span className="font-bold text-on-surface">{quotation.quotationNumber}</span>
-              </p>
-            </div>
-
-            {/* Execution Clause */}
-            <div className="bg-surface-container-low border border-outline-variant/60 rounded-lg p-md">
-              <p className="text-xs leading-relaxed text-on-surface">
-                This Software Development Agreement (<strong>“Agreement”</strong>) is executed on <span className="font-bold border-b border-on-surface pb-0.5 px-2">{executionDate}</span> by and between the parties:
-              </p>
-            </div>
-
-            {/* BETWEEN parties columns */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-lg border-b border-outline-variant/40 pb-lg">
-              <div className="space-y-xs">
-                <h3 className="text-[10px] font-sans font-bold tracking-wider uppercase text-primary border-b border-primary/20 pb-0.5">
-                  SERVICE PROVIDER
-                </h3>
-                <p className="font-bold text-sm text-on-surface">Devronic Technologies</p>
-                <div className="text-xs space-y-1 text-on-surface-variant font-sans">
-                  <p className="flex items-start gap-xs">
-                    <MapPin size={12} className="text-secondary mt-0.5 shrink-0" />
-                    <span>Address: Sadar Azad Chowk, Nagpur</span>
-                  </p>
-                  <p className="flex items-center gap-xs">
-                    <Mail size={12} className="text-secondary shrink-0" />
-                    <span>Email: devronic.org@gmail.com</span>
-                  </p>
-                  <p className="flex items-center gap-xs">
-                    <Phone size={12} className="text-secondary shrink-0" />
-                    <span>Phone: +91 8530025346 | +91 9158441435</span>
-                  </p>
+                <div className="space-y-1 text-xs" style={{ fontFamily: 'Times New Roman' }}>
+                  <p><strong>Client:</strong> {quotation.customer.name}</p>
+                  <p className="pt-2"><strong>Invoice Date:</strong> {executionDate}</p>
+                  <p><strong>Due Date:</strong> {dueDate}</p>
                 </div>
               </div>
 
-              <div className="space-y-xs">
-                <h3 className="text-[10px] font-sans font-bold tracking-wider uppercase text-primary border-b border-primary/20 pb-0.5">
-                  AND CLIENT
-                </h3>
-                <p className="font-bold text-sm text-on-surface">{quotation.customer.name}</p>
-                <div className="text-xs space-y-1 text-on-surface-variant font-sans">
-                  {billingAddress && (
-                    <p className="flex items-start gap-xs">
-                      <MapPin size={12} className="text-secondary mt-0.5 shrink-0" />
-                      <span>Address: {billingAddress}</span>
-                    </p>
-                  )}
-                  {quotation.customer.email && (
-                    <p className="flex items-center gap-xs">
-                      <Mail size={12} className="text-secondary shrink-0" />
-                      <span>Email: {quotation.customer.email}</span>
-                    </p>
-                  )}
-                  {(quotation.customer.phone || contactPerson) && (
-                    <p className="flex items-center gap-xs">
-                      <Phone size={12} className="text-secondary shrink-0" />
-                      <span>Phone/Contact: {quotation.customer.phone || contactPerson}</span>
-                    </p>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            {/* 1. PURPOSE */}
-            <div className="space-y-sm">
-              <h2 className="text-xs font-bold font-sans uppercase tracking-wider text-on-surface border-l-2 border-primary pl-xs">
-                1. PURPOSE OF AGREEMENT
-              </h2>
-              <p className="text-xs leading-relaxed text-on-surface-variant">
-                The Client appoints Devronic Technologies to develop and host a <strong>{quotation.projectType || 'Custom Software Solution'}</strong>, strictly in accordance with the scope defined in this Agreement.
-              </p>
-              {quotation.description && (
-                <p className="text-xs leading-relaxed text-on-surface-variant">
-                  {quotation.description}
-                </p>
-              )}
-            </div>
-
-            {/* 2. SOW */}
-            <div className="space-y-sm">
-              <h2 className="text-xs font-bold font-sans uppercase tracking-wider text-on-surface border-l-2 border-primary pl-xs">
-                2. DETAILED SCOPE OF WORK – MODULES / FEATURES
-              </h2>
-              <p className="text-xs leading-relaxed text-on-surface-variant">
-                The system shall support the following modules and features:
-              </p>
-
-              {quotation.sections.map((sec, secIdx) => {
-                // Parse encoded scope description from section name
-                const parts = sec.name.split('|||');
-                const moduleName = parts[0]?.trim() || sec.name;
-                const scopeText = parts[1]?.trim() || '';
-                const scopeLines = scopeText
-                  ? scopeText.split('\n').map(l => l.trim()).filter(Boolean)
-                  : [];
-                const itemFeatures = sec.items.map(it => it.description.split(' - ')).map(p => ({ title: p[0] || '', detail: p[1] || '' }));
-
-                return (
-                  <div key={sec.id || secIdx} className="pl-sm space-y-xs pt-1">
-                    <h3 className="font-bold text-xs text-primary font-sans flex items-center gap-xs">
-                      <span className="w-1.5 h-1.5 rounded-full bg-primary" />
-                      <span>Module {secIdx + 1}: {moduleName}</span>
-                    </h3>
-
-                    {/* Scope lines (from the scope textarea) */}
-                    {scopeLines.length > 0 && (
-                      <ul className="list-none pl-md space-y-1 text-xs text-on-surface-variant">
-                        {scopeLines.map((line, li) => (
-                          <li key={li} className="flex items-start gap-1.5">
-                            <span className="text-primary mt-0.5 shrink-0">{line.startsWith('•') ? '' : '•'}</span>
-                            <span>{line.replace(/^[•\-]\s*/, '')}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    )}
-
-                    {/* Item features (from line items) */}
-                    {itemFeatures.length > 0 && scopeLines.length === 0 && (
-                      <ul className="list-disc pl-md space-y-1 text-xs text-on-surface-variant">
-                        {itemFeatures.map((feat, fi) => (
-                          <li key={fi}>
-                            <strong>{feat.title}</strong>{feat.detail ? ` — ${feat.detail}` : ''}
-                          </li>
-                        ))}
-                      </ul>
-                    )}
-
-                    {/* If both scope and items exist, show items as sub-features */}
-                    {itemFeatures.length > 0 && scopeLines.length > 0 && (
-                      <ul className="list-none pl-md mt-1 space-y-1 text-xs text-on-surface-variant/80">
-                        {itemFeatures.map((feat, fi) => (
-                          <li key={fi} className="flex items-start gap-1.5">
-                            <span className="text-secondary/60 shrink-0">◦</span>
-                            <span><strong>{feat.title}</strong>{feat.detail ? ` — ${feat.detail}` : ''}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-
-            {/* 3. COST & PAYMENTS */}
-            <div className="space-y-sm mt-8">
-              <h2 className="text-xs font-bold font-sans uppercase tracking-wider text-on-surface border-l-2 border-primary pl-xs">
-                3. PAYMENT TERMS
-              </h2>
-              <p className="text-xs leading-relaxed text-on-surface-variant">
-                The total development cost for the {quotation.projectName} as defined in the Scope of Work shall be:
-              </p>
-              <div className="bg-surface-container-low border border-outline-variant/60 rounded-lg p-md font-sans space-y-1">
-                <p className="text-xs text-on-surface font-bold">
-                  Total Project Cost: {quotation.currency} {Number(quotation.grandTotal).toLocaleString(undefined, { minimumFractionDigits: 2 })}
-                </p>
-                <p className="text-xs text-secondary font-bold italic">
-                  ({numberToWords(Number(quotation.grandTotal), quotation.currency)})
-                </p>
-              </div>
-
-              <table className="w-full border border-outline-variant text-left text-xs font-sans mt-sm print-table">
+              {/* Structured double-column simple table */}
+              <table className="w-full border-collapse border border-black text-xs" style={{ fontFamily: 'Times New Roman' }}>
                 <thead>
-                  <tr className="bg-surface-container-low border-b border-outline-variant text-[11px] font-bold text-on-surface-variant">
-                    <th className="py-2.5 px-md w-16 text-center border-r border-outline-variant/60">Sr.No</th>
-                    <th className="py-2.5 px-md border-r border-outline-variant/60">Modules</th>
-                    <th className="py-2.5 px-md w-36 text-right">Payment</th>
+                  <tr className="border-b border-black bg-slate-50">
+                    <th className="py-2.5 px-md border-r border-black font-bold text-left w-[35%]">Service Description</th>
+                    <th className="py-2.5 px-md font-bold text-left"></th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-outline-variant/30 text-on-surface">
-                  {quotation.sections.map((sec, idx) => {
-                    // Parse module name (strip encoded scope description)
-                    const displayName = sec.name.split('|||')[0]?.trim() || sec.name;
-                    const secTotal = sec.items.reduce((sum, it) => sum + (it.quantity * Number(it.unitPrice)), 0);
-                    return (
-                      <tr key={sec.id || idx}>
-                        <td className="py-2.5 px-md text-center border-r border-outline-variant/30 font-data-mono">{idx + 1}.</td>
-                        <td className="py-2.5 px-md border-r border-outline-variant/30">{displayName}</td>
-                        <td className="py-2.5 px-md text-right font-data-mono font-semibold">
-                          {secTotal > 0 ? `${secTotal.toLocaleString('en-IN')}/-` : '—'}
-                        </td>
-                      </tr>
-                    );
-                  })}
-                  {Number(quotation.discountTotal) > 0 && (
-                    <tr className="bg-surface-container-low/40">
-                      <td className="border-r border-outline-variant/30" />
-                      <td className="py-2.5 px-md border-r border-outline-variant/30 text-right text-on-surface-variant font-bold">Discount:</td>
-                      <td className="py-2.5 px-md text-right font-data-mono text-error font-bold">
-                        -{Number(quotation.discountTotal).toLocaleString('en-IN')}/-
+                <tbody className="divide-y divide-black text-on-surface">
+                  {quotation.sections.map((sec, secIdx) => (
+                    <tr key={sec.id || secIdx} className="border-b border-black">
+                      <td className="py-3 px-md border-r border-black font-bold">{sec.name}</td>
+                      <td className="py-3 px-md space-y-1">
+                        {sec.items.map((item, itemIdx) => {
+                          const descParts = item.description.split(' - ');
+                          const title = descParts[0] || 'Deliverable';
+                          const details = descParts[1] || '';
+                          return (
+                            <div key={item.id || itemIdx}>
+                              <span>{title}</span>
+                              {details && <span className="text-on-surface-variant font-sans font-medium text-[10px]"> ({details})</span>}
+                            </div>
+                          );
+                        })}
                       </td>
                     </tr>
-                  )}
-                  {Number(quotation.taxTotal) > 0 && (
-                    <tr className="bg-surface-container-low/40">
-                      <td className="border-r border-outline-variant/30" />
-                      <td className="py-2.5 px-md border-r border-outline-variant/30 text-right text-on-surface-variant font-bold">GST / Tax:</td>
-                      <td className="py-2.5 px-md text-right font-data-mono font-bold">
-                        +{Number(quotation.taxTotal).toLocaleString('en-IN')}/-
-                      </td>
-                    </tr>
-                  )}
-                  <tr className="bg-surface-container-low font-bold border-t-2 border-outline-variant">
-                    <td className="border-r border-outline-variant/30" />
-                    <td className="py-2.5 px-md border-r border-outline-variant/30 text-right text-primary font-bold font-sans uppercase text-[10px]">Total:</td>
-                    <td className="py-2.5 px-md text-right font-data-mono text-primary text-sm font-bold">
+                  ))}
+                  <tr className="bg-slate-50 font-bold border-t border-black">
+                    <td className="py-2.5 px-md border-r border-black font-bold text-[11px]">TOTAL AMOUNT PAYABLE</td>
+                    <td className="py-2.5 px-md font-bold font-sans text-sm">
                       {Number(quotation.grandTotal).toLocaleString('en-IN')}/-
                     </td>
                   </tr>
                 </tbody>
               </table>
 
-              {quotation.paymentTerms && (
-                <p className="text-xs leading-relaxed text-on-surface-variant font-sans pt-1">
-                  * The client can pay the described amount based on the following schedule: Upfront Deposit (<strong>{quotation.paymentTerms.split(',')[0] || '30'}%</strong>), Mid-Project Milestone (<strong>{quotation.paymentTerms.split(',')[1] || '40'}%</strong>), and Final handover (<strong>{quotation.paymentTerms.split(',')[2] || '30'}%</strong>).
-                </p>
-              )}
+              {/* Dynamic Banking details block and footer */}
+              <div className="space-y-md text-xs pt-md" style={{ fontFamily: 'Times New Roman' }}>
+                <p>Kindly process the payment using the bank details provided below:</p>
+                
+                <div className="pl-md space-y-0.5 text-on-surface-variant font-medium">
+                  <p>Account Name: Sheikh Arbab Munir Sheikh</p>
+                  <p>Bank Name: State Bank of India</p>
+                  <p>Account Number: 41463051431</p>
+                  <p>IFSC Code: SBIN0011519</p>
+                  <p>Branch: Civil Lines Nagpur</p>
+                </div>
+
+                <p className="pt-sm">Once the payment has been completed, kindly share the transaction reference/UTR number for our records.</p>
+                <p>Thank you for your trust and continued support. We look forward to continuing our association.</p>
+                
+                <p className="pt-xs">Best Regards,</p>
+                
+                <div className="space-y-1">
+                  <p className="font-bold">Devronic Technologies</p>
+                  <p className="flex items-center gap-xs text-[11px] font-sans">
+                    <span className="text-red-500">ðŸ“ž</span> 8530025346, 9158441435
+                  </p>
+                  <p className="flex items-center gap-xs text-[11px] font-sans">
+                    <span className="text-blue-500">âœ‰</span> devronic.org@gmail.com
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        ) : (
+          /* ============================================================
+             TEMPLATE B: TECHNICAL QUOTATION â€” SINGLE FLOWING DOCUMENT
+             ============================================================ */
+          <div className="print-card contract-body shadow-soft">
+            {/* â”€â”€ LETTERHEAD HEADER â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+            <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '12px' }}>
+              {/* Left: logo + company name + tagline */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <img src="/nobglogo.png" alt="Devronic Logo" style={{ height: '56px', objectFit: 'contain' }} />
+                <div>
+                  <div style={{ fontSize: '18px', fontWeight: 900, letterSpacing: '0.04em', color: '#0d1a2e', fontFamily: '"Times New Roman", Times, serif', lineHeight: 1.15 }}>
+                    DEVRONIC TECHNOLOGIES
+                  </div>
+                  <div style={{ fontSize: '10px', color: '#4a5568', fontStyle: 'italic', fontFamily: 'Georgia, serif', marginTop: '1px' }}>
+                    Develop. Design. Deploy. Disrupt
+                  </div>
+                </div>
+              </div>
+              {/* Right: QUOTATION label */}
+              <div style={{ fontSize: '22px', fontWeight: 900, letterSpacing: '0.08em', color: '#0d1a2e', fontFamily: '"Times New Roman", Times, serif', textAlign: 'right', paddingTop: '8px' }}>
+                QUOTATION
+              </div>
             </div>
 
-            {/* 4. COST DETAILS */}
-            <div className="space-y-sm">
-              <h2 className="text-xs font-bold font-sans uppercase tracking-wider text-on-surface border-l-2 border-primary pl-xs">
-                4. WHAT THE COST COVERS
-              </h2>
-              <p className="text-xs leading-relaxed text-on-surface-variant">
-                The total cost of <strong className="text-primary">₹{Number(quotation.grandTotal).toLocaleString('en-IN')}/-</strong> covers <strong>complete professional software development</strong>, not just basic coding. This includes:
-              </p>
-              <ol className="list-decimal pl-md space-y-2 text-xs text-on-surface-variant">
-                <li><strong>Built to Handle Growth</strong> — The app is designed so that as your business grows and more users join, it continues to run smoothly without slowing down or crashing.</li>
-                <li><strong>Security</strong> — Your data and your clients' data are protected using industry-standard security practices, including secure login systems, verified access controls, and encrypted communications.</li>
-                <li><strong>Server Setup & Deployment</strong> — Setting up and configuring the live server so your app runs reliably 24/7 on the internet with proper security certificates.</li>
-                <li><strong>Clean, Maintainable Code</strong> — The code is written in an organized, professional manner so that future updates, new features, or bug fixes can be done efficiently without rebuilding everything from scratch.</li>
-                <li><strong>Full Documentation & Code Handover</strong> — Complete technical documentation of the app's architecture, database structure, and workflows shall be provided so that if at any point the Client wishes to discontinue the engagement with Devronic Technologies, any other development agency or developer can understand, maintain, and extend the application independently. However, source code and documentation for each module/phase shall be released only upon receipt of full payment for that respective module/phase.</li>
-              </ol>
+            {/* Address line */}
+            <div style={{ fontSize: '11px', color: '#2d3748', fontFamily: 'Georgia, serif', lineHeight: 1.6, marginBottom: '4px' }}>
+              Azad Chowk, Sadar Nagpur - 440001
+            </div>
+            <div style={{ fontSize: '11px', color: '#2d3748', fontFamily: 'Georgia, serif', marginBottom: '10px' }}>
+              <strong>Email:</strong> devronic.org@gmail.com &nbsp;|&nbsp; <strong>Web:</strong> www.devronic.com
             </div>
 
-            {/* 5. TIMELINES */}
-            <div className="space-y-sm">
-              <h2 className="text-xs font-bold font-sans uppercase tracking-wider text-on-surface border-l-2 border-primary pl-xs">
-                5. TIME DURATION
-              </h2>
-              <p className="text-xs leading-relaxed text-on-surface-variant">
-                A Total of <strong>{duration}</strong> would be required to complete the development of this project.
-              </p>
+            {/* Horizontal rule */}
+            <div style={{ borderTop: '1.5px solid #1a202c', marginBottom: '14px' }} />
 
-              <table className="w-full border border-outline-variant text-left text-xs font-sans mt-sm print-table">
-                <thead>
-                  <tr className="bg-surface-container-low border-b border-outline-variant text-[11px] font-bold text-on-surface-variant">
-                    <th className="py-2.5 px-md w-16 text-center border-r border-outline-variant/60">Sr.No</th>
-                    <th className="py-2.5 px-md border-r border-outline-variant/60">SOW Module / Feature List</th>
-                    <th className="py-2.5 px-md w-36 text-center">Estimated Duration</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-outline-variant/30 text-on-surface">
-                  {quotation.sections.map((sec, idx) => {
-                    const displayName = sec.name.split('|||')[0]?.trim() || sec.name;
-                    return (
-                      <tr key={sec.id || idx}>
-                        <td className="py-2.5 px-md text-center border-r border-outline-variant/30 font-data-mono">{idx + 1}.</td>
-                        <td className="py-2.5 px-md border-r border-outline-variant/30">{displayName}</td>
-                        <td className="py-2.5 px-md text-center font-semibold">
-                          {Math.ceil(Number(duration.split(' ')[0] || 12) / quotation.sections.length)} {duration.split(' ')[1] || 'Weeks'}
-                        </td>
-                      </tr>
-                    );
-                  })}
-                  <tr className="bg-surface-container-low font-bold">
-                    <td className="border-r border-outline-variant/30" />
-                    <td className="py-2.5 px-md border-r border-outline-variant/30 text-right text-primary font-bold font-sans uppercase text-[10px]">Total Duration:</td>
-                    <td className="py-2.5 px-md text-center text-primary font-bold border-t border-outline-variant/80">
-                      {duration}
+            {/* â”€â”€ INFO GRID TABLE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '11px', fontFamily: 'Georgia, serif', marginBottom: '16px', tableLayout: 'fixed' }}>
+              <tbody>
+                <tr>
+                  <td style={{ border: '1px solid #4a5568', padding: '8px 12px', width: '50%', textAlign: 'center', verticalAlign: 'middle' }}>
+                    Prepared For: <strong>{quotation.customer.name}</strong>
+                  </td>
+                  <td style={{ border: '1px solid #4a5568', padding: '8px 12px', width: '50%', textAlign: 'center', verticalAlign: 'middle' }}>
+                    Date: <strong>{executionDate}</strong>
+                  </td>
+                </tr>
+                <tr>
+                  <td style={{ border: '1px solid #4a5568', padding: '8px 12px', textAlign: 'center', verticalAlign: 'middle' }}>
+                    Industry: <strong>{quotation.department?.name || 'Technology Services'}</strong>
+                  </td>
+                  <td style={{ border: '1px solid #4a5568', padding: '8px 12px', textAlign: 'center', verticalAlign: 'middle' }}>
+                    Validity: <strong>15 Days from Issue</strong>
+                  </td>
+                </tr>
+                {quotation.projectName && (
+                  <tr>
+                    <td colSpan={2} style={{ border: '1px solid #4a5568', padding: '8px 12px', textAlign: 'center', verticalAlign: 'middle' }}>
+                      Project Name: <strong>{quotation.projectName}</strong>
                     </td>
                   </tr>
-                </tbody>
-              </table>
-            </div>
+                )}
+              </tbody>
+            </table>
 
-            {/* Standard Legal Clauses */}
-            <div className="space-y-md pt-xs">
-              <div className="space-y-xs">
-                <h3 className="text-xs font-bold font-sans uppercase tracking-wider text-on-surface">6. CHANGE REQUEST POLICY</h3>
-                <p className="text-xs text-on-surface-variant leading-relaxed">
-                  Any feature, functionality, or requirement not explicitly defined within the agreed Scope of Work (SOW) shall be considered out of scope. Change requests shall be estimated separately and commenced only upon written approval.
-                </p>
-              </div>
+            {/* â”€â”€ FLOWING CONTENT â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+                All sections use page-break-inside: avoid so that
+                sentences are never cut mid-line across pages.
+            â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+            <div style={{ fontSize: '12px', fontFamily: 'Georgia, serif', color: '#1a202c', lineHeight: 1.7 }}>
 
-              <div className="space-y-xs">
-                <h3 className="text-xs font-bold font-sans uppercase tracking-wider text-on-surface">7. INTELLECTUAL PROPERTY</h3>
-                <p className="text-xs text-on-surface-variant leading-relaxed">
-                  Upon receipt of full payment, all custom source codes and designs developed specifically for this project shall be handed over and transition to the Client's complete ownership.
-                </p>
-              </div>
-
-              <div className="space-y-xs">
-                <h3 className="text-xs font-bold font-sans uppercase tracking-wider text-on-surface">8. WARRANTY & SUPPORT</h3>
-                <p className="text-xs text-on-surface-variant leading-relaxed">
-                  The Company provides a six (6) month post-launch warranty period starting from the official production deployment date. Bug fixes related to implemented features shall be resolved without additional charges during this period.
-                </p>
-              </div>
-
-              <div className="space-y-xs">
-                <h3 className="text-xs font-bold font-sans uppercase tracking-wider text-on-surface">9. LIMITATION OF LIABILITY</h3>
-                <p className="text-xs text-on-surface-variant leading-relaxed">
-                  The Company's total liability under this Agreement shall not exceed the total fees paid by the Client under this Agreement. The Company shall not be liable for any indirect or consequential damages.
-                </p>
-              </div>
-
-              <div className="space-y-xs">
-                <h3 className="text-xs font-bold font-sans uppercase tracking-wider text-on-surface">10. GOVERNING LAW & JURISDICTION</h3>
-                <p className="text-xs text-on-surface-variant leading-relaxed">
-                  This Agreement shall be governed and interpreted in accordance with the laws of India. Any disputes arising under or relating to this Agreement shall be subject to the exclusive jurisdiction of courts located in Nagpur, Maharashtra.
-                </p>
-              </div>
-            </div>
-
-            {/* ACCEPTANCE & SIGNATURES Block */}
-            <div className="border-t-2 border-outline-variant pt-lg space-y-md font-sans print-avoid-break">
-              <h2 className="text-xs font-bold font-sans uppercase tracking-wider text-on-surface text-center mb-md">
-                ACCEPTANCE & SIGNATURES
-              </h2>
-              
-              <div className="grid grid-cols-2 gap-xl pt-sm">
-                <div className="space-y-sm text-left">
-                  <p className="text-xs font-bold text-on-surface">For Devronic Technologies</p>
-                  <div className="h-16 border-b border-outline-variant/60 flex items-end">
-                    <span className="text-[10px] text-secondary italic pb-1">Signature & Stamp</span>
-                  </div>
-                  <div className="space-y-0.5 text-xs text-on-surface-variant font-sans">
-                    <p>Name: <span className="font-semibold text-on-surface">Aqtab Zafar</span></p>
-                    <p>Designation: <span className="font-semibold text-on-surface">Director</span></p>
-                    <p>Date: <span className="font-semibold text-on-surface">{executionDate}</span></p>
-                  </div>
+              {/* Project Overview */}
+              {quotation.description && (
+                <div style={{ pageBreakInside: 'avoid', breakInside: 'avoid', marginBottom: '10px' }}>
+                  <div style={{ fontWeight: 700, marginBottom: '3px' }}>Project Overview</div>
+                  <div style={{ textAlign: 'justify' }}>{quotation.description}</div>
                 </div>
+              )}
 
-                <div className="space-y-sm text-left">
-                  <p className="text-xs font-bold text-on-surface">For Client ({quotation.customer.name})</p>
-                  <div className="h-16 border-b border-outline-variant/60 flex items-end">
-                    <span className="text-[10px] text-secondary italic pb-1">Signature & Stamp</span>
+              {/* Scope of Work & Deliverables */}
+              {quotation.sections && quotation.sections.length > 0 && (
+                <div style={{ marginBottom: '10px' }}>
+                  <div style={{ fontWeight: 700, marginBottom: '6px', pageBreakInside: 'avoid', breakInside: 'avoid' }}>
+                    Scope of Work &amp; Deliverables
                   </div>
-                  <div className="space-y-0.5 text-xs text-on-surface-variant font-sans">
-                    <p>Name: <span className="font-semibold text-on-surface">{contactPerson || 'Authorized Signatory'}</span></p>
-                    <p>Designation: <span className="font-semibold text-on-surface">{quotation.department?.name || 'Director'}</span></p>
-                    <p>Date: <span className="font-semibold text-on-surface">{executionDate}</span></p>
-                  </div>
+
+                  {quotation.sections.map((sec, secIdx) => {
+                    const parts = sec.name.split('|||');
+                    const moduleName = parts[0]?.trim() || sec.name;
+                    const scopeText = parts[1]?.trim() || '';
+                    const scopeLines = scopeText
+                      ? scopeText.split('\n').map((l: string) => l.trim()).filter(Boolean)
+                      : [];
+                    const itemFeatures = sec.items.map((it: { description: string }) => {
+                      const p = it.description.split(' - ');
+                      return { title: p[0] || '', detail: p[1] || '' };
+                    });
+
+                    return (
+                      <div key={sec.id || secIdx} style={{ pageBreakInside: 'avoid', breakInside: 'avoid', marginBottom: '8px' }}>
+                        <div style={{ fontWeight: 700, marginBottom: '3px' }}>
+                          {secIdx + 1}. <strong>{moduleName}</strong>
+                        </div>
+
+                        {/* Scope lines */}
+                        {scopeLines.length > 0 && (
+                          <ul style={{ margin: '0 0 4px 0', paddingLeft: '20px', listStyleType: 'disc' }}>
+                            {scopeLines.map((line: string, li: number) => (
+                              <li key={li} style={{ pageBreakInside: 'avoid', breakInside: 'avoid', marginBottom: '1px' }}>
+                                {line.replace(/^[â€¢\-]\s*/, '')}
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+
+                        {/* Item features */}
+                        {itemFeatures.length > 0 && (
+                          <ul style={{ margin: '0 0 4px 0', paddingLeft: scopeLines.length > 0 ? '36px' : '20px', listStyleType: scopeLines.length > 0 ? 'circle' : 'disc' }}>
+                            {itemFeatures.map((feat: { title: string; detail: string }, fi: number) => (
+                              <li key={fi} style={{ pageBreakInside: 'avoid', breakInside: 'avoid', marginBottom: '1px' }}>
+                                {feat.detail ? (
+                                  <><strong>{feat.title}</strong>: {feat.detail}</>
+                                ) : feat.title}
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
-              </div>
-            </div>
+              )}
 
-            {/* Document Footer Note */}
-            <div className="border-t border-outline-variant/30 pt-md text-center text-[10px] text-on-surface-variant font-sans">
-              <p>Thank you for your business. For questions regarding this proposal, contact dev@quotaflow.com.</p>
+              {/* Commercials & Financial Investment */}
+              <div style={{ pageBreakInside: 'avoid', breakInside: 'avoid', marginBottom: '10px' }}>
+                <div style={{ fontWeight: 700, marginBottom: '4px' }}>Commercials &amp; Financial Investment</div>
+                <ul style={{ margin: 0, paddingLeft: '20px', listStyleType: 'disc' }}>
+                  <li style={{ pageBreakInside: 'avoid', breakInside: 'avoid', marginBottom: '2px' }}>
+                    Item Description: {quotation.projectType || 'End-to-End Platform Development'}
+                  </li>
+                  {duration && (
+                    <li style={{ pageBreakInside: 'avoid', breakInside: 'avoid', marginBottom: '2px' }}>
+                      Estimated Timeline: <strong>{duration}</strong>
+                    </li>
+                  )}
+                  <li style={{ pageBreakInside: 'avoid', breakInside: 'avoid', marginBottom: '2px' }}>
+                    Total Fixed Investment Amount (Net): <strong>{quotation.currency} {Number(quotation.grandTotal).toLocaleString(undefined, { minimumFractionDigits: 2 })}</strong>
+                  </li>
+                </ul>
+              </div>
+
+              {/* Payment Milestone Schedule */}
+              {quotation.paymentTerms ? (
+                <div style={{ pageBreakInside: 'avoid', breakInside: 'avoid', marginBottom: '10px' }}>
+                  <div style={{ fontWeight: 700, marginBottom: '3px' }}>Payment Milestone Schedule</div>
+                  <div style={{ marginBottom: '4px' }}>
+                    To ensure a smooth workflow and mutual commitment, the financial terms are structured around project milestones:
+                  </div>
+                  <ul style={{ margin: 0, paddingLeft: '20px', listStyleType: 'disc' }}>
+                    {(() => {
+                      const parts = quotation.paymentTerms.split(',').map((s: string) => s.trim()).filter(Boolean);
+                      const labels = ['Project Initiation Advance', 'Mid-Project Development', 'Final Delivery & Deployment'];
+                      const total = Number(quotation.grandTotal);
+                      return parts.map((pct: string, pi: number) => {
+                        const num = parseFloat(pct);
+                        const amt = isNaN(num) ? '' : `${quotation.currency} ${(total * num / 100).toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
+                        return (
+                          <li key={pi} style={{ pageBreakInside: 'avoid', breakInside: 'avoid', marginBottom: '4px' }}>
+                            <strong>{labels[pi] || `Milestone ${pi + 1}`} ({isNaN(num) ? pct : `${num}%`})</strong>
+                            {amt && (
+                              <ul style={{ paddingLeft: '18px', margin: '2px 0', listStyleType: 'circle' }}>
+                                <li>Amount: {amt}</li>
+                              </ul>
+                            )}
+                          </li>
+                        );
+                      });
+                    })()}
+                  </ul>
+                </div>
+              ) : null}
+
+              {/* Terms & Conditions */}
+              <div style={{ pageBreakInside: 'avoid', breakInside: 'avoid', marginBottom: '10px' }}>
+                <div style={{ fontWeight: 700, marginBottom: '4px' }}>Terms &amp; Conditions</div>
+                <ul style={{ margin: 0, paddingLeft: '20px', listStyleType: 'disc' }}>
+                  <li style={{ pageBreakInside: 'avoid', breakInside: 'avoid', marginBottom: '2px' }}>
+                    <strong>Scope Adjustments:</strong> Any feature requests or functional modifications outside this specified document will be assessed and billed separately as an addendum.
+                  </li>
+                  <li style={{ pageBreakInside: 'avoid', breakInside: 'avoid', marginBottom: '2px' }}>
+                    <strong>Content Provision:</strong> The client will provide all initial course copy, branding assets, and media files.
+                  </li>
+                  <li style={{ pageBreakInside: 'avoid', breakInside: 'avoid', marginBottom: '2px' }}>
+                    <strong>Validity:</strong> This quotation remains valid for 15 days from the date of issue.
+                  </li>
+                  <li style={{ pageBreakInside: 'avoid', breakInside: 'avoid', marginBottom: '2px' }}>
+                    <strong>Intellectual Property:</strong> Upon receipt of full payment, all custom source codes and designs shall transfer to the Client's complete ownership.
+                  </li>
+                  <li style={{ pageBreakInside: 'avoid', breakInside: 'avoid', marginBottom: '2px' }}>
+                    <strong>Warranty:</strong> A six (6) month post-launch warranty period. Bug fixes for implemented features resolved without additional charge.
+                  </li>
+                </ul>
+              </div>
+
+              {/* Closing & Signature */}
+              <div style={{ pageBreakInside: 'avoid', breakInside: 'avoid', marginBottom: '16px' }}>
+                <div>Warm regards,</div>
+                <div style={{ height: '48px', display: 'flex', alignItems: 'flex-end', marginTop: '4px' }}>
+                  <div style={{ fontStyle: 'italic', fontSize: '20px', fontFamily: 'cursive', color: '#1a202c' }}>Aqtab Zafar</div>
+                </div>
+                <div style={{ fontWeight: 700 }}>Aqtab Zafar</div>
+                <div>Director,</div>
+                <div>Devronic Technologies</div>
+              </div>
+
+              {/* Project Acceptance */}
+              <div style={{ pageBreakInside: 'avoid', breakInside: 'avoid', borderTop: '1px solid #a0aec0', paddingTop: '10px' }}>
+                <div style={{ fontWeight: 700, marginBottom: '4px' }}>Project Acceptance</div>
+                <div style={{ marginBottom: '4px' }}>
+                  I, the undersigned, accept the scope, deliverables, and payment milestones detailed in this quotation.
+                </div>
+                <ul style={{ margin: 0, paddingLeft: '20px', listStyleType: 'disc' }}>
+                  <li>Signature: <span style={{ display: 'inline-block', width: '160px', borderBottom: '1px solid #1a202c', marginLeft: '4px' }}>&nbsp;</span></li>
+                  <li>Date: <span style={{ display: 'inline-block', width: '140px', borderBottom: '1px solid #1a202c', marginLeft: '4px' }}>&nbsp;</span></li>
+                </ul>
+              </div>
+
             </div>
           </div>
         )}
-
-      </Card>
+      </div>
     </div>
   );
 }
+

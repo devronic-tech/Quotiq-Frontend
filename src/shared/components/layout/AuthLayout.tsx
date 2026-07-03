@@ -18,7 +18,8 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, ease: 'easeOut' }}
-        className="w-full max-w-md glass p-8 rounded-3xl border border-slate-800 bg-slate-900/60 shadow-2xl relative z-10 flex flex-col items-center"
+        className="glass p-8 rounded-3xl border border-slate-800 bg-slate-900/60 shadow-2xl relative z-10 flex flex-col"
+        style={{ width: '450px', maxWidth: '100%' }}
       >
         {/* Brand Header */}
         <div className="flex items-center justify-center mb-6">

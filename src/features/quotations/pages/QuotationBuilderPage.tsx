@@ -1,6 +1,6 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import api from '@/shared/lib/axios';
 import Card from '@/shared/components/ui/Card';
 import Button from '@/shared/components/ui/Button';
@@ -27,10 +27,20 @@ import {
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
+interface Address {
+  type: 'billing' | 'shipping';
+  street: string;
+  city: string;
+  state: string;
+  zipCode: string;
+  country: string;
+}
+
 interface Customer {
   id: string;
   name: string;
   company: string | null;
+  addresses?: Address[];
 }
 
 interface Department {
@@ -75,6 +85,8 @@ interface BuilderSection {
 export default function QuotationBuilderPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const [searchParams] = useSearchParams();
+  const customerIdParam = searchParams.get('customer');
 
   // Master Data Queries
   const { data: customers = [] } = useQuery<Customer[]>({
@@ -121,8 +133,31 @@ export default function QuotationBuilderPage() {
   const [paymentTerms, setPaymentTerms] = useState('30%,40%,30%'); // upfront, mid, final
   const [termsAndConditions, setTermsAndConditions] = useState('');
   const [notes, setNotes] = useState('12 Weeks'); // duration maps here
-  const [currency, setCurrency] = useState('USD');
+  const [currency, setCurrency] = useState('INR');
   const [applyTax, setApplyTax] = useState(false);
+
+  // Prefill customer details if customer ID param is present
+  useEffect(() => {
+    if (customerIdParam && customers.length > 0) {
+      const selectedCustomer = customers.find((c) => c.id === customerIdParam);
+      if (selectedCustomer) {
+        setCustomerName(selectedCustomer.company || selectedCustomer.name);
+        setContactPerson(selectedCustomer.name);
+
+        const billing = selectedCustomer.addresses?.find((a) => a.type === 'billing');
+        if (billing) {
+          const addrStr = [
+            billing.street,
+            billing.city,
+            billing.state,
+            billing.zipCode,
+            billing.country
+          ].filter(Boolean).join(', ');
+          setBillingAddress(addrStr);
+        }
+      }
+    }
+  }, [customerIdParam, customers]);
 
   // Collapsible sections state
   const [activeSections, setActiveSections] = useState({
@@ -417,13 +452,25 @@ export default function QuotationBuilderPage() {
       const { data } = await api.post('/v1/quotations', payload);
       return data.data;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['quotations'] });
       toast.success('Quotation drafted successfully');
-      navigate('/quotations');
+      if (data?.id) {
+        navigate(`/quotations/${data.id}`);
+      } else {
+        navigate('/quotations');
+      }
     },
     onError: (err: any) => {
-      toast.error(err.response?.data?.error?.message || 'Failed to save quotation');
+      const apiError = err.response?.data?.error;
+      if (apiError?.details) {
+        const errorMsg = Object.entries(apiError.details)
+          .map(([field, msgs]) => `${field}: ${(msgs as string[]).join(', ')}`)
+          .join(' | ');
+        toast.error(`Validation Failed: ${errorMsg}`);
+      } else {
+        toast.error(apiError?.message || 'Failed to save quotation');
+      }
     },
   });
 
@@ -442,6 +489,7 @@ export default function QuotationBuilderPage() {
     }
 
     const payload = {
+      customerId: customerIdParam || undefined,
       customerName,
       departmentId: departmentId || undefined,
       projectName,
@@ -678,43 +726,19 @@ export default function QuotationBuilderPage() {
 
                 <div className="space-y-md">
                   <div className="space-y-sm">
-                    <label className="font-label-uppercase text-xs font-bold text-on-surface-variant tracking-wider">CURRENCY & DEPT</label>
-                    <div className="flex gap-sm">
-                      <select 
-                        className="flex-1 h-11 px-md rounded-lg border border-outline-variant bg-white font-body-md focus:border-primary transition-all text-on-surface outline-none"
-                        value={currency}
-                        onChange={(e) => setCurrency(e.target.value)}
-                      >
-                        <option value="USD">USD - US Dollar</option>
-                        <option value="INR">INR - Indian Rupee</option>
-                        <option value="EUR">EUR - Euro</option>
-                      </select>
-                      <select
-                        className="flex-1 h-11 px-md rounded-lg border border-outline-variant bg-white font-body-md focus:border-primary transition-all text-on-surface outline-none"
-                        value={departmentId}
-                        onChange={(e) => setDepartmentId(e.target.value)}
-                      >
-                        <option value="">Department...</option>
-                        {departments.map((d) => (
-                          <option key={d.id} value={d.id}>
-                            {d.name}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-sm pt-2">
-                    <input 
-                      className="rounded border-outline-variant text-primary focus:ring-primary h-4 w-4 cursor-pointer" 
-                      id="tax" 
-                      type="checkbox"
-                      checked={applyTax}
-                      onChange={(e) => setApplyTax(e.target.checked)}
-                    />
-                    <label className="font-body-sm text-secondary font-bold text-xs select-none cursor-pointer" htmlFor="tax">
-                      Apply 15% Sales Tax
-                    </label>
+                    <label className="font-label-uppercase text-xs font-bold text-on-surface-variant tracking-wider">DEPARTMENT</label>
+                    <select
+                      className="w-full h-11 px-md rounded-lg border border-outline-variant bg-white font-body-md focus:border-primary transition-all text-on-surface outline-none"
+                      value={departmentId}
+                      onChange={(e) => setDepartmentId(e.target.value)}
+                    >
+                      <option value="">Select Department...</option>
+                      {departments.map((d) => (
+                        <option key={d.id} value={d.id}>
+                          {d.name}
+                        </option>
+                      ))}
+                    </select>
                   </div>
                 </div>
               </div>

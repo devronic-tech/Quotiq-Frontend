@@ -17,9 +17,15 @@ const InvoiceListPage = lazy(() => import('@/features/invoices/pages/InvoiceList
 const InvoiceBuilderPage = lazy(() => import('@/features/invoices/pages/InvoiceBuilderPage'));
 const InvoiceDetailPage = lazy(() => import('@/features/invoices/pages/InvoiceDetailPage'));
 const CustomersPage = lazy(() => import('@/features/customers/pages/CustomersPage'));
+const CustomerDetailPage = lazy(() => import('@/features/customers/pages/CustomerDetailPage'));
 const DepartmentsPage = lazy(() => import('@/features/departments/pages/DepartmentsPage'));
 const ProductsPage = lazy(() => import('@/features/products/pages/ProductsPage'));
+const SettingsPage = lazy(() => import('@/features/settings/pages/SettingsPage'));
+const OfferListPage = lazy(() => import('@/features/offers/pages/OfferListPage'));
+const OfferBuilderPage = lazy(() => import('@/features/offers/pages/OfferBuilderPage'));
+const OfferDetailPage = lazy(() => import('@/features/offers/pages/OfferDetailPage'));
 const MainLayout = lazy(() => import('@/shared/components/layout/MainLayout'));
+const FinanceDashboardPage = lazy(() => import('@/features/finance/pages/FinanceDashboardPage'));
 const NotFoundPage = lazy(() => import('@/pages/NotFoundPage'));
 
 /** Full-screen loading spinner */
@@ -75,8 +81,14 @@ export function AppRoutes() {
           <Route path="invoices/new" element={<InvoiceBuilderPage />} />
           <Route path="invoices/:id" element={<InvoiceDetailPage />} />
           <Route path="customers" element={<CustomersPage />} />
+          <Route path="customers/:id" element={<CustomerDetailPage />} />
           <Route path="departments" element={<DepartmentsPage />} />
           <Route path="products" element={<ProductsPage />} />
+          <Route path="settings" element={<SettingsPage />} />
+          <Route path="offers" element={<OfferListPage />} />
+          <Route path="offers/new" element={<OfferBuilderPage />} />
+          <Route path="offers/:id" element={<OfferDetailPage />} />
+          <Route path="finance" element={<FinanceDashboardPage />} />
         </Route>
 
         {/* 404 */}

@@ -245,7 +245,15 @@ export default function InvoiceListPage() {
                         onClick={(e) => e.stopPropagation()}
                         onChange={(e) => {
                           e.stopPropagation();
-                          statusMutation.mutate({ id: inv.id, status: e.target.value });
+                          const val = e.target.value;
+                          if (val === 'partially_paid' || val === 'paid') {
+                            setSelectedInvoice(inv);
+                            const remaining = Number(inv.grandTotal) - Number(inv.amountPaid);
+                            setAmount(val === 'paid' ? remaining.toString() : '');
+                            setIsPaymentModalOpen(true);
+                          } else {
+                            statusMutation.mutate({ id: inv.id, status: val });
+                          }
                         }}
                         className={`text-xs font-semibold px-2.5 py-1 rounded-full border cursor-pointer outline-none appearance-none pr-6 ${getStatusColor(inv.status)}`}
                         style={{
@@ -348,6 +356,14 @@ export default function InvoiceListPage() {
 
             {/* Modal Body */}
             <form onSubmit={handleRecordPaymentSubmit} style={{ padding: '20px 24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              
+              {/* Already Paid Warning */}
+              {(Number(selectedInvoice?.grandTotal || 0) - Number(selectedInvoice?.amountPaid || 0)) <= 0 && (
+                <div style={{ backgroundColor: '#fef2f2', border: '1px solid #fee2e2', borderRadius: '8px', padding: '12px', color: '#991b1b', fontSize: '12px', fontWeight: 500 }}>
+                  ⓘ This invoice is already fully paid or voided. No further payments can be recorded.
+                </div>
+              )}
+
               {/* Amount */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                 <label style={{ fontSize: '11px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', color: '#64748b' }}>Payment Amount (₹)</label>
@@ -357,16 +373,21 @@ export default function InvoiceListPage() {
                     type="number"
                     step="0.01"
                     min="0.01"
-                    max={Number(selectedInvoice?.grandTotal || 0) - Number(selectedInvoice?.amountPaid || 0)}
+                    max={(Number(selectedInvoice?.grandTotal || 0) - Number(selectedInvoice?.amountPaid || 0)) > 0 ? (Number(selectedInvoice?.grandTotal || 0) - Number(selectedInvoice?.amountPaid || 0)) : undefined}
+                    disabled={(Number(selectedInvoice?.grandTotal || 0) - Number(selectedInvoice?.amountPaid || 0)) <= 0}
                     value={amount}
                     onChange={(e) => {
                       const balance = Number(selectedInvoice?.grandTotal || 0) - Number(selectedInvoice?.amountPaid || 0);
-                      const val = Math.min(Number(e.target.value), balance);
-                      setAmount(val > 0 ? String(val) : e.target.value);
+                      if (balance > 0) {
+                        const val = Math.min(Number(e.target.value), balance);
+                        setAmount(val > 0 ? String(val) : e.target.value);
+                      } else {
+                        setAmount(e.target.value);
+                      }
                     }}
                     required
                     placeholder="0.00"
-                    style={{ width: '100%', height: '40px', paddingLeft: '28px', paddingRight: '12px', border: '1px solid #e2e8f0', borderRadius: '8px', fontSize: '14px', color: '#0f172a', backgroundColor: '#fff', outline: 'none', boxSizing: 'border-box' }}
+                    style={{ width: '100%', height: '40px', paddingLeft: '28px', paddingRight: '12px', border: '1px solid #e2e8f0', borderRadius: '8px', fontSize: '14px', color: '#0f172a', backgroundColor: (Number(selectedInvoice?.grandTotal || 0) - Number(selectedInvoice?.amountPaid || 0)) <= 0 ? '#f1f5f9' : '#fff', outline: 'none', boxSizing: 'border-box' }}
                   />
                 </div>
               </div>
@@ -422,8 +443,8 @@ export default function InvoiceListPage() {
                 </button>
                 <button
                   type="submit"
-                  disabled={paymentMutation.isPending}
-                  style={{ padding: '0 16px', height: '36px', borderRadius: '8px', border: 'none', fontSize: '13px', fontWeight: 600, color: '#fff', backgroundColor: '#3b82f6', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', opacity: paymentMutation.isPending ? 0.7 : 1 }}
+                  disabled={paymentMutation.isPending || (Number(selectedInvoice?.grandTotal || 0) - Number(selectedInvoice?.amountPaid || 0)) <= 0}
+                  style={{ padding: '0 16px', height: '36px', borderRadius: '8px', border: 'none', fontSize: '13px', fontWeight: 600, color: '#fff', backgroundColor: '#3b82f6', cursor: (Number(selectedInvoice?.grandTotal || 0) - Number(selectedInvoice?.amountPaid || 0)) <= 0 ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', gap: '8px', opacity: (paymentMutation.isPending || (Number(selectedInvoice?.grandTotal || 0) - Number(selectedInvoice?.amountPaid || 0)) <= 0) ? 0.5 : 1 }}
                 >
                   {paymentMutation.isPending && <Loader2 size={14} className="animate-spin" />}
                   Record Transaction

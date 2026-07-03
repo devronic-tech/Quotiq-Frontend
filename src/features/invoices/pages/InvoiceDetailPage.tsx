@@ -178,55 +178,152 @@ export default function InvoiceDetailPage() {
     <div className="space-y-lg max-w-4xl mx-auto pb-xl">
       {/* Print Style Injections */}
       <style>{`
+        /* =====================================================
+           SCREEN STYLES: Fixed A4 page preview boxes
+           ===================================================== */
+        @media screen {
+          .contract-body {
+            width: 210mm;
+            height: 297mm;
+            overflow: hidden;
+            padding: 40px !important;
+            background-image: url(/back.png) !important;
+            background-size: 100% 100% !important;
+            background-repeat: no-repeat !important;
+            background-position: center !important;
+            background-color: white;
+            box-sizing: border-box;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.13);
+          }
+          
+          .contract-body p, .contract-body li {
+            font-family: "Times New Roman", Times, serif;
+            line-height: 1.6;
+            color: #333333;
+          }
+        }
+
+        /* =====================================================
+           PRINT STYLES: Flowing document with tiling background
+           ===================================================== */
         @media print {
           @page {
-            margin-top: 20px;
-            margin-bottom: 20px;
-            margin-left: 2cm;
-            margin-right: 2cm;
+            size: A4 portrait;
+            margin: 0;
           }
-          aside, header, nav, .no-print, button, .chat-widget, [class*="chat"], [id*="chat"], [class*="floating"] {
+
+          /* Hide sidebar, header, buttons, chatbots, iframes */
+          body > :not(#root),
+          aside, header, nav,
+          .no-print, button,
+          .chat-widget,
+          [class*="chat"], [id*="chat"],
+          [class*="floating"],
+          iframe {
             display: none !important;
+            visibility: hidden !important;
           }
-          div[style*="paddingLeft"], div[style*="padding-left"] {
-            padding-left: 0 !important;
-          }
-          body {
-            background-color: white !important;
-            color: #1a1a1a !important;
-            font-family: "Times New Roman", Times, serif !important;
+
+          /* Flatten all layout wrappers */
+          html, body, #root {
+            display: block !important;
             margin: 0 !important;
-            padding-top: 20px !important;
-            padding-bottom: 20px !important;
-          }
-          .print-card {
+            padding: 0 !important;
+            width: 100% !important;
+            max-width: none !important;
+            height: auto !important;
+            min-height: 0 !important;
             border: none !important;
+            background: transparent !important;
             box-shadow: none !important;
+          }
+
+          /* Sidebar padding killer */
+          main,
+          .min-h-screen,
+          .flex-col,
+          .space-y-lg,
+          .max-w-4xl,
+          .mx-auto,
+          .flex,
+          [class*="layout"],
+          div[style*="paddingLeft"],
+          div[style*="padding-left"] {
+            display: block !important;
             padding: 0 !important;
             margin: 0 !important;
+            max-width: none !important;
+            width: 100% !important;
+            height: auto !important;
+            min-height: 0 !important;
+            border: none !important;
+            box-shadow: none !important;
             background: transparent !important;
           }
+
+          /* Kill Tailwind space-y-* child gap */
+          [class*="space-y-"] > * {
+            margin-top: 0 !important;
+            margin-bottom: 0 !important;
+          }
+
+          /* Remove any page-level padding that pushes content down */
+          [class*="pb-"], [class*="pt-"], [class*="py-"] {
+            padding-top: 0 !important;
+            padding-bottom: 0 !important;
+          }
+
+          body {
+            background: white !important;
+            color: #1a1a1a !important;
+            font-family: "Times New Roman", Times, serif !important;
+          }
+
+          /* The print document root: 210mm wide, background tiles every 297mm */
+          .print-doc-root {
+            display: block !important;
+            width: 210mm !important;
+            margin: 0 !important;
+            margin-top: 0 !important;
+            padding: 0 !important;
+            position: relative !important;
+            top: 0 !important;
+            background-image: url(/back.png) !important;
+            background-size: 210mm 297mm !important;
+            background-repeat: repeat-y !important;
+            background-position: top left !important;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+            box-sizing: border-box !important;
+          }
+
+          /* Each section becomes a transparent flowing block with 40px padding */
+          .print-doc-root .contract-body {
+            display: block !important;
+            width: auto !important;
+            height: auto !important;
+            min-height: 0 !important;
+            overflow: visible !important;
+            background: none !important;
+            border: none !important;
+            box-shadow: none !important;
+            margin: 0 !important;
+            padding: 40px !important;
+            box-sizing: border-box !important;
+          }
+
           .table-header {
             background-color: #f1f5f9 !important;
             color: black !important;
             -webkit-print-color-adjust: exact;
             print-color-adjust: exact;
           }
-          .print-page-break {
-            page-break-before: always !important;
-            break-before: page !important;
-            margin-top: 2.5cm !important; /* Spacious margin at the top of the new page */
-          }
+
           .print-avoid-break {
             page-break-inside: avoid !important;
             break-inside: avoid !important;
           }
-        }
-        
-        .contract-body p, .contract-body li {
-          font-family: "Times New Roman", Times, serif;
-          line-height: 1.6;
-          color: #333333;
         }
       `}</style>
 
@@ -330,7 +427,8 @@ export default function InvoiceDetailPage() {
       )}
 
       {/* DOCUMENT PAGE SHEET */}
-      <div className="print-card border border-slate-200 bg-white p-12 rounded-xl shadow-md space-y-xl text-gray-900 contract-body" style={{ backgroundColor: '#ffffff', color: '#1a1a1a' }}>
+      <div className="flex flex-col items-center print-doc-root">
+        <div className="contract-body">
         
         {isSocialMedia ? (
           /* ============================================================
@@ -619,7 +717,7 @@ export default function InvoiceDetailPage() {
             </div>
           </div>
         )}
-
+        </div>
       </div>
     </div>
   );

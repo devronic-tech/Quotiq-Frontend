@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import api from '@/shared/lib/axios';
 import Card from '@/shared/components/ui/Card';
 import Button from '@/shared/components/ui/Button';
@@ -19,12 +19,22 @@ import {
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
+interface Address {
+  type: 'billing' | 'shipping';
+  street: string;
+  city: string;
+  state: string;
+  zipCode: string;
+  country: string;
+}
+
 interface Customer {
   id: string;
   name: string;
   company: string | null;
   email: string;
   address: string | null;
+  addresses?: Address[];
 }
 
 interface QuotationItem {
@@ -66,6 +76,8 @@ interface InvoiceItemInput {
 export default function InvoiceBuilderPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const [searchParams] = useSearchParams();
+  const customerIdParam = searchParams.get('customer');
 
   // Prefill Quotations List
   const { data: quotations = [] } = useQuery<Quotation[]>({
@@ -152,6 +164,37 @@ export default function InvoiceBuilderPage() {
     }
   };
 
+  // Prefill customer details and quotation if customer ID param is present
+  useEffect(() => {
+    if (customerIdParam && customers.length > 0) {
+      const selectedCustomer = customers.find((c) => c.id === customerIdParam);
+      if (selectedCustomer) {
+        // If this customer has any quotations in the loaded list, auto-select it!
+        const customerQuote = quotations.find((q) => q.customer?.id === customerIdParam);
+        if (customerQuote) {
+          handlePrefillQuotation(customerQuote.id);
+        } else {
+          setCustomerName(selectedCustomer.company || selectedCustomer.name);
+          setContactPerson(selectedCustomer.name);
+
+          const billing = selectedCustomer.addresses?.find((a) => a.type === 'billing');
+          if (billing) {
+            const addrStr = [
+              billing.street,
+              billing.city,
+              billing.state,
+              billing.zipCode,
+              billing.country
+            ].filter(Boolean).join(', ');
+            setBillingAddress(addrStr);
+          } else if (selectedCustomer.address) {
+            setBillingAddress(selectedCustomer.address);
+          }
+        }
+      }
+    }
+  }, [customerIdParam, customers, quotations]);
+
   // Calculations
   const calculateTotals = () => {
     let subtotal = 0;
@@ -181,13 +224,25 @@ export default function InvoiceBuilderPage() {
       const { data } = await api.post('/v1/invoices', payload);
       return data.data;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['invoices'] });
       toast.success('Invoice created successfully');
-      navigate('/invoices');
+      if (data?.id) {
+        navigate(`/invoices/${data.id}`);
+      } else {
+        navigate('/invoices');
+      }
     },
     onError: (err: any) => {
-      toast.error(err.response?.data?.error?.message || 'Failed to save invoice');
+      const apiError = err.response?.data?.error;
+      if (apiError?.details) {
+        const errorMsg = Object.entries(apiError.details)
+          .map(([field, msgs]) => `${field}: ${(msgs as string[]).join(', ')}`)
+          .join(' | ');
+        toast.error(`Validation Failed: ${errorMsg}`);
+      } else {
+        toast.error(apiError?.message || 'Failed to save invoice');
+      }
     },
   });
 
@@ -202,7 +257,11 @@ export default function InvoiceBuilderPage() {
     }
 
     // Resolve or lookup customer name in loaded customer list, or let backend resolve it
-    const matchedCustomer = customers.find(c => c.name.toLowerCase() === customerName.toLowerCase());
+    const matchedCustomer = customers.find(c => 
+      c.id === customerIdParam ||
+      c.name.toLowerCase() === customerName.toLowerCase() ||
+      (c.company && c.company.toLowerCase() === customerName.toLowerCase())
+    );
 
     const payload = {
       quotationId: selectedQuoteId || undefined,

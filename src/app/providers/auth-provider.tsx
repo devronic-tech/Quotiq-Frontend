@@ -35,10 +35,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setUser(freshProfile);
           localStorage.setItem('qt_user', JSON.stringify(freshProfile));
         }
-      } catch {
-        localStorage.removeItem('qt_user');
-        localStorage.removeItem('qt_tokens');
-        setUser(null);
+      } catch (err: any) {
+        // Only log out if the server explicitly rejects the auth token (401/403)
+        // If the server is offline (502, 503, connection refused) or there's a temporary network glitch, retain the local session.
+        const status = err.response?.status;
+        if (status === 401 || status === 403) {
+          localStorage.removeItem('qt_user');
+          localStorage.removeItem('qt_tokens');
+          setUser(null);
+        } else {
+          console.warn('Profile validation skipped due to network/server error:', err);
+        }
       } finally {
         setIsLoading(false);
       }

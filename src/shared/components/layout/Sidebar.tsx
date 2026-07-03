@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useLocation } from 'react-router-dom';
 import { useAuth } from '@/app/providers/auth-provider';
 import {
   LayoutDashboard,
@@ -15,6 +15,8 @@ import {
   Users,
   Building2,
   ShoppingBag,
+  FileSignature,
+  Wallet,
 } from 'lucide-react';
 import { clsx } from 'clsx';
 import { motion } from 'framer-motion';
@@ -23,11 +25,24 @@ const navItems = [
   { label: 'Dashboard', to: '/', icon: LayoutDashboard },
   { label: 'Quotations', to: '/quotations', icon: FileText },
   { label: 'Invoices', to: '/invoices', icon: Receipt },
+  { label: 'Offer Letters', to: '/offers', icon: FileSignature },
   { label: 'Customers', to: '/customers', icon: Users },
   { label: 'Departments', to: '/departments', icon: Building2 },
   { label: 'Products & Services', to: '/products', icon: ShoppingBag },
-  { label: 'Templates', to: '/templates', icon: FileCode2 },
-  { label: 'Analytics', to: '/analytics', icon: BarChart3 },
+  {
+    label: 'Finance',
+    to: '/finance',
+    icon: Wallet,
+    subItems: [
+      { label: 'Overview', hash: 'overview' },
+      { label: 'Cash Flow', hash: 'cashflow' },
+      { label: 'Transactions', hash: 'transactions' },
+      { label: 'Expenses', hash: 'expenses' },
+      { label: 'Liabilities', hash: 'liabilities' },
+      { label: 'Payroll', hash: 'payroll' },
+      { label: 'Reports', hash: 'reports' },
+    ],
+  },
   { label: 'Settings', to: '/settings', icon: Settings },
 ];
 
@@ -38,6 +53,7 @@ interface SidebarProps {
 
 export default function Sidebar({ isCollapsed, setIsCollapsed }: SidebarProps) {
   const { user, logout } = useAuth();
+  const location = useLocation();
 
   return (
     <motion.aside
@@ -70,31 +86,56 @@ export default function Sidebar({ isCollapsed, setIsCollapsed }: SidebarProps) {
 
       {/* Nav Items */}
       <nav className="flex-1 px-sm space-y-1 overflow-y-auto">
-        {navItems.map((item) => (
-          <NavLink
-            key={item.to}
-            to={item.to}
-            className={({ isActive }) =>
-              clsx(
-                'flex items-center gap-md px-lg py-sm font-semibold transition-colors border-l-2 text-sm group',
-                isActive
-                  ? 'bg-primary/5 border-primary text-primary'
-                  : 'border-transparent text-secondary hover:bg-secondary-container/50 hover:text-on-secondary-fixed'
-              )
-            }
-          >
-            <item.icon size={18} className="shrink-0 group-hover:scale-105 transition-transform duration-200" />
-            {!isCollapsed && (
-              <motion.span
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="whitespace-nowrap font-body-sm"
+        {navItems.map((item) => {
+          const isCurrentActive = location.pathname === item.to || (item.to !== '/' && location.pathname.startsWith(item.to));
+          return (
+            <div key={item.to} className="space-y-1">
+              <NavLink
+                to={item.to}
+                className={({ isActive }) =>
+                  clsx(
+                    'flex items-center gap-md px-lg py-sm font-semibold transition-colors border-l-2 text-sm group',
+                    isActive
+                      ? 'bg-primary/5 border-primary text-primary'
+                      : 'border-transparent text-secondary hover:bg-secondary-container/50 hover:text-on-secondary-fixed'
+                  )
+                }
               >
-                {item.label}
-              </motion.span>
-            )}
-          </NavLink>
-        ))}
+                <item.icon size={18} className="shrink-0 group-hover:scale-105 transition-transform duration-200" />
+                {!isCollapsed && (
+                  <motion.span
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="whitespace-nowrap font-body-sm"
+                  >
+                    {item.label}
+                  </motion.span>
+                )}
+              </NavLink>
+              {item.subItems && isCurrentActive && !isCollapsed && (
+                <div className="pl-9 pr-sm py-1 flex flex-col gap-1 border-l border-outline-variant/30 ml-6">
+                  {item.subItems.map((sub) => (
+                    <a
+                      key={sub.hash}
+                      href={`${item.to}#${sub.hash}`}
+                      onClick={(e) => {
+                        const el = document.getElementById(sub.hash);
+                        if (el) {
+                          e.preventDefault();
+                          el.scrollIntoView({ behavior: 'smooth' });
+                          window.location.hash = sub.hash;
+                        }
+                      }}
+                      className="text-xs py-1.5 px-3 text-secondary hover:text-primary hover:bg-primary/5 rounded font-semibold transition-all"
+                    >
+                      {sub.label}
+                    </a>
+                  ))}
+                </div>
+              )}
+            </div>
+          );
+        })}
       </nav>
 
       {/* Footer / User Profile */}
