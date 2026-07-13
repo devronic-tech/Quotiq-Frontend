@@ -129,10 +129,10 @@ export default function InvoiceBuilderPage() {
       // Extract client person and address details from notes if present
       const notesParts = q.notes ? q.notes.split(' | ') : [];
       const extractedContact = notesParts[1]?.replace('Contact: ', '') || '';
-      const extractedAddress = notesParts[2]?.replace('Address: ', '') || q.customer.address || '';
+      const extractedAddress = notesParts[2]?.replace('Address: ', '') || q.customer?.address || '';
 
       // Prefill states
-      setCustomerName(q.customer.name);
+      setCustomerName(q.customer?.name || '');
       setContactPerson(extractedContact);
       setBillingAddress(extractedAddress);
       setCurrency(q.currency);

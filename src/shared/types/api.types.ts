@@ -79,8 +79,10 @@ export interface AuthTokens {
 
 /** Login response */
 export interface LoginResponse {
-  user: UserProfile;
-  tokens: AuthTokens;
+  user?: UserProfile;
+  tokens?: AuthTokens;
+  otpRequired?: boolean;
+  email?: string;
 }
 
 /** Organization summary */

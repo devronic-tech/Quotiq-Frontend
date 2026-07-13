@@ -102,9 +102,9 @@ export default function InvoiceListPage() {
       case 'partially_paid': return 'bg-yellow-50 text-yellow-800 border-yellow-300';
       case 'unpaid': return 'bg-red-50 text-red-700 border-red-300';
       case 'overdue': return 'bg-orange-50 text-orange-700 border-orange-300';
-      case 'draft': return 'bg-slate-100 text-slate-600 border-slate-300';
-      case 'voided': return 'bg-gray-100 text-gray-500 border-gray-300';
-      default: return 'bg-gray-100 text-gray-600 border-gray-300';
+      case 'draft': return 'bg-surface-container text-on-surface-variant border-outline-variant';
+      case 'voided': return 'bg-surface-container text-on-surface-variant border-outline-variant';
+      default: return 'bg-surface-container text-on-surface-variant border-outline-variant';
     }
   };
 
@@ -153,12 +153,12 @@ export default function InvoiceListPage() {
   return (
     <div className="space-y-6 max-w-7xl mx-auto pb-12">
       {/* Header and Quick Search */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200 pb-4">
-        <div className="space-y-1">
-          <h2 className="text-xl font-bold text-on-surface">Invoices</h2>
-          <p className="text-xs text-on-surface-variant">Manage billing, GST details, payment tracking, and transaction logs</p>
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-md mb-xl">
+        <div>
+          <h2 className="font-page-title text-page-title text-on-surface">Invoices</h2>
+          <p className="text-on-surface-variant font-body-md">Manage billing, GST details, payment tracking, and transaction logs</p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-sm">
           <div className="relative w-64">
             <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant" />
             <input
@@ -166,7 +166,7 @@ export default function InvoiceListPage() {
               placeholder="Search invoices..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full h-10 pl-9 pr-4 bg-white border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-primary focus:border-transparent outline-none text-on-surface"
+              className="w-full h-11 pl-9 pr-4 bg-surface-container-lowest border border-outline-variant rounded-lg text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none text-on-surface transition-all"
             />
           </div>
           <Button
@@ -186,8 +186,8 @@ export default function InvoiceListPage() {
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
       ) : filteredInvoices.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-20 text-center border border-dashed border-slate-200 rounded-xl bg-white">
-          <div className="h-14 w-14 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-center mb-4 text-primary">
+        <div className="flex flex-col items-center justify-center py-20 text-center border border-dashed border-outline-variant rounded-xl bg-surface-container-lowest shadow-soft">
+          <div className="h-14 w-14 rounded-2xl bg-surface-container border border-outline-variant flex items-center justify-center mb-4 text-primary">
             <Receipt size={24} />
           </div>
           <h3 className="text-sm font-bold text-on-surface">No invoices found</h3>
@@ -205,11 +205,11 @@ export default function InvoiceListPage() {
           </Button>
         </div>
       ) : (
-        <div className="border border-slate-200 rounded-xl overflow-hidden bg-white shadow-sm">
+        <div className="border border-outline-variant rounded-xl overflow-hidden bg-surface-container-lowest shadow-soft">
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse text-xs">
               <thead>
-                <tr className="border-b border-slate-200 bg-slate-50 text-slate-500 font-bold uppercase tracking-wider">
+                <tr className="border-b border-outline-variant bg-surface-container-low text-on-surface-variant font-bold uppercase tracking-wider">
                   <th className="px-5 py-3.5">Invoice #</th>
                   <th className="px-5 py-3.5">Type</th>
                   <th className="px-5 py-3.5">Client</th>
@@ -220,23 +220,23 @@ export default function InvoiceListPage() {
                   <th className="px-5 py-3.5 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 text-on-surface">
+              <tbody className="divide-y divide-outline-variant/30 text-on-surface">
                 {filteredInvoices.map((inv) => (
                   <tr
                     key={inv.id}
                     onClick={() => navigate(`/invoices/${inv.id}`)}
-                    className="hover:bg-slate-50 transition-colors cursor-pointer"
+                    className="hover:bg-surface-container-low/50 transition-colors cursor-pointer"
                   >
                     <td className="px-5 py-3.5 font-bold font-mono text-primary">{inv.invoiceNumber}</td>
-                    <td className="px-5 py-3.5 capitalize font-semibold text-slate-600">{inv.type}</td>
+                    <td className="px-5 py-3.5 capitalize font-semibold text-on-surface-variant">{inv.type}</td>
                     <td className="px-5 py-3.5">
                       <div className="font-semibold text-on-surface">{inv.customer?.name}</div>
-                      {inv.customer?.company && <div className="text-[10px] text-slate-400">{inv.customer.company}</div>}
+                      {inv.customer?.company && <div className="text-[10px] text-on-surface-variant/70">{inv.customer.company}</div>}
                     </td>
-                    <td className="px-5 py-3.5 text-slate-500">{new Date(inv.dueDate).toLocaleDateString('en-IN')}</td>
+                    <td className="px-5 py-3.5 text-on-surface-variant">{new Date(inv.dueDate).toLocaleDateString('en-IN')}</td>
                     <td className="px-5 py-3.5 font-bold font-mono text-on-surface">₹{Number(inv.grandTotal).toLocaleString('en-IN')}</td>
                     <td className="px-5 py-3.5 text-emerald-700 font-bold font-mono">
-                      {Number(inv.amountPaid) > 0 ? `₹${Number(inv.amountPaid).toLocaleString('en-IN')}` : <span className="text-slate-400">—</span>}
+                      {Number(inv.amountPaid) > 0 ? `₹${Number(inv.amountPaid).toLocaleString('en-IN')}` : <span className="text-on-surface-variant/50">—</span>}
                     </td>
                     <td className="px-5 py-3.5">
                       {/* Inline status dropdown */}
@@ -275,7 +275,7 @@ export default function InvoiceListPage() {
                         {inv.status !== 'paid' && (
                           <button
                             onClick={(e) => { e.stopPropagation(); handleOpenPayment(inv); }}
-                            className="p-1.5 rounded-lg hover:bg-emerald-50 text-slate-400 hover:text-emerald-600 cursor-pointer transition-colors"
+                            className="p-1.5 rounded-lg hover:bg-emerald-50 text-on-surface-variant hover:text-emerald-600 cursor-pointer transition-colors"
                             title="Record Payment"
                           >
                             <CreditCard size={14} />
@@ -283,7 +283,7 @@ export default function InvoiceListPage() {
                         )}
                         <button
                           onClick={(e) => { e.stopPropagation(); window.open(`/invoices/${inv.id}?print=true`, '_blank'); }}
-                          className="p-1.5 rounded-lg hover:bg-blue-50 text-slate-400 hover:text-blue-600 transition-colors cursor-pointer"
+                          className="p-1.5 rounded-lg hover:bg-primary/10 text-on-surface-variant hover:text-primary transition-colors cursor-pointer"
                           title="Download / Print PDF"
                         >
                           <Download size={14} />
@@ -295,7 +295,7 @@ export default function InvoiceListPage() {
                               deleteMutation.mutate(inv.id);
                             }
                           }}
-                          className="p-1.5 rounded-lg hover:bg-red-50 text-slate-400 hover:text-red-600 transition-colors cursor-pointer"
+                          className="p-1.5 rounded-lg hover:bg-error-container/20 text-on-surface-variant hover:text-error transition-colors cursor-pointer"
                           title="Delete Invoice"
                         >
                           <Trash2 size={14} />

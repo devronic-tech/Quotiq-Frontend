@@ -419,7 +419,7 @@ export default function QuotationDetailPage() {
                 </h2>
 
                 <div className="space-y-1 text-xs" style={{ fontFamily: 'Times New Roman' }}>
-                  <p><strong>Client:</strong> {quotation.customer.name}</p>
+                  <p><strong>Client:</strong> {quotation.customer?.name || 'Unknown Client'}</p>
                   <p className="pt-2"><strong>Invoice Date:</strong> {executionDate}</p>
                   <p><strong>Due Date:</strong> {dueDate}</p>
                 </div>
@@ -531,7 +531,7 @@ export default function QuotationDetailPage() {
               <tbody>
                 <tr>
                   <td style={{ border: '1px solid #4a5568', padding: '8px 12px', width: '50%', textAlign: 'center', verticalAlign: 'middle' }}>
-                    Prepared For: <strong>{quotation.customer.name}</strong>
+                    Prepared For: <strong>{quotation.customer?.name || 'Unknown Client'}</strong>
                   </td>
                   <td style={{ border: '1px solid #4a5568', padding: '8px 12px', width: '50%', textAlign: 'center', verticalAlign: 'middle' }}>
                     Date: <strong>{executionDate}</strong>

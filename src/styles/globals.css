@@ -276,3 +276,38 @@ textarea {
 @utility animate-pulse-dot {
   animation: pulse-dot 2s ease-in-out infinite;
 }
+
+/* ── Shadow Soft (subtle elevation for cards) ────────────────── */
+@utility shadow-soft {
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.04),
+    0 1px 2px rgba(0, 0, 0, 0.03);
+}
+
+/* ── Page Container Standard ─────────────────────────────────── */
+@utility page-container {
+  max-width: 80rem; /* 7xl */
+  margin-left: auto;
+  margin-right: auto;
+  padding-bottom: var(--spacing-xl);
+}
+
+/* ── Section Card Standard ───────────────────────────────────── */
+@utility section-card {
+  background-color: var(--color-surface-container-lowest);
+  border: 1px solid var(--color-outline-variant);
+  border-radius: var(--radius-xl);
+  padding: var(--spacing-lg);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.03);
+}
+
+/* ── Keyframes ───────────────────────────────────────────────── */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.85); }
+}

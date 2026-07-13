@@ -9,6 +9,7 @@ import { Loader2 } from 'lucide-react';
 // Lazy load pages
 const LoginPage = lazy(() => import('@/features/auth/pages/LoginPage'));
 const RegisterPage = lazy(() => import('@/features/auth/pages/RegisterPage'));
+const ForgotPasswordPage = lazy(() => import('@/features/auth/pages/ForgotPasswordPage'));
 const DashboardPage = lazy(() => import('@/features/dashboard/pages/DashboardPage'));
 const QuotationListPage = lazy(() => import('@/features/quotations/pages/QuotationListPage'));
 const QuotationBuilderPage = lazy(() => import('@/features/quotations/pages/QuotationBuilderPage'));
@@ -27,6 +28,7 @@ const OfferDetailPage = lazy(() => import('@/features/offers/pages/OfferDetailPa
 const MainLayout = lazy(() => import('@/shared/components/layout/MainLayout'));
 const FinanceDashboardPage = lazy(() => import('@/features/finance/pages/FinanceDashboardPage'));
 const NotFoundPage = lazy(() => import('@/pages/NotFoundPage'));
+const LandingPage = lazy(() => import('@/pages/LandingPage'));
 
 /** Full-screen loading spinner */
 function PageLoader() {
@@ -57,6 +59,21 @@ function PublicOnlyRoute({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
+/** Conditional Home Route — shows landing page for public, dashboard for auth */
+function HomeRoute() {
+  const { isAuthenticated, isLoading } = useAuth();
+
+  if (isLoading) return <PageLoader />;
+  if (isAuthenticated) {
+    return (
+      <ProtectedRoute>
+        <MainLayout />
+      </ProtectedRoute>
+    );
+  }
+  return <LandingPage />;
+}
+
 export function AppRoutes() {
   return (
     <Suspense fallback={<PageLoader />}>
@@ -64,6 +81,12 @@ export function AppRoutes() {
         {/* Public routes */}
         <Route path="/login" element={<PublicOnlyRoute><LoginPage /></PublicOnlyRoute>} />
         <Route path="/register" element={<PublicOnlyRoute><RegisterPage /></PublicOnlyRoute>} />
+        <Route path="/forgot-password" element={<PublicOnlyRoute><ForgotPasswordPage /></PublicOnlyRoute>} />
+
+        {/* Conditional root route */}
+        <Route path="/" element={<HomeRoute />}>
+          <Route index element={<DashboardPage />} />
+        </Route>
 
         {/* Protected routes inside MainLayout */}
         <Route
@@ -73,7 +96,6 @@ export function AppRoutes() {
             </ProtectedRoute>
           }
         >
-          <Route index element={<DashboardPage />} />
           <Route path="quotations" element={<QuotationListPage />} />
           <Route path="quotations/new" element={<QuotationBuilderPage />} />
           <Route path="quotations/:id" element={<QuotationDetailPage />} />

@@ -156,99 +156,99 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="space-y-6 max-w-4xl mx-auto pb-12">
-      {/* Header */}
-      <div className="border-b border-slate-200 pb-4 flex justify-between items-center">
-        <div className="space-y-1">
-          <h2 className="text-xl font-bold text-on-surface">Settings</h2>
-          <p className="text-xs text-on-surface-variant">Configure organization profiles, billing default configurations, and API keys</p>
+    <div className="space-y-lg max-w-4xl mx-auto pb-xl">
+      {/* Header — same pattern as Dashboard and Invoices */}
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-md mb-xl">
+        <div>
+          <h2 className="font-page-title text-page-title font-bold text-on-surface">Settings</h2>
+          <p className="text-on-surface-variant font-body-md">Configure organization profiles, billing defaults, and API keys</p>
         </div>
         <Button
           variant="primary"
           size="sm"
-          icon={<Save size={14} />}
+          icon={<Save size={16} />}
           onClick={handleSave}
           isLoading={saveMutation.isPending}
-          className="h-10"
+          className="h-11 px-md"
         >
           Save Settings
         </Button>
       </div>
 
-      <form onSubmit={handleSave} className="space-y-6">
+      <form onSubmit={handleSave} className="space-y-lg">
         {/* Section 1: Org Details */}
-        <section className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm space-y-4">
-          <div className="flex items-center gap-3 border-b border-slate-100 pb-3">
-            <div className="p-2 bg-primary/5 text-primary rounded-lg">
+        <section className="bg-surface-container-lowest border border-outline-variant rounded-xl p-lg shadow-soft space-y-lg">
+          <div className="flex items-center gap-md border-b border-outline-variant/40 pb-md">
+            <div className="p-2 bg-primary/10 text-primary rounded-lg">
               <Building2 size={18} />
             </div>
             <div>
-              <h3 className="text-sm font-bold text-on-surface">Organization Profile</h3>
-              <p className="text-[10px] text-on-surface-variant">Update identity, billing credentials, and currency defaults</p>
+              <h3 className="font-card-title text-card-title text-on-surface">Organization Profile</h3>
+              <p className="text-body-sm text-on-surface-variant">Update identity, billing credentials, and currency defaults</p>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-1">
-              <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Company Name</label>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-md">
+            <div className="space-y-sm">
+              <label className="font-label-uppercase text-label-uppercase text-on-surface-variant">Company Name</label>
               <input
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 required
-                className="w-full h-10 px-3 bg-white border border-slate-200 rounded-lg text-xs outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-on-surface"
+                className="w-full h-11 px-md bg-surface-container-lowest border border-outline-variant rounded-xl text-sm outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-on-surface transition-all placeholder:text-on-surface-variant/60"
                 placeholder="e.g. Devronic Solutions"
               />
             </div>
 
-            <div className="space-y-1">
-              <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Website Link</label>
+            <div className="space-y-sm">
+              <label className="font-label-uppercase text-label-uppercase text-on-surface-variant">Website Link</label>
               <div className="relative">
-                <Globe size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                <Globe size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant/60" />
                 <input
                   type="url"
                   value={website}
                   onChange={(e) => setWebsite(e.target.value)}
-                  className="w-full h-10 pl-9 pr-3 bg-white border border-slate-200 rounded-lg text-xs outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-on-surface"
+                  className="w-full h-11 pl-9 pr-md bg-surface-container-lowest border border-outline-variant rounded-xl text-sm outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-on-surface transition-all placeholder:text-on-surface-variant/60"
                   placeholder="e.g. https://devronic.org"
                 />
               </div>
             </div>
 
-            <div className="space-y-1">
-              <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Billing Email</label>
+            <div className="space-y-sm">
+              <label className="font-label-uppercase text-label-uppercase text-on-surface-variant">Billing Email</label>
               <div className="relative">
-                <Mail size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                <Mail size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant/60" />
                 <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full h-10 pl-9 pr-3 bg-white border border-slate-200 rounded-lg text-xs outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-on-surface"
+                  className="w-full h-11 pl-9 pr-md bg-surface-container-lowest border border-outline-variant rounded-xl text-sm outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-on-surface transition-all placeholder:text-on-surface-variant/60"
                   placeholder="e.g. finance@devronic.org"
                 />
               </div>
             </div>
 
-            <div className="space-y-1">
-              <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Support Phone</label>
+            <div className="space-y-sm">
+              <label className="font-label-uppercase text-label-uppercase text-on-surface-variant">Support Phone</label>
               <div className="relative">
-                <Phone size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                <Phone size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant/60" />
                 <input
                   type="tel"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
-                  className="w-full h-10 pl-9 pr-3 bg-white border border-slate-200 rounded-lg text-xs outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-on-surface"
+                  className="w-full h-11 pl-9 pr-md bg-surface-container-lowest border border-outline-variant rounded-xl text-sm outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-on-surface transition-all placeholder:text-on-surface-variant/60"
                   placeholder="e.g. +91 98765 43210"
                 />
               </div>
             </div>
 
-            <div className="space-y-1">
-              <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Billing Currency</label>
+            <div className="space-y-sm">
+              <label className="font-label-uppercase text-label-uppercase text-on-surface-variant">Billing Currency</label>
               <select
                 value={currency}
                 onChange={(e) => setCurrency(e.target.value)}
-                className="w-full h-10 px-3 bg-white border border-slate-200 rounded-lg text-xs outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-on-surface cursor-pointer"
+                className="w-full h-11 px-md bg-surface-container-lowest border border-outline-variant rounded-xl text-sm outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-on-surface transition-all cursor-pointer"
               >
                 <option value="USD">USD ($) - US Dollar</option>
                 <option value="INR">INR (₹) - Indian Rupee</option>
@@ -260,66 +260,66 @@ export default function SettingsPage() {
         </section>
 
         {/* Section 2: Address Details */}
-        <section className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm space-y-4">
-          <div className="flex items-center gap-3 border-b border-slate-100 pb-3">
-            <div className="p-2 bg-primary/5 text-primary rounded-lg">
+        <section className="bg-surface-container-lowest border border-outline-variant rounded-xl p-lg shadow-soft space-y-lg">
+          <div className="flex items-center gap-md border-b border-outline-variant/40 pb-md">
+            <div className="p-2 bg-primary/10 text-primary rounded-lg">
               <MapPin size={18} />
             </div>
             <div>
-              <h3 className="text-sm font-bold text-on-surface">Registered Office Address</h3>
-              <p className="text-[10px] text-on-surface-variant">Default billing address appended to invoices and quotations</p>
+              <h3 className="font-card-title text-card-title text-on-surface">Registered Office Address</h3>
+              <p className="text-body-sm text-on-surface-variant">Default billing address appended to invoices and quotations</p>
             </div>
           </div>
 
-          <div className="space-y-1">
-            <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Street Line</label>
+          <div className="space-y-sm">
+            <label className="font-label-uppercase text-label-uppercase text-on-surface-variant">Street Line</label>
             <input
               type="text"
               value={street}
               onChange={(e) => setStreet(e.target.value)}
-              className="w-full h-10 px-3 bg-white border border-slate-200 rounded-lg text-xs outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-on-surface"
+              className="w-full h-11 px-md bg-surface-container-lowest border border-outline-variant rounded-xl text-sm outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-on-surface transition-all placeholder:text-on-surface-variant/60"
               placeholder="e.g. 102 First Floor, Kamptee Road"
             />
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="space-y-1">
-              <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">City</label>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-md">
+            <div className="space-y-sm">
+              <label className="font-label-uppercase text-label-uppercase text-on-surface-variant">City</label>
               <input
                 type="text"
                 value={city}
                 onChange={(e) => setCity(e.target.value)}
-                className="w-full h-10 px-3 bg-white border border-slate-200 rounded-lg text-xs outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-on-surface"
+                className="w-full h-11 px-md bg-surface-container-lowest border border-outline-variant rounded-xl text-sm outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-on-surface transition-all placeholder:text-on-surface-variant/60"
                 placeholder="Nagpur"
               />
             </div>
-            <div className="space-y-1">
-              <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">State</label>
+            <div className="space-y-sm">
+              <label className="font-label-uppercase text-label-uppercase text-on-surface-variant">State</label>
               <input
                 type="text"
                 value={state}
                 onChange={(e) => setState(e.target.value)}
-                className="w-full h-10 px-3 bg-white border border-slate-200 rounded-lg text-xs outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-on-surface"
+                className="w-full h-11 px-md bg-surface-container-lowest border border-outline-variant rounded-xl text-sm outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-on-surface transition-all placeholder:text-on-surface-variant/60"
                 placeholder="Maharashtra"
               />
             </div>
-            <div className="space-y-1">
-              <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Zip Code</label>
+            <div className="space-y-sm">
+              <label className="font-label-uppercase text-label-uppercase text-on-surface-variant">Zip Code</label>
               <input
                 type="text"
                 value={zipCode}
                 onChange={(e) => setZipCode(e.target.value)}
-                className="w-full h-10 px-3 bg-white border border-slate-200 rounded-lg text-xs outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-on-surface"
+                className="w-full h-11 px-md bg-surface-container-lowest border border-outline-variant rounded-xl text-sm outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-on-surface transition-all placeholder:text-on-surface-variant/60"
                 placeholder="441001"
               />
             </div>
-            <div className="space-y-1">
-              <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Country</label>
+            <div className="space-y-sm">
+              <label className="font-label-uppercase text-label-uppercase text-on-surface-variant">Country</label>
               <input
                 type="text"
                 value={country}
                 onChange={(e) => setCountry(e.target.value)}
-                className="w-full h-10 px-3 bg-white border border-slate-200 rounded-lg text-xs outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-on-surface"
+                className="w-full h-11 px-md bg-surface-container-lowest border border-outline-variant rounded-xl text-sm outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-on-surface transition-all placeholder:text-on-surface-variant/60"
                 placeholder="India"
               />
             </div>
@@ -327,64 +327,64 @@ export default function SettingsPage() {
         </section>
 
         {/* Section 3: AI & Voice Developer Keys */}
-        <section className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm space-y-4">
-          <div className="flex items-center gap-3 border-b border-slate-100 pb-3">
-            <div className="p-2 bg-primary/5 text-primary rounded-lg">
+        <section className="bg-surface-container-lowest border border-outline-variant rounded-xl p-lg shadow-soft space-y-lg">
+          <div className="flex items-center gap-md border-b border-outline-variant/40 pb-md">
+            <div className="p-2 bg-primary/10 text-primary rounded-lg">
               <Key size={18} />
             </div>
             <div>
-              <h3 className="text-sm font-bold text-on-surface">AI & Developer API Settings</h3>
-              <p className="text-[10px] text-on-surface-variant">Enable automated SOW generation and speech transcription keys</p>
+              <h3 className="font-card-title text-card-title text-on-surface">AI &amp; Developer API Settings</h3>
+              <p className="text-body-sm text-on-surface-variant">Enable automated SOW generation and speech transcription keys</p>
             </div>
           </div>
 
-          <div className="space-y-4">
-            <div className="space-y-1">
-              <div className="flex items-center gap-2">
-                <Bot size={14} className="text-slate-500" />
-                <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Groq API Key</label>
+          <div className="space-y-lg">
+            <div className="space-y-sm">
+              <div className="flex items-center gap-xs">
+                <Bot size={14} className="text-on-surface-variant" />
+                <label className="font-label-uppercase text-label-uppercase text-on-surface-variant">Groq API Key</label>
               </div>
               <div className="relative">
                 <input
                   type={showGroq ? 'text' : 'password'}
                   value={groqKey}
                   onChange={(e) => setGroqKey(e.target.value)}
-                  className="w-full h-10 pl-3 pr-10 bg-white border border-slate-200 rounded-lg text-xs outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-on-surface font-mono"
+                  className="w-full h-11 pl-md pr-10 bg-surface-container-lowest border border-outline-variant rounded-xl text-sm outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-on-surface font-mono transition-all placeholder:text-on-surface-variant/60"
                   placeholder="gsk_..."
                 />
                 <button
                   type="button"
                   onClick={() => setShowGroq(!showGroq)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-650 cursor-pointer"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant/60 hover:text-on-surface cursor-pointer transition-colors"
                 >
                   {showGroq ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
               </div>
-              <p className="text-[10px] text-slate-400">Used for quick structure generation and SOW quotation summarization.</p>
+              <p className="text-[11px] text-on-surface-variant/70">Used for quick structure generation and SOW quotation summarization.</p>
             </div>
 
-            <div className="space-y-1">
-              <div className="flex items-center gap-2">
-                <Volume2 size={14} className="text-slate-500" />
-                <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Deepgram API Key</label>
+            <div className="space-y-sm">
+              <div className="flex items-center gap-xs">
+                <Volume2 size={14} className="text-on-surface-variant" />
+                <label className="font-label-uppercase text-label-uppercase text-on-surface-variant">Deepgram API Key</label>
               </div>
               <div className="relative">
                 <input
                   type={showDeepgram ? 'text' : 'password'}
                   value={deepgramKey}
                   onChange={(e) => setDeepgramKey(e.target.value)}
-                  className="w-full h-10 pl-3 pr-10 bg-white border border-slate-200 rounded-lg text-xs outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-on-surface font-mono"
+                  className="w-full h-11 pl-md pr-10 bg-surface-container-lowest border border-outline-variant rounded-xl text-sm outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-on-surface font-mono transition-all placeholder:text-on-surface-variant/60"
                   placeholder="Enter Deepgram Key"
                 />
                 <button
                   type="button"
                   onClick={() => setShowDeepgram(!showDeepgram)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-650 cursor-pointer"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant/60 hover:text-on-surface cursor-pointer transition-colors"
                 >
                   {showDeepgram ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
               </div>
-              <p className="text-[10px] text-slate-400">Used for real-time speech transcription to draft quotations from voice logs.</p>
+              <p className="text-[11px] text-on-surface-variant/70">Used for real-time speech transcription to draft quotations from voice logs.</p>
             </div>
           </div>
         </section>

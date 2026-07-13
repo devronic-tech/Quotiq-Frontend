@@ -514,16 +514,15 @@ export default function FinanceDashboardPage() {
   };
 
   return (
-    <div className="space-y-lg max-w-7xl mx-auto pb-xl font-body-sm relative">
+    <div className="space-y-lg max-w-7xl mx-auto pb-xl relative">
       
       {/* ── HEADER ── */}
-      <div id="overview" className="flex flex-col md:flex-row md:items-center justify-between gap-md border-b border-outline-variant/35 pb-md">
-        <div className="space-y-1">
-          <h2 className="font-page-title text-2xl font-black text-on-surface tracking-tight flex items-center gap-xs">
-            <Cpu className="text-primary h-6 w-6 animate-pulse" />
-            <span>Finance & Cash Flow Workspace</span>
+      <div id="overview" className="flex flex-col md:flex-row md:items-end justify-between gap-md mb-xl">
+        <div>
+          <h2 className="font-page-title text-page-title font-bold text-on-surface">
+            Finance &amp; Cash Flow
           </h2>
-          <p className="text-xs text-on-surface-variant">CFO operating dashboard & dynamic financial metrics</p>
+          <p className="text-on-surface-variant font-body-md">CFO operating dashboard &amp; dynamic financial metrics</p>
         </div>
 
         <div className="flex flex-wrap items-center gap-sm">
@@ -532,9 +531,9 @@ export default function FinanceDashboardPage() {
               setSelectedExpense(null);
               setIsExpenseOpen(true);
             }}
-            className="px-md h-9 bg-primary text-white font-bold rounded-lg shadow-soft hover:bg-primary/95 transition-all flex items-center gap-xs cursor-pointer"
+            className="px-md h-11 bg-primary text-white font-semibold rounded-lg shadow-soft hover:bg-primary/90 transition-all flex items-center gap-xs cursor-pointer"
           >
-            <Plus size={14} />
+            <Plus size={16} />
             <span>Add Expense</span>
           </button>
           
@@ -543,106 +542,121 @@ export default function FinanceDashboardPage() {
               setSelectedLiability(null);
               setIsLiabilityOpen(true);
             }}
-            className="px-md h-9 bg-surface-container-lowest border border-outline-variant text-on-surface font-bold rounded-lg hover:bg-slate-50 transition-all flex items-center gap-xs cursor-pointer"
+            className="px-md h-11 bg-surface-container-lowest border border-outline-variant text-on-surface font-semibold rounded-lg hover:bg-surface-container transition-all flex items-center gap-xs cursor-pointer"
           >
-            <AlertTriangle size={14} className="text-warning" />
+            <AlertTriangle size={16} className="text-warning" />
             <span>Create Liability</span>
           </button>
 
           <button
             onClick={() => seedMutation.mutate()}
             disabled={seedMutation.isPending}
-            className="p-2 h-9 w-9 bg-slate-100 border border-outline-variant/30 text-secondary hover:text-primary rounded-lg flex items-center justify-center cursor-pointer transition-colors"
+            className="p-2 h-11 w-11 bg-surface-container border border-outline-variant/30 text-on-surface-variant hover:text-primary rounded-lg flex items-center justify-center cursor-pointer transition-colors"
             title="Reset Mock Data"
           >
-            <RefreshCw size={14} className={clsx(seedMutation.isPending && 'animate-spin')} />
+            <RefreshCw size={15} className={clsx(seedMutation.isPending && 'animate-spin')} />
+          </button>
+
+          <button
+            onClick={() => {
+              if (window.confirm('Are you sure you want to remove all financial records and mock data? This will reset the ledger.')) {
+                clearMutation.mutate();
+              }
+            }}
+            disabled={clearMutation.isPending}
+            className="p-2 h-11 w-11 bg-error-container/20 border border-error/20 text-error hover:bg-error-container/40 rounded-lg flex items-center justify-center cursor-pointer transition-colors"
+            title="Remove Mock Data"
+          >
+            <Trash2 size={15} className={clsx(clearMutation.isPending && 'animate-spin')} />
           </button>
         </div>
       </div>
 
-      {/* ── KPI GRID ── */}
-      <section className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-sm">
-        
+      {/* ── KPI GRID ── 3-column layout matching Dashboard standard */}
+      <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-gutter mb-xl">
+
         {/* KPI 1: Company Balance */}
-        <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-sm shadow-soft flex flex-col justify-between hover:shadow-md transition-shadow">
-          <div className="flex justify-between items-start">
-            <span className="text-[9px] uppercase font-bold text-on-surface-variant tracking-wider">Company Balance</span>
-            <span className="text-primary"><Wallet size={16} /></span>
+        <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-lg shadow-soft hover:shadow-md transition-all duration-300">
+          <div className="flex justify-between items-start mb-sm">
+            <p className="font-label-uppercase text-label-uppercase text-on-surface-variant">COMPANY BALANCE</p>
+            <span className="text-primary"><Wallet size={20} /></span>
           </div>
-          <div className="mt-md">
-            <h3 className="font-mono text-base font-bold text-on-surface">₹{Math.round(kpi.companyBalance).toLocaleString('en-IN')}</h3>
-            <div className={clsx("flex items-center gap-xs text-[10px] font-bold mt-xs", kpi.balanceGrowth >= 0 ? "text-green-600" : "text-error")}>
-              {kpi.balanceGrowth >= 0 ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
-              <span>{kpi.balanceGrowth >= 0 ? '+' : ''}{kpi.balanceGrowth}% vs last month</span>
-            </div>
+          <div className="flex items-baseline gap-sm">
+            <h3 className="font-page-title text-[28px] font-bold text-on-surface">₹{Math.round(kpi.companyBalance).toLocaleString('en-IN')}</h3>
+            <span className={clsx("text-xs font-bold flex items-center gap-[2px]", kpi.balanceGrowth >= 0 ? "text-green-600" : "text-error")}>
+              {kpi.balanceGrowth >= 0 ? <TrendingUp size={14} /> : <TrendingDown size={14} />}
+              {kpi.balanceGrowth >= 0 ? '+' : ''}{kpi.balanceGrowth}%
+            </span>
           </div>
+          <p className="text-[11px] text-on-surface-variant mt-xs">vs. last month balance</p>
         </div>
 
         {/* KPI 2: Available Cash */}
-        <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-sm shadow-soft flex flex-col justify-between hover:shadow-md transition-shadow">
-          <div className="flex justify-between items-start">
-            <span className="text-[9px] uppercase font-bold text-on-surface-variant tracking-wider">Available Cash</span>
-            <span className="text-indigo-500"><DollarSign size={16} /></span>
+        <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-lg shadow-soft hover:shadow-md transition-all duration-300">
+          <div className="flex justify-between items-start mb-sm">
+            <p className="font-label-uppercase text-label-uppercase text-on-surface-variant">AVAILABLE CASH</p>
+            <span className="text-indigo-500"><DollarSign size={20} /></span>
           </div>
-          <div className="mt-md">
-            <h3 className="font-mono text-base font-bold text-on-surface">₹{Math.round(kpi.availableCash).toLocaleString('en-IN')}</h3>
-            <span className="text-[9px] text-on-surface-variant mt-xs block">Excludes locked liabilities</span>
+          <div className="flex items-baseline gap-sm">
+            <h3 className="font-page-title text-[28px] font-bold text-on-surface">₹{Math.round(kpi.availableCash).toLocaleString('en-IN')}</h3>
           </div>
+          <p className="text-[11px] text-on-surface-variant mt-xs">Excludes locked liabilities</p>
         </div>
 
-        {/* KPI 3: Pending Invoices / Revenue */}
-        <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-sm shadow-soft flex flex-col justify-between hover:shadow-md transition-shadow">
-          <div className="flex justify-between items-start">
-            <span className="text-[9px] uppercase font-bold text-on-surface-variant tracking-wider">Pending Revenue</span>
-            <span className="text-rose-500"><FileText size={16} /></span>
+        {/* KPI 3: Pending Revenue */}
+        <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-lg shadow-soft hover:shadow-md transition-all duration-300">
+          <div className="flex justify-between items-start mb-sm">
+            <p className="font-label-uppercase text-label-uppercase text-on-surface-variant">PENDING REVENUE</p>
+            <span className="text-error"><FileText size={20} /></span>
           </div>
-          <div className="mt-md">
-            <h3 className="font-mono text-base font-bold text-on-surface">₹{Math.round(kpi.pendingRevenue).toLocaleString('en-IN')}</h3>
-            <span className="text-[9px] text-rose-600 font-bold block mt-xs">{invoices.filter(inv => inv.status !== 'paid').length} Unpaid Invoices</span>
+          <div className="flex items-baseline gap-sm">
+            <h3 className="font-page-title text-[28px] font-bold text-on-surface">₹{Math.round(kpi.pendingRevenue).toLocaleString('en-IN')}</h3>
+            <span className="text-xs font-bold text-error">{invoices.filter(inv => inv.status !== 'paid').length} unpaid</span>
           </div>
+          <p className="text-[11px] text-on-surface-variant mt-xs">Collectable client balances</p>
         </div>
 
-        {/* KPI 5: Net Profit */}
-        <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-sm shadow-soft flex flex-col justify-between hover:shadow-md transition-shadow">
-          <div className="flex justify-between items-start">
-            <span className="text-[9px] uppercase font-bold text-on-surface-variant tracking-wider">Net Profit</span>
-            <span className="text-primary"><Check size={16} /></span>
+        {/* KPI 4: Net Profit */}
+        <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-lg shadow-soft hover:shadow-md transition-all duration-300">
+          <div className="flex justify-between items-start mb-sm">
+            <p className="font-label-uppercase text-label-uppercase text-on-surface-variant">NET PROFIT</p>
+            <span className="text-primary"><Check size={20} /></span>
           </div>
-          <div className="mt-md">
-            <h3 className="font-mono text-base font-bold text-on-surface">₹{Math.round(kpi.netProfit).toLocaleString('en-IN')}</h3>
-            <div className={clsx("flex items-center gap-xs text-[10px] font-bold mt-xs", kpi.profitMargin >= 0 ? "text-green-600" : "text-error")}>
-              {kpi.profitMargin >= 0 ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
-              <span>{kpi.profitMargin}% margin</span>
-            </div>
+          <div className="flex items-baseline gap-sm">
+            <h3 className="font-page-title text-[28px] font-bold text-on-surface">₹{Math.round(kpi.netProfit).toLocaleString('en-IN')}</h3>
+            <span className={clsx("text-xs font-bold flex items-center gap-[2px]", kpi.profitMargin >= 0 ? "text-green-600" : "text-error")}>
+              {kpi.profitMargin >= 0 ? <TrendingUp size={14} /> : <TrendingDown size={14} />}
+              {kpi.profitMargin}%
+            </span>
           </div>
+          <p className="text-[11px] text-on-surface-variant mt-xs">Profit margin this period</p>
         </div>
 
-
-
-        {/* KPI 8: Critical Liabilities */}
-        <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-sm shadow-soft flex flex-col justify-between hover:shadow-md transition-shadow">
-          <div className="flex justify-between items-start">
-            <span className="text-[9px] uppercase font-bold text-on-surface-variant tracking-wider">Critical Liabilities</span>
-            <span className="text-error"><AlertTriangle size={16} /></span>
+        {/* KPI 5: Critical Liabilities */}
+        <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-lg shadow-soft hover:shadow-md transition-all duration-300">
+          <div className="flex justify-between items-start mb-sm">
+            <p className="font-label-uppercase text-label-uppercase text-on-surface-variant">CRITICAL LIABILITIES</p>
+            <span className="text-error"><AlertTriangle size={20} /></span>
           </div>
-          <div className="mt-md">
-            <h3 className="font-mono text-base font-bold text-on-surface">{kpi.criticalLiabilities} Pending</h3>
-            <span className="text-[9px] text-rose-600 font-bold block mt-xs">Due within 5 days</span>
+          <div className="flex items-baseline gap-sm">
+            <h3 className="font-page-title text-[28px] font-bold text-on-surface">{kpi.criticalLiabilities}</h3>
+            <span className="text-xs font-bold text-error">Pending</span>
           </div>
+          <p className="text-[11px] text-on-surface-variant mt-xs">Due within 5 days</p>
         </div>
 
-        {/* KPI 9: Monthly Subscription Cost */}
-        <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-sm shadow-soft flex flex-col justify-between hover:shadow-md transition-shadow">
-          <div className="flex justify-between items-start">
-            <span className="text-[9px] uppercase font-bold text-on-surface-variant tracking-wider">Subscriptions cost</span>
-            <span className="text-secondary"><Layers size={16} /></span>
+        {/* KPI 6: Monthly Subscription Cost */}
+        <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-lg shadow-soft hover:shadow-md transition-all duration-300">
+          <div className="flex justify-between items-start mb-sm">
+            <p className="font-label-uppercase text-label-uppercase text-on-surface-variant">SUBSCRIPTIONS</p>
+            <span className="text-on-surface-variant"><Layers size={20} /></span>
           </div>
-          <div className="mt-md">
-            <h3 className="font-mono text-base font-bold text-on-surface">₹{Math.round(kpi.subscriptionCostMonthly).toLocaleString('en-IN')}/mo</h3>
-            <span className="text-[9px] text-on-surface-variant block mt-xs">{kpi.upcomingRenewals} Renewals in 15 days</span>
+          <div className="flex items-baseline gap-sm">
+            <h3 className="font-page-title text-[28px] font-bold text-on-surface">₹{Math.round(kpi.subscriptionCostMonthly).toLocaleString('en-IN')}</h3>
+            <span className="text-xs font-bold text-on-surface-variant">/mo</span>
           </div>
+          <p className="text-[11px] text-on-surface-variant mt-xs">{kpi.upcomingRenewals} renewals in next 15 days</p>
         </div>
-
 
       </section>
 
@@ -650,20 +664,20 @@ export default function FinanceDashboardPage() {
       <div id="cashflow" className="grid grid-cols-1 lg:grid-cols-3 gap-gutter">
         
         {/* Main Cash Flow Chart */}
-        <div className="lg:col-span-2 bg-surface-container-lowest border border-outline-variant rounded-xl p-md shadow-soft">
+        <div className="lg:col-span-2 bg-surface-container-lowest border border-outline-variant rounded-xl p-lg shadow-soft">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-sm mb-md">
             <div>
-              <h4 className="font-card-title text-sm text-on-surface font-bold">Cash Flow Overview</h4>
-              <p className="text-[10px] text-on-surface-variant mt-0.5">Projected balance, income and outlays tracking</p>
+              <h4 className="font-card-title text-card-title text-on-surface">Cash Flow Overview</h4>
+              <p className="text-body-sm text-on-surface-variant">Projected balance, income and outlays tracking</p>
             </div>
-            <div className="flex gap-xs border border-outline-variant/30 rounded-lg p-0.5 bg-slate-50">
+            <div className="flex gap-xs border border-outline-variant/30 rounded-lg p-0.5 bg-surface-container-low">
               {['7D', '30D', '3M', '6M', '1Y'].map(range => (
                 <button
                   key={range}
                   onClick={() => setCashFlowRange(range)}
                   className={clsx(
                     'px-2 py-1 text-[10px] font-bold rounded-md cursor-pointer transition-all',
-                    cashFlowRange === range ? 'bg-primary text-white' : 'text-secondary hover:bg-slate-100'
+                    cashFlowRange === range ? 'bg-primary text-white' : 'text-on-surface-variant hover:bg-surface-container'
                   )}
                 >
                   {range}
@@ -674,7 +688,7 @@ export default function FinanceDashboardPage() {
 
           <div className="h-64 w-full">
             {isCashFlowLoading ? (
-              <div className="h-full w-full flex items-center justify-center shimmer rounded-lg border border-outline-variant/20 bg-slate-50">
+              <div className="h-full w-full flex items-center justify-center shimmer rounded-lg border border-outline-variant/20 bg-surface-container-low">
                 <span className="text-xs text-on-surface-variant font-semibold">Loading charts data...</span>
               </div>
             ) : (
@@ -705,10 +719,10 @@ export default function FinanceDashboardPage() {
         </div>
 
         {/* Revenue Analytics (Pie Chart) */}
-        <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-md shadow-soft flex flex-col justify-between">
+        <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-lg shadow-soft flex flex-col justify-between">
           <div>
-            <h4 className="font-card-title text-sm text-on-surface font-bold">Revenue Sources</h4>
-            <p className="text-[10px] text-on-surface-variant mt-0.5">Project and AMC breakdown analysis</p>
+            <h4 className="font-card-title text-card-title text-on-surface">Revenue Sources</h4>
+            <p className="text-body-sm text-on-surface-variant">Project and AMC breakdown analysis</p>
           </div>
 
           <div className="h-48 w-full relative flex items-center justify-center my-xs">
@@ -766,23 +780,23 @@ export default function FinanceDashboardPage() {
         {/* Pending Client Payments */}
         <div className="bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden shadow-soft flex flex-col justify-between">
           <div>
-            <div className="p-md border-b border-outline-variant/35 flex justify-between items-center">
+            <div className="p-lg border-b border-outline-variant/30 flex justify-between items-center">
               <div>
-                <h4 className="font-card-title text-sm text-on-surface font-bold">Pending Client Payments</h4>
-                <p className="text-[10px] text-on-surface-variant mt-0.5">Collectable client balances, overdue timelines, and follow-ups</p>
+                <h4 className="font-card-title text-card-title text-on-surface">Pending Client Payments</h4>
+                <p className="text-body-sm text-on-surface-variant">Collectable client balances, overdue timelines, and follow-ups</p>
               </div>
-              <span className="text-[10px] font-bold text-rose-600 bg-rose-50 border border-rose-200 px-2 py-0.5 rounded">₹{Math.round(kpi.pendingRevenue).toLocaleString('en-IN')} Total</span>
+              <span className="text-[10px] font-bold text-error bg-error-container/20 border border-error/20 px-2 py-0.5 rounded">₹{Math.round(kpi.pendingRevenue).toLocaleString('en-IN')} Total</span>
             </div>
 
             <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse text-[11px]">
-                <thead className="bg-slate-50 text-slate-500 font-bold uppercase tracking-wider border-b border-outline-variant/20">
+              <table className="w-full text-left border-collapse text-body-sm">
+                <thead className="bg-surface-container-low text-on-surface-variant font-label-uppercase text-label-uppercase border-b border-outline-variant/30">
                   <tr>
-                    <th className="px-md py-sm">Client</th>
-                    <th className="px-md py-sm">Invoice #</th>
-                    <th className="px-md py-sm text-right">Owed</th>
-                    <th className="px-md py-sm">Status</th>
-                    <th className="px-md py-sm text-right">Actions</th>
+                    <th className="px-lg py-md">Client</th>
+                    <th className="px-lg py-md">Invoice #</th>
+                    <th className="px-lg py-md text-right">Owed</th>
+                    <th className="px-lg py-md">Status</th>
+                    <th className="px-lg py-md text-right">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-outline-variant/20 text-on-surface">
@@ -802,20 +816,20 @@ export default function FinanceDashboardPage() {
                         <optgroup key={inv.id} className="border-none">
                           <tr 
                             onClick={() => setExpandedPaymentInvoiceId(isExpanded ? null : inv.id)}
-                            className="hover:bg-slate-50/60 transition-colors cursor-pointer"
+                            className="hover:bg-surface-container-low/50 transition-colors cursor-pointer"
                           >
-                            <td className="px-md py-sm font-semibold">{inv.customer?.name || 'Client'}</td>
-                            <td className="px-md py-sm font-mono font-bold text-primary">{inv.invoiceNumber}</td>
-                            <td className="px-md py-sm font-mono font-bold text-right">₹{outstanding.toLocaleString('en-IN')}</td>
-                            <td className="px-md py-sm">
+                            <td className="px-lg py-md font-semibold">{inv.customer?.name || 'Client'}</td>
+                            <td className="px-lg py-md font-data-mono text-data-mono font-bold text-primary">{inv.invoiceNumber}</td>
+                            <td className="px-lg py-md font-data-mono text-data-mono font-bold text-right">₹{outstanding.toLocaleString('en-IN')}</td>
+                            <td className="px-lg py-md">
                               <span className={clsx(
-                                'px-2 py-0.25 rounded-full text-[9px] font-bold uppercase border',
+                                'px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase border',
                                 inv.status === 'overdue' ? 'bg-orange-50 text-orange-700 border-orange-200' : 'bg-red-50 text-error border-red-200'
                               )}>
                                 {inv.status}
                               </span>
                             </td>
-                            <td className="px-md py-sm text-right" onClick={(e) => e.stopPropagation()}>
+                            <td className="px-lg py-md text-right" onClick={(e) => e.stopPropagation()}>
                               <div className="flex gap-xs justify-end">
                                 <button 
                                   onClick={() => toast.success('Sent WhatsApp payment link reminder')}
@@ -837,23 +851,23 @@ export default function FinanceDashboardPage() {
 
                           {/* Expanded Section */}
                           {isExpanded && (
-                            <tr className="bg-slate-50/50">
-                              <td colSpan={5} className="px-lg py-sm border-t border-outline-variant/10 text-[10px] text-secondary">
+                            <tr className="bg-surface-container-low/50">
+                              <td colSpan={5} className="px-lg py-md border-t border-outline-variant/10 text-body-sm text-secondary">
                                 <div className="grid grid-cols-2 md:grid-cols-4 gap-md">
                                   <div>
-                                    <span className="font-bold text-on-surface-variant uppercase block">Due Date</span>
+                                    <span className="font-bold text-on-surface-variant uppercase block text-[10px] tracking-wider">Due Date</span>
                                     <span>{new Date(inv.dueDate).toLocaleDateString('en-IN')}</span>
                                   </div>
                                   <div>
-                                    <span className="font-bold text-on-surface-variant uppercase block">Total Billing</span>
-                                    <span>₹{Number(inv.grandTotal).toLocaleString('en-IN')}</span>
+                                    <span className="font-bold text-on-surface-variant uppercase block text-[10px] tracking-wider">Total Billing</span>
+                                    <span className="font-data-mono text-data-mono">₹{Number(inv.grandTotal).toLocaleString('en-IN')}</span>
                                   </div>
                                   <div>
-                                    <span className="font-bold text-on-surface-variant uppercase block">Total Payouts</span>
-                                    <span>₹{Number(inv.amountPaid).toLocaleString('en-IN')}</span>
+                                    <span className="font-bold text-on-surface-variant uppercase block text-[10px] tracking-wider">Total Payouts</span>
+                                    <span className="font-data-mono text-data-mono">₹{Number(inv.amountPaid).toLocaleString('en-IN')}</span>
                                   </div>
                                   <div>
-                                    <span className="font-bold text-on-surface-variant uppercase block">Timeline Logs</span>
+                                    <span className="font-bold text-on-surface-variant uppercase block text-[10px] tracking-wider">Timeline Logs</span>
                                     <span className="text-orange-600 font-bold">1 Reminder dispatched</span>
                                   </div>
                                 </div>
@@ -869,8 +883,8 @@ export default function FinanceDashboardPage() {
             </div>
           </div>
           
-          <div className="p-sm bg-slate-50/80 border-t border-outline-variant/35 text-center">
-            <button className="text-[10px] font-bold text-primary hover:underline cursor-pointer flex items-center justify-center gap-xs w-full">
+          <div className="p-md bg-surface-container-low/80 border-t border-outline-variant/35 text-center">
+            <button className="text-body-sm font-bold text-primary hover:underline cursor-pointer flex items-center justify-center gap-xs w-full">
               <span>View All Outstanding Receivables</span>
               <ArrowRight size={12} />
             </button>
@@ -880,20 +894,20 @@ export default function FinanceDashboardPage() {
         {/* Project Profitability */}
         <div className="bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden shadow-soft flex flex-col justify-between">
           <div>
-            <div className="p-md border-b border-outline-variant/35">
-              <h4 className="font-card-title text-sm text-on-surface font-bold">Project Profitability Analytics</h4>
-              <p className="text-[10px] text-on-surface-variant mt-0.5">Budget utilization, gross profit margins, and ROI index</p>
+            <div className="p-lg border-b border-outline-variant/30">
+              <h4 className="font-card-title text-card-title text-on-surface">Project Profitability Analytics</h4>
+              <p className="text-body-sm text-on-surface-variant">Budget utilization, gross profit margins, and ROI index</p>
             </div>
 
             <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse text-[11px]">
-                <thead className="bg-slate-50 text-slate-500 font-bold uppercase tracking-wider border-b border-outline-variant/20">
+              <table className="w-full text-left border-collapse text-body-sm">
+                <thead className="bg-surface-container-low text-on-surface-variant font-label-uppercase text-label-uppercase border-b border-outline-variant/30">
                   <tr>
-                    <th className="px-md py-sm">Project Module</th>
-                    <th className="px-md py-sm text-right">Revenue</th>
-                    <th className="px-md py-sm text-right">Expense</th>
-                    <th className="px-md py-sm text-right">Margin</th>
-                    <th className="px-md py-sm text-right">ROI</th>
+                    <th className="px-lg py-md">Project Module</th>
+                    <th className="px-lg py-md text-right">Revenue</th>
+                    <th className="px-lg py-md text-right">Expense</th>
+                    <th className="px-lg py-md text-right">Margin</th>
+                    <th className="px-lg py-md text-right">ROI</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-outline-variant/20 text-on-surface">
@@ -905,13 +919,13 @@ export default function FinanceDashboardPage() {
                     projectProfitabilityList.map(proj => (
                       <tr 
                         key={proj.id}
-                        className="hover:bg-slate-50/60 transition-colors"
+                        className="hover:bg-surface-container-low/50 transition-colors"
                       >
-                        <td className="px-md py-sm font-semibold">{proj.name}</td>
-                        <td className="px-md py-sm font-mono text-right">₹{proj.rev.toLocaleString('en-IN')}</td>
-                        <td className="px-md py-sm font-mono text-right text-rose-600">₹{proj.exp.toLocaleString('en-IN')}</td>
-                        <td className="px-md py-sm font-mono text-right text-green-700 font-bold">{proj.margin}%</td>
-                        <td className="px-md py-sm font-mono text-right font-bold text-primary">{proj.roi}x</td>
+                        <td className="px-lg py-md font-semibold">{proj.name}</td>
+                        <td className="px-lg py-md font-data-mono text-data-mono text-right">₹{proj.rev.toLocaleString('en-IN')}</td>
+                        <td className="px-lg py-md font-data-mono text-data-mono text-right text-rose-600">₹{proj.exp.toLocaleString('en-IN')}</td>
+                        <td className="px-lg py-md font-data-mono text-data-mono text-right text-green-700 font-bold">{proj.margin}%</td>
+                        <td className="px-lg py-md font-data-mono text-data-mono text-right font-bold text-primary">{proj.roi}x</td>
                       </tr>
                     ))
                   )}
@@ -925,10 +939,10 @@ export default function FinanceDashboardPage() {
 
       {/* ── EXPENSE MANAGEMENT ── */}
       <div id="expenses" className="bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden shadow-soft">
-        <div className="p-md border-b border-outline-variant/35 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-sm">
+        <div className="p-lg border-b border-outline-variant/30 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-sm">
           <div>
-            <h4 className="font-card-title text-sm text-on-surface font-bold">Expense Registry</h4>
-            <p className="text-[10px] text-on-surface-variant mt-0.5">Recorded cash outlays, tax receipts, and payment method audit</p>
+            <h4 className="font-card-title text-card-title text-on-surface">Expense Registry</h4>
+            <p className="text-body-sm text-on-surface-variant">Recorded cash outlays, tax receipts, and payment method audit</p>
           </div>
           
           <div className="flex items-center gap-sm">
@@ -941,7 +955,7 @@ export default function FinanceDashboardPage() {
                   setExpenseSearch(e.target.value);
                   setExpensePage(1);
                 }}
-                className="w-48 h-8 pl-3 pr-8 bg-white border border-outline-variant/40 rounded-lg text-xs outline-none focus:border-primary text-on-surface"
+                className="w-48 h-11 px-md bg-surface-container-lowest border border-outline-variant rounded-xl text-sm outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-on-surface transition-all placeholder:text-on-surface-variant/60"
               />
             </div>
 
@@ -950,25 +964,25 @@ export default function FinanceDashboardPage() {
                 setSelectedExpense(null);
                 setIsExpenseOpen(true);
               }}
-              className="px-sm h-8 bg-primary text-white font-bold rounded-lg text-xs hover:bg-primary/95 flex items-center gap-xs cursor-pointer shadow-soft"
+              className="px-md h-11 bg-primary text-white font-semibold rounded-lg shadow-soft hover:bg-primary/90 transition-all flex items-center gap-xs cursor-pointer text-sm"
             >
-              <Plus size={13} />
+              <Plus size={16} />
               <span>Record Expense</span>
             </button>
           </div>
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse text-[11px]">
-            <thead className="bg-slate-50 text-slate-500 font-bold uppercase tracking-wider border-b border-outline-variant/20">
+          <table className="w-full text-left border-collapse text-body-sm">
+            <thead className="bg-surface-container-low text-on-surface-variant font-label-uppercase text-label-uppercase border-b border-outline-variant/30">
               <tr>
-                <th className="px-md py-sm">Title</th>
-                <th className="px-md py-sm">Category</th>
-                <th className="px-md py-sm">Vendor</th>
-                <th className="px-md py-sm">Date</th>
-                <th className="px-md py-sm">Invoice #</th>
-                <th className="px-md py-sm text-right">Amount</th>
-                <th className="px-md py-sm text-right">Actions</th>
+                <th className="px-lg py-md">Title</th>
+                <th className="px-lg py-md">Category</th>
+                <th className="px-lg py-md">Vendor</th>
+                <th className="px-lg py-md">Date</th>
+                <th className="px-lg py-md">Invoice #</th>
+                <th className="px-lg py-md text-right">Amount</th>
+                <th className="px-lg py-md text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-outline-variant/20 text-on-surface">
@@ -982,25 +996,25 @@ export default function FinanceDashboardPage() {
                 </tr>
               ) : (
                 expensesResult.data.map((exp: Expense) => (
-                  <tr key={exp.id} className="hover:bg-slate-50/50 transition-colors">
-                    <td className="px-md py-sm font-semibold">{exp.title}</td>
-                    <td className="px-md py-sm">
-                      <span className="px-1.5 py-0.25 bg-slate-100 border border-outline-variant/30 rounded text-[9px] font-semibold text-secondary">
+                  <tr key={exp.id} className="hover:bg-surface-container-low/50 transition-colors">
+                    <td className="px-lg py-md font-semibold">{exp.title}</td>
+                    <td className="px-lg py-md">
+                      <span className="px-2 py-0.5 bg-surface-container border border-outline-variant/30 rounded text-[10px] font-bold text-on-surface-variant uppercase">
                         {exp.category}
                       </span>
                     </td>
-                    <td className="px-md py-sm font-semibold text-on-surface-variant">{exp.vendor || '—'}</td>
-                    <td className="px-md py-sm text-secondary font-mono">{new Date(exp.expenseDate).toLocaleDateString('en-IN')}</td>
-                    <td className="px-md py-sm font-mono text-secondary">{exp.invoiceNumber || '—'}</td>
-                    <td className="px-md py-sm font-mono font-bold text-right text-rose-600">₹{Number(exp.amount).toLocaleString('en-IN')}</td>
-                    <td className="px-md py-sm text-right">
+                    <td className="px-lg py-md font-semibold text-on-surface-variant">{exp.vendor || '—'}</td>
+                    <td className="px-lg py-md text-secondary font-data-mono text-data-mono">{new Date(exp.expenseDate).toLocaleDateString('en-IN')}</td>
+                    <td className="px-lg py-md font-data-mono text-data-mono text-secondary">{exp.invoiceNumber || '—'}</td>
+                    <td className="px-lg py-md font-data-mono text-data-mono font-bold text-right text-rose-600">₹{Number(exp.amount).toLocaleString('en-IN')}</td>
+                    <td className="px-lg py-md text-right">
                       <div className="flex gap-xs justify-end">
                         <button
                           onClick={() => {
                             setSelectedExpense(exp);
                             setIsExpenseOpen(true);
                           }}
-                          className="text-primary hover:underline text-[10px] font-bold cursor-pointer"
+                          className="text-primary hover:underline text-xs font-semibold cursor-pointer"
                         >
                           Edit
                         </button>
@@ -1010,7 +1024,7 @@ export default function FinanceDashboardPage() {
                               deleteExpenseMutation.mutate(exp.id);
                             }
                           }}
-                          className="text-error hover:underline text-[10px] font-bold cursor-pointer ml-sm"
+                          className="text-error hover:underline text-xs font-semibold cursor-pointer ml-sm"
                         >
                           Delete
                         </button>
@@ -1025,20 +1039,20 @@ export default function FinanceDashboardPage() {
 
         {/* Pagination footer */}
         {expensesResult.meta?.totalPages > 1 && (
-          <div className="p-sm bg-slate-50/60 border-t border-outline-variant/25 flex justify-between items-center px-md text-[10px] font-bold">
+          <div className="p-md bg-surface-container-low/60 border-t border-outline-variant/25 flex justify-between items-center px-lg text-body-sm font-bold">
             <span className="text-secondary">Page {expensePage} of {expensesResult.meta.totalPages}</span>
             <div className="flex gap-xs">
               <button
                 disabled={expensePage === 1}
                 onClick={() => setExpensePage(prev => Math.max(1, prev - 1))}
-                className="px-sm py-1 bg-white border border-outline-variant/50 rounded hover:bg-slate-100 disabled:opacity-50 transition-colors"
+                className="px-md py-1.5 bg-white border border-outline-variant/50 rounded hover:bg-slate-100 disabled:opacity-50 transition-colors"
               >
                 Previous
               </button>
               <button
                 disabled={expensePage === expensesResult.meta.totalPages}
                 onClick={() => setExpensePage(prev => Math.min(expensesResult.meta.totalPages, prev + 1))}
-                className="px-sm py-1 bg-white border border-outline-variant/50 rounded hover:bg-slate-100 disabled:opacity-50 transition-colors"
+                className="px-md py-1.5 bg-white border border-outline-variant/50 rounded hover:bg-slate-100 disabled:opacity-50 transition-colors"
               >
                 Next
               </button>
@@ -1051,12 +1065,12 @@ export default function FinanceDashboardPage() {
       <div id="liabilities" className="grid grid-cols-1 lg:grid-cols-3 gap-gutter">
         
         {/* Liability Kanban Board */}
-        <div className="lg:col-span-2 bg-surface-container-lowest border border-outline-variant rounded-xl p-md shadow-soft flex flex-col justify-between">
+        <div className="lg:col-span-2 bg-surface-container-lowest border border-outline-variant rounded-xl p-lg shadow-soft flex flex-col justify-between">
           <div>
-            <div className="flex justify-between items-center border-b border-outline-variant/35 pb-sm mb-md">
+            <div className="flex justify-between items-center border-b border-outline-variant/30 pb-sm mb-md">
               <div>
-                <h4 className="font-card-title text-sm text-on-surface font-bold">Company Liabilities</h4>
-                <p className="text-[10px] text-on-surface-variant mt-0.5">Debts, critical supplier bills, and corporate tax timelines</p>
+                <h4 className="font-card-title text-card-title text-on-surface">Company Liabilities</h4>
+                <p className="text-body-sm text-on-surface-variant">Debts, critical supplier bills, and corporate tax timelines</p>
               </div>
               <button
                 onClick={() => {
@@ -1075,7 +1089,7 @@ export default function FinanceDashboardPage() {
                 const columnLiabs = liabilities.filter(l => l.priority === prio && l.status === 'pending');
                 const prioLabel = prio === 'critical' ? '🔴 Critical' : prio === 'high' ? '🟠 High' : '🟡 Medium';
                 return (
-                  <div key={prio} className="space-y-sm bg-slate-50/50 p-sm rounded-xl border border-outline-variant/20">
+                  <div key={prio} className="space-y-sm bg-surface-container-low/50 p-sm rounded-xl border border-outline-variant/30">
                     <span className="text-[10px] uppercase font-bold tracking-wider text-on-surface flex justify-between">
                       <span>{prioLabel}</span>
                       <span className="font-mono text-primary">{columnLiabs.length}</span>
@@ -1084,7 +1098,7 @@ export default function FinanceDashboardPage() {
                       {isLiabilitiesLoading ? (
                         <div className="text-center py-md text-[9px] shimmer">Loading...</div>
                       ) : columnLiabs.length === 0 ? (
-                        <div className="text-center py-md text-[9px] text-slate-400 bg-white border border-dashed border-slate-200 rounded-lg">Clear</div>
+                        <div className="text-center py-md text-[9px] text-on-surface-variant/60 bg-surface-container-lowest border border-dashed border-outline-variant/40 rounded-lg">Clear</div>
                       ) : (
                         columnLiabs.map(liab => (
                           <div 
@@ -1093,11 +1107,11 @@ export default function FinanceDashboardPage() {
                               setSelectedLiability(liab);
                               setIsLiabilityOpen(true);
                             }}
-                            className="p-xs bg-white border border-outline-variant/30 rounded-lg shadow-soft hover:shadow-md transition-shadow cursor-pointer flex flex-col gap-0.5"
+                            className="p-xs bg-surface-container-lowest border border-outline-variant/30 rounded-lg shadow-soft hover:shadow-md transition-shadow cursor-pointer flex flex-col gap-0.5"
                           >
                             <span className="text-[10px] font-bold text-on-surface leading-tight truncate">{liab.title}</span>
                             <span className="text-[9px] text-on-surface-variant">Vendor: {liab.vendor}</span>
-                            <div className="flex justify-between items-center mt-1 border-t border-slate-100 pt-1">
+                            <div className="flex justify-between items-center mt-1 border-t border-outline-variant/30 pt-1">
                               <span className="text-[9px] font-bold text-primary font-mono">₹{Math.round(liab.amount).toLocaleString('en-IN')}</span>
                               <button
                                 onClick={(e) => {
@@ -1123,10 +1137,10 @@ export default function FinanceDashboardPage() {
         </div>
 
         {/* Monthly Fixed Costs */}
-        <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-md shadow-soft flex flex-col justify-between">
+        <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-lg shadow-soft flex flex-col justify-between">
           <div>
-            <h4 className="font-card-title text-sm text-on-surface font-bold">Monthly Fixed Costs</h4>
-            <p className="text-[10px] text-on-surface-variant mt-0.5">Recurring overheads, rent, and utility commitments</p>
+            <h4 className="font-card-title text-card-title text-on-surface">Monthly Fixed Costs</h4>
+            <p className="text-body-sm text-on-surface-variant">Recurring overheads, rent, and utility commitments</p>
 
             <div className="space-y-sm mt-md">
               {fixedCostsList.length === 0 ? (
@@ -1137,7 +1151,7 @@ export default function FinanceDashboardPage() {
                 fixedCostsList.map(cost => (
                   <div 
                     key={cost.name} 
-                    className="p-sm bg-slate-50/50 border border-outline-variant/35 rounded-xl flex items-center justify-between"
+                    className="p-sm bg-surface-container-low/50 border border-outline-variant/35 rounded-xl flex items-center gap-sm justify-between"
                   >
                     <div className="space-y-0.5">
                       <span className="text-[10px] font-bold text-on-surface block">{cost.name}</span>
@@ -1146,7 +1160,7 @@ export default function FinanceDashboardPage() {
                     <div className="text-right flex items-center gap-md">
                       <div className="space-y-0.5">
                         <span className="text-[10px] font-bold font-mono text-primary block">₹{cost.cost.toLocaleString('en-IN')}</span>
-                        <span className="text-[8px] font-bold text-on-surface-variant bg-slate-100 border px-1 rounded block uppercase tracking-wider">{cost.prio}</span>
+                        <span className="text-[8px] font-bold text-on-surface-variant bg-surface-container border border-outline-variant/30 px-1 py-0.5 rounded uppercase tracking-wider">{cost.prio}</span>
                       </div>
                       
                       {/* Auto-pay Toggle */}
@@ -1177,21 +1191,21 @@ export default function FinanceDashboardPage() {
       <div id="payroll" className="grid grid-cols-1 lg:grid-cols-3 gap-gutter">
         
         {/* Subscription Tracker */}
-        <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-md shadow-soft flex flex-col justify-between">
+        <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-lg shadow-soft flex flex-col justify-between">
           <div>
-            <div className="flex justify-between items-center border-b border-outline-variant/35 pb-sm mb-md">
+            <div className="flex justify-between items-center border-b border-outline-variant/30 pb-sm mb-md">
               <div>
-                <h4 className="font-card-title text-sm text-on-surface font-bold">SaaS & Cloud Subscriptions</h4>
-                <p className="text-[10px] text-on-surface-variant mt-0.5">Automated billing renewals and active license overheads</p>
+                <h4 className="font-card-title text-card-title text-on-surface">SaaS &amp; Cloud Subscriptions</h4>
+                <p className="text-body-sm text-on-surface-variant">Automated billing renewals and active license overheads</p>
               </div>
               <button
                 onClick={() => {
                   setSelectedSubscription(null);
                   setIsSubscriptionOpen(true);
                 }}
-                className="px-sm h-8 bg-secondary text-white font-bold rounded-lg text-xs hover:bg-secondary/95 flex items-center gap-xs cursor-pointer"
+                className="px-md h-11 bg-secondary text-white font-semibold rounded-lg hover:bg-secondary/90 transition-all flex items-center gap-xs cursor-pointer text-sm"
               >
-                <Plus size={13} />
+                <Plus size={16} />
                 <span>Track SaaS</span>
               </button>
             </div>
@@ -1200,7 +1214,7 @@ export default function FinanceDashboardPage() {
               {isSubscriptionsLoading ? (
                 <div className="text-center py-lg shimmer">Loading subscriptions...</div>
               ) : subscriptions.length === 0 ? (
-                <div className="text-center py-lg text-slate-400 border border-dashed border-outline-variant/40 rounded-xl font-semibold">
+                <div className="text-center py-lg text-on-surface-variant/50 border border-dashed border-outline-variant/40 rounded-xl text-xs font-semibold">
                   No active SaaS subscriptions tracked.
                 </div>
               ) : (
@@ -1209,7 +1223,7 @@ export default function FinanceDashboardPage() {
                   return (
                     <div 
                       key={sub.id} 
-                      className="p-sm bg-white border border-outline-variant/35 rounded-xl flex items-center justify-between shadow-soft hover:shadow-md transition-shadow"
+                      className="p-sm bg-surface-container-lowest border border-outline-variant/35 rounded-xl flex items-center gap-sm justify-between shadow-soft hover:shadow-md transition-shadow"
                     >
                       <div 
                         onClick={() => {
@@ -1218,9 +1232,9 @@ export default function FinanceDashboardPage() {
                         }}
                         className="space-y-0.5 cursor-pointer flex-1"
                       >
-                        <span className="text-[10px] font-bold text-on-surface block truncate w-32">{sub.name}</span>
+                        <span className="text-[11px] font-bold text-on-surface block truncate w-32">{sub.name}</span>
                         <span className={clsx(
-                          'text-[9px] font-bold',
+                          'text-[10px] font-bold',
                           daysLeft <= 10 ? 'text-rose-600' : 'text-secondary'
                         )}>
                           {daysLeft > 0 ? `Renews in ${daysLeft} days` : `Renewed/Due today`}
@@ -1228,8 +1242,8 @@ export default function FinanceDashboardPage() {
                       </div>
                       <div className="text-right flex items-center gap-sm">
                         <div className="text-right space-y-0.5 mr-xs">
-                          <span className="text-[10px] font-bold font-mono text-primary block">₹{Number(sub.cost).toLocaleString('en-IN')}</span>
-                          <span className="text-[8px] text-secondary uppercase block">{sub.billingCycle}</span>
+                          <span className="text-body-sm font-bold font-data-mono text-data-mono text-primary block">₹{Number(sub.cost).toLocaleString('en-IN')}</span>
+                          <span className="text-[9px] text-secondary uppercase block tracking-wider font-semibold">{sub.billingCycle}</span>
                         </div>
                         <button
                           type="button"
@@ -1262,35 +1276,35 @@ export default function FinanceDashboardPage() {
         </div>
 
         {/* Employee Payroll */}
-        <div className="lg:col-span-2 bg-surface-container-lowest border border-outline-variant rounded-xl p-md shadow-soft flex flex-col justify-between">
+        <div className="lg:col-span-2 bg-surface-container-lowest border border-outline-variant rounded-xl p-lg shadow-soft flex flex-col justify-between">
           <div>
-            <div className="flex justify-between items-center border-b border-outline-variant/35 pb-sm mb-md">
+            <div className="flex justify-between items-center border-b border-outline-variant/30 pb-sm mb-md">
               <div>
-                <h4 className="font-card-title text-sm text-on-surface font-bold">Employee Payroll Registry</h4>
-                <p className="text-[10px] text-on-surface-variant mt-0.5">Track monthly staff salaries, bonus disbursements, and pending payouts</p>
+                <h4 className="font-card-title text-card-title text-on-surface">Employee Payroll Registry</h4>
+                <p className="text-body-sm text-on-surface-variant">Track monthly staff salaries, bonus disbursements, and pending payouts</p>
               </div>
               <button
                 onClick={() => {
                   setSelectedPayrollRecord(null);
                   setIsPayrollRecordOpen(true);
                 }}
-                className="px-sm h-8 bg-secondary text-white font-bold rounded-lg text-xs hover:bg-secondary/95 flex items-center gap-xs cursor-pointer"
+                className="px-md h-11 bg-secondary text-white font-semibold rounded-lg hover:bg-secondary/90 transition-all flex items-center gap-xs cursor-pointer text-sm"
               >
-                <Plus size={13} />
+                <Plus size={16} />
                 <span>Add Employee</span>
               </button>
             </div>
 
             <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse text-[10px]">
-                <thead className="bg-slate-50 text-slate-500 font-bold uppercase tracking-wider border-b border-outline-variant/20">
+              <table className="w-full text-left border-collapse text-body-sm">
+                <thead className="bg-surface-container-low text-on-surface-variant font-label-uppercase text-label-uppercase border-b border-outline-variant/30">
                   <tr>
-                    <th className="px-md py-sm">Employee</th>
-                    <th className="px-md py-sm">Department</th>
-                    <th className="px-md py-sm text-right">Base Salary</th>
-                    <th className="px-md py-sm text-right">Pending Owed</th>
-                    <th className="px-md py-sm">Status</th>
-                    <th className="px-md py-sm text-right">Actions</th>
+                    <th className="px-lg py-md">Employee</th>
+                    <th className="px-lg py-md">Department</th>
+                    <th className="px-lg py-md text-right">Base Salary</th>
+                    <th className="px-lg py-md text-right">Pending Owed</th>
+                    <th className="px-lg py-md">Status</th>
+                    <th className="px-lg py-md text-right">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-outline-variant/20 text-on-surface font-semibold">
@@ -1300,35 +1314,35 @@ export default function FinanceDashboardPage() {
                     </tr>
                   ) : payrollList.length === 0 ? (
                     <tr>
-                      <td colSpan={6} className="text-center py-lg text-slate-400 border border-dashed border-outline-variant/40 rounded-xl font-semibold">
+                      <td colSpan={6} className="text-center py-lg text-on-surface-variant/50 border border-dashed border-outline-variant/40 rounded-xl text-xs font-semibold">
                         No payroll records found.
                       </td>
                     </tr>
                   ) : (
                     payrollList.map(pay => (
-                      <tr key={pay.id} className="hover:bg-slate-50/60 transition-colors">
-                        <td className="px-md py-sm font-bold">
+                      <tr key={pay.id} className="hover:bg-surface-container-low/60 transition-colors">
+                        <td className="px-lg py-md font-bold">
                           <div>
                             <span className="block font-bold">{pay.employeeName}</span>
-                            <span className="block text-[8px] text-secondary font-mono">
+                            <span className="block text-[10px] text-secondary font-data-mono text-data-mono">
                               Due: {new Date(pay.dueDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
                             </span>
                           </div>
                         </td>
-                        <td className="px-md py-sm text-secondary font-medium">{pay.department}</td>
-                        <td className="px-md py-sm font-mono text-right">₹{Number(pay.salary).toLocaleString('en-IN')}</td>
-                        <td className="px-md py-sm font-mono text-right text-rose-600 font-bold">
+                        <td className="px-lg py-md text-secondary font-medium">{pay.department}</td>
+                        <td className="px-lg py-md font-data-mono text-data-mono text-right">₹{Number(pay.salary).toLocaleString('en-IN')}</td>
+                        <td className="px-lg py-md font-data-mono text-data-mono text-right text-rose-600 font-bold">
                           {Number(pay.pending) > 0 ? `₹${Number(pay.pending).toLocaleString('en-IN')}` : '—'}
                         </td>
-                        <td className="px-md py-sm">
+                        <td className="px-lg py-md">
                           <span className={clsx(
-                            'px-1.5 py-0.25 rounded text-[8px] font-bold border uppercase',
+                            'px-2.5 py-0.5 rounded text-[10px] font-bold border uppercase',
                             pay.status === 'paid' ? 'bg-green-50 text-green-700 border-green-200' : 'bg-red-50 text-error border-red-200'
                           )}>
                             {pay.status}
                           </span>
                         </td>
-                        <td className="px-md py-sm text-right">
+                        <td className="px-lg py-md text-right">
                           <div className="flex gap-xs justify-end items-center">
                             {pay.status !== 'paid' ? (
                               <button
@@ -1336,19 +1350,19 @@ export default function FinanceDashboardPage() {
                                   setSelectedPayroll(pay);
                                   setIsPayrollOpen(true);
                                 }}
-                                className="px-2 py-1 bg-primary text-white font-bold rounded hover:bg-primary/95 text-[9px] transition-colors cursor-pointer"
+                                className="px-3 py-1.5 bg-primary text-white font-semibold rounded hover:bg-primary/95 text-xs transition-colors cursor-pointer"
                               >
                                 Disburse
                               </button>
                             ) : (
-                              <span className="text-[9px] text-green-700 font-bold mr-xs">Completed</span>
+                              <span className="text-xs text-green-700 font-bold mr-xs">Completed</span>
                             )}
                             <button
                               onClick={() => {
                                 setSelectedPayrollRecord(pay);
                                 setIsPayrollRecordOpen(true);
                               }}
-                              className="text-primary hover:underline text-[9px] font-bold cursor-pointer ml-xs"
+                              className="text-primary hover:underline text-xs font-semibold cursor-pointer ml-xs"
                             >
                               Edit
                             </button>
@@ -1358,7 +1372,7 @@ export default function FinanceDashboardPage() {
                                   deletePayrollMutation.mutate(pay.id);
                                 }
                               }}
-                              className="text-error hover:underline text-[9px] font-bold cursor-pointer ml-xs"
+                              className="text-error hover:underline text-xs font-semibold cursor-pointer ml-xs"
                             >
                               Delete
                             </button>
@@ -1386,29 +1400,29 @@ export default function FinanceDashboardPage() {
         {/* Ledger table */}
         <div className="lg:col-span-2 bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden shadow-soft flex flex-col justify-between">
           <div>
-            <div className="p-md border-b border-outline-variant/35 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-sm">
+            <div className="p-lg border-b border-outline-variant/30 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-sm">
               <div>
-                <h4 className="font-card-title text-sm text-on-surface font-bold">Ledger Transactions Logs</h4>
-                <p className="text-[10px] text-on-surface-variant mt-0.5">Audit log of all receipts, overhead payouts, and vendor settlement history</p>
+                <h4 className="font-card-title text-card-title text-on-surface">Ledger Transactions Logs</h4>
+                <p className="text-body-sm text-on-surface-variant">Audit log of all receipts, overhead payouts, and vendor settlement history</p>
               </div>
               <input
                 type="text"
                 placeholder="Search logs..."
                 value={transactionSearch}
                 onChange={(e) => setTransactionSearch(e.target.value)}
-                className="w-40 h-8 px-3 bg-white border border-outline-variant/40 rounded-lg text-xs outline-none focus:border-primary text-on-surface"
+                className="w-40 h-11 px-md bg-surface-container-lowest border border-outline-variant rounded-xl text-sm outline-none focus:ring-2 focus:ring-primary/20 text-on-surface transition-all placeholder:text-on-surface-variant/60"
               />
             </div>
 
             <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse text-[10px]">
-                <thead className="bg-slate-50 text-slate-500 font-bold uppercase tracking-wider border-b border-outline-variant/20">
+              <table className="w-full text-left border-collapse text-body-sm">
+                <thead className="bg-surface-container-low text-on-surface-variant font-label-uppercase text-label-uppercase border-b border-outline-variant/30">
                   <tr>
-                    <th className="px-md py-sm">Type</th>
-                    <th className="px-md py-sm">Description</th>
-                    <th className="px-md py-sm">Category</th>
-                    <th className="px-md py-sm text-right">Amount</th>
-                    <th className="px-md py-sm">Status</th>
+                    <th className="px-lg py-md">Type</th>
+                    <th className="px-lg py-md">Description</th>
+                    <th className="px-lg py-md">Category</th>
+                    <th className="px-lg py-md text-right">Amount</th>
+                    <th className="px-lg py-md">Status</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-outline-variant/20 text-on-surface font-medium">
@@ -1425,25 +1439,25 @@ export default function FinanceDashboardPage() {
                         return desc.includes(query) || cat.includes(query);
                       })
                       .map((tx) => (
-                        <tr key={tx.id} className="hover:bg-slate-50/50 transition-colors">
-                          <td className="px-md py-sm">
+                        <tr key={tx.id} className="hover:bg-surface-container-low/50 transition-colors">
+                          <td className="px-lg py-md">
                             <span className={clsx(
-                              'px-1.5 py-0.25 rounded text-[8px] font-bold uppercase border',
+                              'px-2.5 py-0.5 rounded text-[10px] font-bold uppercase border',
                               tx.type === 'income' ? 'bg-green-50 text-green-700 border-green-200' : 'bg-red-50 text-error border-red-200'
                             )}>
                               {tx.type}
                             </span>
                           </td>
-                          <td className="px-md py-sm font-semibold">{tx.description}</td>
-                          <td className="px-md py-sm text-secondary">{tx.category}</td>
+                          <td className="px-lg py-md font-semibold">{tx.description}</td>
+                          <td className="px-lg py-md text-secondary">{tx.category}</td>
                           <td className={clsx(
-                            'px-md py-sm font-mono font-bold text-right',
+                            'px-lg py-md font-data-mono text-data-mono font-bold text-right',
                             tx.type === 'income' ? 'text-green-700' : 'text-rose-600'
                           )}>
                             {tx.type === 'income' ? '+' : ''}₹{tx.amount.toLocaleString('en-IN')}
                           </td>
-                          <td className="px-md py-sm">
-                            <span className="text-[9px] text-green-700 font-bold uppercase">✔ Paid</span>
+                          <td className="px-lg py-md">
+                            <span className="text-[10px] text-green-700 font-bold uppercase border border-green-200 bg-green-50 px-2 py-0.5 rounded-full">✔ Paid</span>
                           </td>
                         </tr>
                       ))
@@ -1455,10 +1469,10 @@ export default function FinanceDashboardPage() {
         </div>
 
         {/* Financial Reports Generator */}
-        <div id="reports" className="bg-surface-container-lowest border border-outline-variant rounded-xl p-md shadow-soft flex flex-col justify-between">
+        <div id="reports" className="bg-surface-container-lowest border border-outline-variant rounded-xl p-lg shadow-soft flex flex-col justify-between">
           <div>
-            <h4 className="font-card-title text-sm text-on-surface font-bold">Financial Reports Compiler</h4>
-            <p className="text-[10px] text-on-surface-variant mt-0.5">Generate and download official PDF audits and spreadsheets</p>
+            <h4 className="font-card-title text-card-title text-on-surface">Financial Reports Compiler</h4>
+            <p className="text-body-sm text-on-surface-variant">Generate and download official PDF audits and spreadsheets</p>
 
             <div className="space-y-sm mt-md">
               {[
@@ -1467,19 +1481,19 @@ export default function FinanceDashboardPage() {
                 { name: 'Project Profitability SOW Sheet', type: 'Profitability' },
                 { name: 'Quarterly Cash Flow Audits', type: 'CashFlow_Q' }
               ].map(report => (
-                <div key={report.type} className="p-sm bg-slate-50/50 border border-outline-variant/35 rounded-xl flex items-center justify-between">
+                <div key={report.type} className="p-sm bg-surface-container-low/50 border border-outline-variant/35 rounded-xl flex items-center justify-between gap-sm">
                   <span className="text-[10px] font-bold text-on-surface truncate w-40">{report.name}</span>
                   <div className="flex gap-xs">
                     <button
                       onClick={() => handleReportGeneration('csv', report.type)}
-                      className="p-1.5 bg-white border border-outline-variant/40 rounded hover:bg-slate-100 text-secondary"
+                      className="p-1.5 bg-surface-container-lowest border border-outline-variant/40 rounded hover:bg-surface-container transition-all cursor-pointer text-secondary"
                       title="CSV Sheet"
                     >
                       <FileSpreadsheet size={13} />
                     </button>
                     <button
                       onClick={() => handleReportGeneration('pdf', report.type)}
-                      className="p-1.5 bg-white border border-outline-variant/40 rounded hover:bg-slate-100 text-rose-600"
+                      className="p-1.5 bg-surface-container-lowest border border-outline-variant/40 rounded hover:bg-surface-container transition-all cursor-pointer text-rose-600"
                       title="PDF Document"
                     >
                       <Download size={13} />
@@ -1509,7 +1523,7 @@ export default function FinanceDashboardPage() {
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 15 }}
-              className="absolute bottom-12 left-0 w-44 bg-white border border-outline-variant/60 rounded-xl shadow-xl p-sm space-y-1 overflow-hidden"
+              className="absolute bottom-12 left-0 w-44 bg-surface-container-lowest border border-outline-variant/60 rounded-xl shadow-md overflow-hidden"
             >
               {[
                 { label: 'Quick Expense', icon: Plus, action: () => { setSelectedExpense(null); setIsExpenseOpen(true); } },
@@ -1523,7 +1537,7 @@ export default function FinanceDashboardPage() {
                     item.action();
                     setIsQuickActionOpen(false);
                   }}
-                  className="flex items-center gap-sm w-full px-sm py-1.5 hover:bg-slate-50 rounded-lg text-secondary hover:text-primary transition-colors text-left text-[10px] font-bold cursor-pointer"
+                  className="flex items-center gap-sm w-full px-sm py-1.5 hover:bg-surface-container-low rounded-lg text-[11px] text-on-surface-variant cursor-pointer transition-colors font-semibold"
                 >
                   <item.icon size={12} className="shrink-0" />
                   <span>{item.label}</span>

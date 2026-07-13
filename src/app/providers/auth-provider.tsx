@@ -14,6 +14,7 @@ interface AuthContextType {
   login: (input: LoginInput) => Promise<void>;
   register: (input: RegisterInput) => Promise<void>;
   logout: () => Promise<void>;
+  establishSession: (user: UserProfile, tokens: AuthTokens) => void;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -21,6 +22,12 @@ const AuthContext = createContext<AuthContextType | null>(null);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+
+  const establishSession = useCallback((userProfile: UserProfile, authTokens: AuthTokens) => {
+    setUser(userProfile);
+    localStorage.setItem('qt_user', JSON.stringify(userProfile));
+    localStorage.setItem('qt_tokens', JSON.stringify(authTokens));
+  }, []);
 
   // Restore session on mount
   useEffect(() => {
@@ -55,18 +62,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = useCallback(async (input: LoginInput) => {
     const result = await loginApi(input);
-    setUser(result.user);
-    localStorage.setItem('qt_user', JSON.stringify(result.user));
-    localStorage.setItem('qt_tokens', JSON.stringify(result.tokens));
-    toast.success(`Welcome back, ${result.user.firstName}!`);
+    if (result.user && result.tokens) {
+      setUser(result.user);
+      localStorage.setItem('qt_user', JSON.stringify(result.user));
+      localStorage.setItem('qt_tokens', JSON.stringify(result.tokens));
+      toast.success(`Welcome back, ${result.user.firstName}!`);
+    }
   }, []);
 
   const register = useCallback(async (input: RegisterInput) => {
     const result = await registerApi(input);
-    setUser(result.user);
-    localStorage.setItem('qt_user', JSON.stringify(result.user));
-    localStorage.setItem('qt_tokens', JSON.stringify(result.tokens));
-    toast.success('Organization created! Welcome to QuotaFlow.');
+    if (result.user && result.tokens) {
+      setUser(result.user);
+      localStorage.setItem('qt_user', JSON.stringify(result.user));
+      localStorage.setItem('qt_tokens', JSON.stringify(result.tokens));
+      toast.success('Organization created! Welcome to QuotaFlow.');
+    }
   }, []);
 
   const logout = useCallback(async () => {
@@ -95,6 +106,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         login,
         register,
         logout,
+        establishSession,
       }}
     >
       {children}

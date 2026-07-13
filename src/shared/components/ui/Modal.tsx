@@ -67,26 +67,23 @@ export default function Modal({ isOpen, onClose, title, size = 'md', children }:
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 10 }}
             transition={{ duration: 0.15, ease: 'easeOut' }}
-            className="relative overflow-hidden rounded-2xl flex flex-col"
+            className="relative overflow-hidden rounded-2xl flex flex-col bg-surface-container-lowest text-on-surface border border-outline-variant"
             style={{
               ...sizeStyles[size],
-              backgroundColor: '#ffffff', // Clean white
-              color: '#0f172a', // Dark slate text
-              border: '1px solid #e2e8f0', // Soft gray border Slate 200
               boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.15)',
               flexShrink: 0,
             }}
           >
             {/* Header */}
-            <div className="flex items-center justify-between border-b border-slate-200 p-4">
+            <div className="flex items-center justify-between border-b border-outline-variant/50 px-6 py-4">
               {title ? (
-                <h3 className="text-base font-bold text-slate-900">{title}</h3>
+                <h3 className="text-base font-bold text-on-surface">{title}</h3>
               ) : (
                 <div />
               )}
               <button
                 onClick={onClose}
-                className="rounded-lg p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition-all duration-200 cursor-pointer"
+                className="rounded-lg p-1.5 text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-all duration-200 cursor-pointer"
                 style={{ background: 'transparent', border: 'none' }}
               >
                 <X size={18} />
@@ -94,7 +91,7 @@ export default function Modal({ isOpen, onClose, title, size = 'md', children }:
             </div>
 
             {/* Content */}
-            <div className="flex-1 overflow-y-auto p-6" style={{ backgroundColor: '#ffffff', color: '#334155' }}>{children}</div>
+            <div className="flex-1 overflow-y-auto p-6 text-on-surface-variant">{children}</div>
           </motion.div>
         </div>
       )}

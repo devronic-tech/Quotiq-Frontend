@@ -20,6 +20,7 @@ export const registerSchema = z.object({
   password: passwordSchema,
   confirmPassword: z.string(),
   organizationName: z.string().min(2, 'Organization name is required').max(100).trim(),
+  verificationToken: z.string().optional(),
 }).refine((data) => data.password === data.confirmPassword, {
   message: 'Passwords do not match',
   path: ['confirmPassword'],
@@ -35,7 +36,8 @@ export const forgotPasswordSchema = z.object({
 });
 
 export const resetPasswordSchema = z.object({
-  token: z.string().min(1, 'Reset token is required'),
+  email: z.string().email('Invalid email address').toLowerCase().trim(),
+  otp: z.string().length(6, 'OTP must be exactly 6 digits'),
   password: passwordSchema,
   confirmPassword: z.string(),
 }).refine((data) => data.password === data.confirmPassword, {

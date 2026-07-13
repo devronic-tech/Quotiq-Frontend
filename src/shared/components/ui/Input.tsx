@@ -19,7 +19,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
     return (
       <div className="space-y-1.5">
         {label && (
-          <label className="block text-xs font-semibold uppercase tracking-wider text-[var(--color-text-secondary)]">
+          <label className="block text-xs font-semibold uppercase tracking-wider text-on-surface-variant">
             {label}
           </label>
         )}
@@ -33,13 +33,13 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
             ref={ref}
             type={isPassword && showPassword ? 'text' : type}
             className={clsx(
-              'w-full rounded-xl border bg-[var(--color-bg-card)] px-4 py-2.5 text-sm text-[var(--color-text-primary)]',
-              'placeholder:text-[var(--color-text-muted)]',
-              'focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500',
+              'w-full rounded-xl border bg-surface-container-lowest px-4 py-2.5 text-sm text-on-surface',
+              'placeholder:text-on-surface-variant/60',
+              'focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary',
               'transition-all duration-200',
               error
-                ? 'border-red-500/50 focus:ring-red-500/50 focus:border-red-500'
-                : 'border-[var(--color-border)] hover:border-[var(--color-border-hover)]',
+                ? 'border-error/50 focus:ring-error/20 focus:border-error'
+                : 'border-outline-variant hover:border-outline',
               icon && 'pl-10',
               isPassword && 'pr-10',
               className
@@ -57,7 +57,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
           )}
         </div>
         {error && (
-          <p className="text-xs text-red-400 mt-1">{error}</p>
+          <p className="text-xs text-error mt-1">{error}</p>
         )}
       </div>
     );

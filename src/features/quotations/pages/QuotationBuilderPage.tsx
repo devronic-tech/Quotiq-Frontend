@@ -677,7 +677,7 @@ export default function QuotationBuilderPage() {
         <div className="lg:col-span-8 space-y-lg">
           
           {/* Section: Customer Info */}
-          <section className="bg-white rounded-xl border border-outline-variant shadow-sm overflow-hidden transition-all">
+          <section className="bg-surface-container-lowest rounded-xl border border-outline-variant shadow-soft overflow-hidden transition-all">
             <div 
               onClick={() => toggleSection('customerInfo')}
               className="px-lg py-md flex items-center justify-between bg-surface-container-low cursor-pointer hover:bg-surface-container transition-colors"
@@ -690,11 +690,11 @@ export default function QuotationBuilderPage() {
             </div>
 
             {activeSections.customerInfo && (
-              <div className="px-lg py-lg grid grid-cols-1 md:grid-cols-2 gap-lg border-t border-outline-variant bg-white">
+              <div className="px-lg py-lg grid grid-cols-1 md:grid-cols-2 gap-lg border-t border-outline-variant bg-surface-container-lowest">
                 <div className="space-y-sm">
                   <label className="font-label-uppercase text-xs font-bold text-on-surface-variant tracking-wider">CLIENT NAME</label>
                   <input 
-                    className="w-full h-11 px-md rounded-lg border border-outline-variant bg-white font-body-md focus:border-primary transition-all text-on-surface outline-none" 
+                    className="w-full h-11 px-md rounded-lg border border-outline-variant bg-surface-container-lowest font-body-md focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-on-surface outline-none placeholder:text-on-surface-variant/60" 
                     placeholder="e.g. Acme Corp Industries" 
                     type="text"
                     value={customerName}
@@ -705,7 +705,7 @@ export default function QuotationBuilderPage() {
                 <div className="space-y-sm">
                   <label className="font-label-uppercase text-xs font-bold text-on-surface-variant tracking-wider">CONTACT PERSON</label>
                   <input 
-                    className="w-full h-11 px-md rounded-lg border border-outline-variant bg-white font-body-md focus:border-primary transition-all text-on-surface outline-none" 
+                    className="w-full h-11 px-md rounded-lg border border-outline-variant bg-surface-container-lowest font-body-md focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-on-surface outline-none placeholder:text-on-surface-variant/60" 
                     placeholder="e.g. Sarah Jenkins" 
                     type="text"
                     value={contactPerson}
@@ -716,7 +716,7 @@ export default function QuotationBuilderPage() {
                 <div className="space-y-sm">
                   <label className="font-label-uppercase text-xs font-bold text-on-surface-variant tracking-wider">BILLING ADDRESS</label>
                   <textarea 
-                    className="w-full p-md rounded-lg border border-outline-variant bg-white font-body-md focus:border-primary transition-all resize-none text-on-surface outline-none" 
+                    className="w-full p-md rounded-lg border border-outline-variant bg-surface-container-lowest font-body-md text-on-surface focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all placeholder:text-on-surface-variant/60 resize-none" 
                     placeholder="Street, City, Zip, Country" 
                     rows={3}
                     value={billingAddress}
@@ -728,7 +728,7 @@ export default function QuotationBuilderPage() {
                   <div className="space-y-sm">
                     <label className="font-label-uppercase text-xs font-bold text-on-surface-variant tracking-wider">DEPARTMENT</label>
                     <select
-                      className="w-full h-11 px-md rounded-lg border border-outline-variant bg-white font-body-md focus:border-primary transition-all text-on-surface outline-none"
+                      className="w-full h-11 px-md rounded-lg border border-outline-variant bg-surface-container-lowest font-body-md focus:border-primary transition-all text-on-surface outline-none"
                       value={departmentId}
                       onChange={(e) => setDepartmentId(e.target.value)}
                     >
@@ -746,7 +746,7 @@ export default function QuotationBuilderPage() {
           </section>
 
           {/* Section: Project Overview */}
-          <section className="bg-white rounded-xl border border-outline-variant shadow-sm overflow-hidden transition-all">
+          <section className="bg-surface-container-lowest rounded-xl border border-outline-variant shadow-sm overflow-hidden transition-all">
             <div 
               onClick={() => toggleSection('projectDesc')}
               className="px-lg py-md flex items-center justify-between bg-surface-container-low cursor-pointer hover:bg-surface-container transition-colors"
@@ -759,11 +759,11 @@ export default function QuotationBuilderPage() {
             </div>
 
             {activeSections.projectDesc && (
-              <div className="px-lg py-lg space-y-lg border-t border-outline-variant bg-white">
+              <div className="px-lg py-lg space-y-lg border-t border-outline-variant bg-surface-container-lowest">
                 <div className="space-y-sm">
                   <label className="font-label-uppercase text-xs font-bold text-on-surface-variant tracking-wider">PROJECT TITLE</label>
                   <input 
-                    className="w-full h-11 px-md rounded-lg border border-outline-variant bg-white font-body-md focus:border-primary transition-all text-on-surface outline-none" 
+                    className="w-full h-11 px-md rounded-lg border border-outline-variant bg-surface-container-lowest font-body-md focus:border-primary transition-all text-on-surface outline-none" 
                     placeholder="Design & Development of Enterprise Portal" 
                     type="text"
                     value={projectName}
@@ -775,7 +775,7 @@ export default function QuotationBuilderPage() {
                   <label className="font-label-uppercase text-xs font-bold text-on-surface-variant tracking-wider">EXECUTIVE SUMMARY</label>
                   <div className="relative">
                     <textarea 
-                      className="w-full p-md rounded-lg border border-outline-variant bg-white font-body-md focus:border-primary transition-all resize-none text-on-surface outline-none pb-12" 
+                      className="w-full p-md rounded-lg border border-outline-variant bg-surface-container-lowest font-body-md focus:border-primary transition-all resize-none text-on-surface outline-none pb-12" 
                       placeholder="Briefly describe the scope and value proposition..." 
                       rows={4}
                       value={description}
@@ -796,7 +796,7 @@ export default function QuotationBuilderPage() {
           </section>
 
           {/* Section: Core Deliverables */}
-          <section className="bg-white rounded-xl border border-outline-variant shadow-sm overflow-hidden">
+          <section className="bg-surface-container-lowest rounded-xl border border-outline-variant shadow-soft overflow-hidden">
             <div className="px-lg py-md flex items-center justify-between bg-surface-container-low">
               <div className="flex items-center gap-md">
                 <Layers className="text-primary" size={20} />
@@ -805,7 +805,7 @@ export default function QuotationBuilderPage() {
               <button 
                 type="button"
                 onClick={addSection}
-                className="flex items-center gap-sm bg-white border border-outline-variant px-md py-1.5 rounded-lg hover:border-primary transition-all text-xs font-bold cursor-pointer"
+                className="flex items-center gap-sm bg-surface-container-lowest border border-outline-variant px-md py-1.5 rounded-xl w-full focus-within:ring-2 focus-within:ring-primary/20 focus-within:border-primary transition-all text-xs font-bold cursor-pointer"
               >
                 <Plus size={16} />
                 <span>Add Section</span>
@@ -821,7 +821,7 @@ export default function QuotationBuilderPage() {
                       type="button"
                       disabled={secIndex === 0}
                       onClick={() => moveSectionUp(secIndex)}
-                      className="p-1 rounded hover:bg-slate-100 disabled:opacity-20 text-slate-500 hover:text-slate-800 transition-colors cursor-pointer text-[10px] font-bold"
+                      className="p-1 rounded hover:bg-surface-container disabled:opacity-20 text-on-surface-variant hover:text-on-surface transition-colors cursor-pointer text-[10px] font-bold"
                       title="Move Section Up"
                     >
                       ▲
@@ -830,7 +830,7 @@ export default function QuotationBuilderPage() {
                       type="button"
                       disabled={secIndex === sections.length - 1}
                       onClick={() => moveSectionDown(secIndex)}
-                      className="p-1 rounded hover:bg-slate-100 disabled:opacity-20 text-slate-500 hover:text-slate-800 transition-colors cursor-pointer text-[10px] font-bold"
+                      className="p-1 rounded hover:bg-surface-container disabled:opacity-20 text-on-surface-variant hover:text-on-surface transition-colors cursor-pointer text-[10px] font-bold"
                       title="Move Section Down"
                     >
                       ▼
@@ -866,7 +866,7 @@ export default function QuotationBuilderPage() {
                     <span className="text-on-surface-variant font-normal normal-case tracking-normal ml-1">(appears in Technical quotation document)</span>
                   </label>
                   <textarea
-                    className="w-full p-3 rounded-lg border border-outline-variant/60 bg-surface-container-lowest text-xs text-on-surface focus:border-primary focus:outline-none resize-none leading-relaxed placeholder:text-on-surface-variant/50"
+                    className="w-full h-11 px-md rounded-lg border border-outline-variant bg-surface-container-lowest font-body-md text-on-surface focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all placeholder:text-on-surface-variant/60"
                     rows={4}
                     placeholder={`Describe features for this module, one per line:\n• User Authentication — Sign up, Login, OTP verification\n• Profile Management — Name, email, photo upload\n• Dashboard — Overview stats, quick actions`}
                     value={sec.scopeDescription}
@@ -913,7 +913,7 @@ export default function QuotationBuilderPage() {
                                   type="button"
                                   disabled={itemIndex === 0}
                                   onClick={() => moveItemUp(secIndex, itemIndex)}
-                                  className="text-[8px] p-0.5 rounded hover:bg-slate-100 disabled:opacity-20 text-slate-500 hover:text-slate-800 transition-colors cursor-pointer"
+                                  className="text-[8px] p-0.5 rounded hover:bg-surface-container disabled:opacity-20 text-on-surface-variant hover:text-on-surface transition-colors cursor-pointer"
                                   title="Move Up"
                                 >
                                   ▲
@@ -922,7 +922,7 @@ export default function QuotationBuilderPage() {
                                   type="button"
                                   disabled={itemIndex === sec.items.length - 1}
                                   onClick={() => moveItemDown(secIndex, itemIndex)}
-                                  className="text-[8px] p-0.5 rounded hover:bg-slate-100 disabled:opacity-20 text-slate-500 hover:text-slate-800 transition-colors cursor-pointer"
+                                  className="text-[8px] p-0.5 rounded hover:bg-surface-container disabled:opacity-20 text-on-surface-variant hover:text-on-surface transition-colors cursor-pointer"
                                   title="Move Down"
                                 >
                                   ▼
@@ -956,7 +956,7 @@ export default function QuotationBuilderPage() {
                               />
                               {/* Catalog link options */}
                               <select 
-                                className="bg-slate-50 border border-slate-200 rounded-md px-2 py-1 text-[11px] text-primary hover:bg-slate-100 hover:border-slate-300 focus:outline-none focus:ring-1 focus:ring-primary w-full max-w-[200px] cursor-pointer mt-1.5 font-bold transition-all duration-200"
+                                className="bg-surface-container-low border border-outline-variant/50 rounded-md px-2 py-1 text-[9px] font-bold text-on-surface-variant outline-none focus:border-primary transition-all w-full max-w-[200px] cursor-pointer mt-1.5"
                                 value={item.productId ? `p:${item.productId}` : item.serviceId ? `s:${item.serviceId}` : 'custom'}
                                 onChange={(e) => {
                                   const val = e.target.value;
@@ -1002,7 +1002,7 @@ export default function QuotationBuilderPage() {
                                 onChange={(e) => updateItemField(secIndex, itemIndex, 'quantity', Number(e.target.value) || 1)}
                               />
                               <select
-                                className="bg-transparent border-none p-0 text-[10px] text-slate-550 hover:text-slate-750 focus:ring-0 outline-none cursor-pointer font-bold uppercase text-right"
+                                className="bg-transparent border-none p-0 text-[10px] text-on-surface-variant hover:text-primary cursor-pointer outline-none font-bold uppercase text-right"
                                 value={item.unit}
                                 onChange={(e) => updateItemField(secIndex, itemIndex, 'unit', e.target.value)}
                               >
@@ -1055,7 +1055,7 @@ export default function QuotationBuilderPage() {
 
           {/* Section: Timeline & Payment */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-lg">
-            <section className="bg-white rounded-xl border border-outline-variant shadow-sm p-lg">
+            <section className="bg-surface-container-lowest rounded-xl border border-outline-variant shadow-soft p-lg">
               <div className="flex items-center gap-md mb-md">
                 <Calendar className="text-primary" size={20} />
                 <h2 className="font-card-title text-on-surface">Project Timeline</h2>
@@ -1089,7 +1089,7 @@ export default function QuotationBuilderPage() {
               </div>
             </section>
 
-            <section className="bg-white rounded-xl border border-outline-variant shadow-sm p-lg">
+            <section className="bg-surface-container-lowest rounded-xl border border-outline-variant shadow-soft p-lg">
               <div className="flex items-center gap-md mb-md">
                 <span className="material-symbols-outlined text-primary">payments</span>
                 <h2 className="font-card-title text-on-surface">Payment Schedule</h2>
@@ -1143,21 +1143,21 @@ export default function QuotationBuilderPage() {
         <div className="lg:col-span-4 space-y-lg lg:sticky lg:top-[80px]">
           
           {/* AI Assistant Panel */}
-          <section className="bg-white rounded-2xl border border-outline-variant shadow-md p-lg overflow-hidden relative group">
+          <section className="bg-surface-container-lowest rounded-2xl border border-outline-variant shadow-soft p-lg overflow-hidden relative group">
             <div className="absolute -right-12 -top-12 w-32 h-32 bg-primary/10 opacity-20 blur-3xl group-hover:opacity-40 transition-opacity"></div>
             <div className="flex items-center gap-md mb-lg relative">
               <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center">
                 <Sparkles className="text-primary animate-pulse" size={20} />
               </div>
               <div>
-                <h3 className="font-card-title text-slate-800">AI Assistant</h3>
-                <p className="text-xs text-slate-500">Smart Draft Generator</p>
+                <h3 className="font-card-title text-on-surface">AI Assistant</h3>
+                <p className="text-xs text-on-surface-variant">Smart Draft Generator</p>
               </div>
             </div>
 
             <div className="space-y-md relative">
-              <div className="bg-slate-50 border border-slate-100 rounded-xl p-md">
-                <p className="text-sm text-slate-650 leading-relaxed">
+              <div className="bg-surface-container-low border border-outline-variant/40 rounded-xl p-md">
+                <p className="text-sm text-on-surface-variant leading-relaxed">
                   "Upload your project brief or paste the requirements below. I'll automatically populate the deliverables, costs, and timeline."
                 </p>
               </div>
@@ -1169,7 +1169,7 @@ export default function QuotationBuilderPage() {
                   className={`flex-1 border-2 border-dashed rounded-xl p-md flex flex-col items-center justify-center gap-sm transition-all cursor-pointer ${
                     isRecording 
                       ? 'border-red-500 bg-red-50 text-red-650' 
-                      : 'border-slate-200 bg-slate-50/50 text-slate-500 hover:bg-slate-50 hover:border-primary/50 hover:text-primary'
+                      : 'border-outline-variant bg-surface-container-low text-on-surface-variant hover:bg-surface-container hover:border-primary/50 hover:text-primary'
                   }`}
                 >
                   {isRecording ? (
@@ -1194,7 +1194,7 @@ export default function QuotationBuilderPage() {
                   className={`flex-1 border-2 border-dashed rounded-xl p-md flex flex-col items-center justify-center gap-sm transition-all cursor-pointer ${
                     uploadedFile 
                       ? 'border-emerald-500 bg-emerald-50 text-emerald-650' 
-                      : 'border-slate-200 bg-slate-50/50 text-slate-500 hover:bg-slate-50 hover:border-primary/50 hover:text-primary'
+                      : 'border-outline-variant bg-surface-container-low text-on-surface-variant hover:bg-surface-container hover:border-primary/50 hover:text-primary'
                   }`}
                 >
                   <UploadCloud size={20} />
@@ -1214,16 +1214,16 @@ export default function QuotationBuilderPage() {
               />
 
               {uploadedFile && (
-                <div className="flex items-center justify-between bg-slate-50 border border-slate-250 rounded-xl p-3 text-xs text-slate-700">
+                <div className="flex items-center justify-between bg-surface-container-low border border-outline-variant/40 rounded-lg px-3 py-1.5">
                   <div className="flex items-center gap-2 overflow-hidden">
                     <FileText size={16} className="text-primary shrink-0" />
                     <span className="truncate font-semibold">{uploadedFile.name}</span>
-                    <span className="text-[10px] text-slate-400 shrink-0">({(uploadedFile.size / 1024).toFixed(1)} KB)</span>
+                    <span className="text-[10px] text-on-surface-variant/70 shrink-0">({(uploadedFile.size / 1024).toFixed(1)} KB)</span>
                   </div>
                   <button 
                     type="button" 
                     onClick={() => setUploadedFile(null)} 
-                    className="text-slate-400 hover:text-slate-700 hover:bg-slate-100 p-1 rounded transition-colors cursor-pointer"
+                    className="text-on-surface-variant/60 hover:text-on-surface hover:bg-surface-container p-1 rounded transition-colors cursor-pointer"
                   >
                     <X size={14} />
                   </button>
@@ -1231,13 +1231,13 @@ export default function QuotationBuilderPage() {
               )}
 
               {audioUrl && !isRecording && (
-                <div className="w-full flex justify-center bg-slate-50 p-2 rounded-xl border border-slate-200">
+                <div className="w-full flex justify-center bg-surface-container-low p-2 rounded-xl border border-outline-variant/40">
                   <audio src={audioUrl} controls className="h-8 max-w-full" />
                 </div>
               )}
 
               <textarea 
-                className="w-full bg-slate-50/50 border border-slate-200 rounded-xl p-md text-sm text-slate-800 placeholder-slate-400 focus:bg-white focus:border-primary transition-all resize-none outline-none focus:ring-1 focus:ring-primary" 
+                className="w-full bg-surface-container-low/50 border border-outline-variant/50 rounded-xl p-md text-sm text-on-surface-variant resize-none focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" 
                 placeholder="Paste raw notes here..." 
                 rows={3}
                 value={descriptionInput}
@@ -1257,7 +1257,7 @@ export default function QuotationBuilderPage() {
           </section>
 
           {/* Summary Panel */}
-          <section className="bg-white rounded-xl border border-outline-variant shadow-lg p-lg">
+          <section className="bg-surface-container-lowest rounded-xl border border-outline-variant shadow-soft p-lg">
             <h3 className="font-label-uppercase text-xs font-bold text-on-surface-variant tracking-wider mb-lg">QUOTATION SUMMARY</h3>
             <div className="space-y-md mb-xl">
               <div className="flex justify-between items-center">

@@ -5,16 +5,31 @@ import { useLocation, Link } from 'react-router-dom';
 const routeLabels: Record<string, string> = {
   '/': 'Dashboard',
   '/quotations': 'Quotations',
+  '/quotations/new': 'New Quotation',
   '/invoices': 'Invoices',
+  '/invoices/new': 'New Invoice',
   '/templates': 'Templates',
   '/analytics': 'Analytics',
   '/settings': 'Settings',
+  '/customers': 'Customers',
+  '/departments': 'Departments',
+  '/products': 'Products & Services',
+  '/finance': 'Finance',
 };
+
+function getPageTitle(pathname: string): string {
+  if (routeLabels[pathname]) return routeLabels[pathname];
+  if (pathname.startsWith('/customers/')) return 'Customer Detail';
+  if (pathname.startsWith('/quotations/')) return 'Quotation Detail';
+  if (pathname.startsWith('/invoices/')) return 'Invoice Detail';
+  if (pathname.startsWith('/departments/')) return 'Department';
+  return 'QuotaFlow';
+}
 
 export default function Header() {
   const { user, logout } = useAuth();
   const location = useLocation();
-  const title = routeLabels[location.pathname] || 'QuotaFlow';
+  const title = getPageTitle(location.pathname);
 
   return (
     <header className="sticky top-0 z-40 h-16 w-full  border-b border-outline-variant flex items-center justify-between px-layout-margin bg-white">

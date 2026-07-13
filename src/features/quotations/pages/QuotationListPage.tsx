@@ -144,8 +144,8 @@ export default function QuotationListPage() {
                     <td className="px-lg py-md font-data-mono text-data-mono">{q.quotationNumber}</td>
                     <td className="px-lg py-md font-bold text-on-surface">{q.projectName}</td>
                     <td className="px-lg py-md">
-                      <div className="font-semibold text-on-surface">{q.customer.name}</div>
-                      {q.customer.company && <div className="text-[11px] text-on-surface-variant">{q.customer.company}</div>}
+                      <div className="font-semibold text-on-surface">{q.customer?.name || 'Unknown Client'}</div>
+                      {q.customer?.company && <div className="text-[11px] text-on-surface-variant">{q.customer?.company}</div>}
                     </td>
                     <td className="px-lg py-md font-data-mono text-right font-semibold text-on-surface">
                       ₹{Number(q.grandTotal).toLocaleString(undefined, { minimumFractionDigits: 2 })}

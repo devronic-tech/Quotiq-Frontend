@@ -463,7 +463,7 @@ export default function InvoiceDetailPage() {
               </h2>
 
               <div className="space-y-1 text-xs" style={{ fontFamily: 'Times New Roman' }}>
-                <p><strong>Client:</strong> {invoice.customer.name}</p>
+                <p><strong>Client:</strong> {invoice.customer?.name || 'Unknown Client'}</p>
                 <p className="pt-2"><strong>Invoice Date:</strong> {issueDateText}</p>
                 <p><strong>Due Date:</strong> {dueDateText}</p>
               </div>
@@ -585,10 +585,10 @@ export default function InvoiceDetailPage() {
                 <h3 className="text-[10px] font-sans font-bold tracking-wider uppercase text-primary border-b border-primary/20 pb-0.5">
                   TO CLIENT
                 </h3>
-                <p className="font-bold text-sm text-on-surface">{invoice.customer.name}</p>
+                <p className="font-bold text-sm text-on-surface">{invoice.customer?.name || 'Unknown Client'}</p>
                 <div className="text-xs space-y-1 text-on-surface-variant font-sans">
                   {billingAddress && <p>Address: {billingAddress}</p>}
-                  {invoice.customer.email && <p>Email: {invoice.customer.email}</p>}
+                  {invoice.customer?.email && <p>Email: {invoice.customer?.email}</p>}
                   {contactPerson && <p>Contact Person: {contactPerson}</p>}
                 </div>
               </div>
@@ -699,7 +699,7 @@ export default function InvoiceDetailPage() {
                 </div>
 
                 <div className="space-y-sm text-left">
-                  <p className="text-xs font-bold text-on-surface">Client Handover Receipt ({invoice.customer.name})</p>
+                  <p className="text-xs font-bold text-on-surface">Client Handover Receipt ({invoice.customer?.name || 'Unknown Client'})</p>
                   <div className="h-16 border-b border-outline-variant/60 flex items-end">
                     <span className="text-[10px] text-secondary italic pb-1">Signature & Stamp</span>
                   </div>

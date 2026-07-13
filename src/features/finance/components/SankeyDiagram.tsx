@@ -23,7 +23,7 @@ interface SankeyDiagramProps {
 export default function SankeyDiagram({ data, isLoading }: SankeyDiagramProps) {
   if (isLoading || !data || !data.nodes || data.nodes.length === 0) {
     return (
-      <div className="h-64 w-full flex items-center justify-center bg-slate-50 border border-slate-200 rounded-xl shimmer">
+      <div className="h-64 w-full flex items-center justify-center bg-surface-container border border-outline-variant rounded-xl shimmer">
         <span className="text-xs text-on-surface-variant font-semibold">Loading money flow mapping...</span>
       </div>
     );
@@ -50,8 +50,8 @@ export default function SankeyDiagram({ data, isLoading }: SankeyDiagramProps) {
   const totalValue = links.filter(l => l.source === 1).reduce((sum, l) => sum + l.value, 0) || 1;
 
   return (
-    <div className="relative w-full bg-surface-container-lowest border border-outline-variant rounded-xl p-md overflow-x-auto">
-      <h4 className="font-card-title text-sm text-on-surface mb-sm flex items-center gap-xs">
+    <div className="relative w-full bg-surface-container-lowest border border-outline-variant rounded-xl p-lg overflow-x-auto shadow-soft">
+      <h4 className="font-card-title text-card-title text-on-surface mb-sm flex items-center gap-xs">
         <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse-dot"></span>
         <span>Interactive Money Flow Ledger</span>
       </h4>

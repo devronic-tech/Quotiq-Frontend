@@ -339,23 +339,23 @@ export default function CustomersPage() {
 
       {/* Dynamic 3-Column Bento Grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-gutter mb-lg">
-        <div className="bg-white p-lg rounded-xl border border-outline-variant shadow-sm hover:shadow-md transition-shadow">
-          <p className="font-label-uppercase text-secondary mb-xs uppercase tracking-wider text-[11px] font-bold">Total Customers</p>
-          <h3 className="text-section-heading font-black text-on-surface text-[28px]">{customers.length}</h3>
-          <p className="text-body-sm text-green-600 flex items-center gap-1 mt-1 font-semibold">
+        <div className="bg-surface-container-lowest p-lg rounded-xl border border-outline-variant shadow-soft hover:shadow-md transition-shadow">
+          <p className="font-label-uppercase text-on-surface-variant mb-xs uppercase tracking-wider text-[11px] font-bold">Total Customers</p>
+          <h3 className="font-page-title font-black text-on-surface text-[28px]">{customers.length}</h3>
+          <p className="text-body-sm text-emerald-600 flex items-center gap-1 mt-1 font-semibold">
             <TrendingUp size={14} className="text-emerald-600" /> Live active registry
           </p>
         </div>
-        <div className="bg-white p-lg rounded-xl border border-outline-variant shadow-sm hover:shadow-md transition-shadow">
-          <p className="font-label-uppercase text-secondary mb-xs uppercase tracking-wider text-[11px] font-bold">Active Projects</p>
-          <h3 className="text-section-heading font-black text-on-surface text-[28px]">{activeProjectsCount}</h3>
-          <p className="text-body-sm text-secondary flex items-center gap-1 mt-1 font-medium">
+        <div className="bg-surface-container-lowest p-lg rounded-xl border border-outline-variant shadow-soft hover:shadow-md transition-shadow">
+          <p className="font-label-uppercase text-on-surface-variant mb-xs uppercase tracking-wider text-[11px] font-bold">Active Projects</p>
+          <h3 className="font-page-title font-black text-on-surface text-[28px]">{activeProjectsCount}</h3>
+          <p className="text-body-sm text-on-surface-variant flex items-center gap-1 mt-1 font-medium">
             Active and sent quotations
           </p>
         </div>
-        <div className="bg-white p-lg rounded-xl border border-outline-variant shadow-sm hover:shadow-md transition-shadow">
-          <p className="font-label-uppercase text-secondary mb-xs uppercase tracking-wider text-[11px] font-bold">Total Outstanding</p>
-          <h3 className="text-section-heading font-black text-primary text-[28px]">
+        <div className="bg-surface-container-lowest p-lg rounded-xl border border-outline-variant shadow-soft hover:shadow-md transition-shadow">
+          <p className="font-label-uppercase text-on-surface-variant mb-xs uppercase tracking-wider text-[11px] font-bold">Total Outstanding</p>
+          <h3 className="font-page-title font-black text-primary text-[28px]">
             ₹{totalOutstandingAll.toLocaleString('en-IN')}
           </h3>
           <p className="text-body-sm text-error flex items-center gap-1 mt-1 font-semibold">
@@ -365,7 +365,7 @@ export default function CustomersPage() {
       </div>
 
       {/* Data Table Section */}
-      <div className="bg-white border border-outline-variant rounded-xl shadow-sm overflow-hidden flex flex-col">
+      <div className="bg-surface-container-lowest border border-outline-variant rounded-xl shadow-soft overflow-hidden flex flex-col">
         {/* Table Controls */}
         <div className="p-md border-b border-outline-variant flex items-center justify-between bg-surface-container-low/30">
           <div className="flex items-center gap-md">
@@ -554,7 +554,7 @@ export default function CustomersPage() {
                   Contact Person Name <span className="text-error font-bold">*</span>
                 </label>
                 <input
-                  className="w-full bg-white border border-outline-variant rounded-xl py-2.5 px-4 text-body-md focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all placeholder:text-outline-variant h-11"
+                  className="w-full bg-surface-container-lowest border border-outline-variant rounded-xl py-2.5 px-4 text-body-md focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all placeholder:text-on-surface-variant/60 h-11"
                   placeholder="e.g. John Doe"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
@@ -566,7 +566,7 @@ export default function CustomersPage() {
                   Company Name
                 </label>
                 <input
-                  className="w-full bg-white border border-outline-variant rounded-xl py-2.5 px-4 text-body-md focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all placeholder:text-outline-variant h-11"
+                  className="w-full bg-surface-container-lowest border border-outline-variant rounded-xl py-2.5 px-4 text-body-md focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all placeholder:text-on-surface-variant/60 h-11"
                   placeholder="e.g. Acme Corp"
                   value={company}
                   onChange={(e) => setCompany(e.target.value)}
@@ -577,7 +577,7 @@ export default function CustomersPage() {
                   Email Address
                 </label>
                 <input
-                  className="w-full bg-white border border-outline-variant rounded-xl py-2.5 px-4 text-body-md focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all placeholder:text-outline-variant h-11"
+                  className="w-full bg-surface-container-lowest border border-outline-variant rounded-xl py-2.5 px-4 text-body-md focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all placeholder:text-on-surface-variant/60 h-11"
                   placeholder="e.g. client@example.com"
                   type="email"
                   value={email}
@@ -589,7 +589,7 @@ export default function CustomersPage() {
                   Phone Number
                 </label>
                 <input
-                  className="w-full bg-white border border-outline-variant rounded-xl py-2.5 px-4 text-body-md focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all placeholder:text-outline-variant h-11"
+                  className="w-full bg-surface-container-lowest border border-outline-variant rounded-xl py-2.5 px-4 text-body-md focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all placeholder:text-on-surface-variant/60 h-11"
                   placeholder="e.g. +91 99999 99999"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
@@ -600,7 +600,7 @@ export default function CustomersPage() {
                   Status
                 </label>
                 <select
-                  className="w-full bg-white border border-outline-variant rounded-xl py-2.5 px-4 text-body-md focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all h-11"
+                  className="w-full bg-surface-container-lowest border border-outline-variant rounded-xl py-2.5 px-4 text-body-md focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all h-11"
                   value={status}
                   onChange={(e) => setStatus(e.target.value as any)}
                 >
@@ -614,7 +614,7 @@ export default function CustomersPage() {
                   Department
                 </label>
                 <select
-                  className="w-full bg-white border border-outline-variant rounded-xl py-2.5 px-4 text-body-md focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all h-11"
+                  className="w-full bg-surface-container-lowest border border-outline-variant rounded-xl py-2.5 px-4 text-body-md focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all h-11"
                   value={departmentId}
                   onChange={(e) => setDepartmentId(e.target.value)}
                 >
@@ -638,7 +638,7 @@ export default function CustomersPage() {
                   GSTIN
                 </label>
                 <input
-                  className="w-full bg-white border border-outline-variant rounded-xl py-2.5 px-4 text-body-md focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all placeholder:text-outline-variant h-11"
+                  className="w-full bg-surface-container-lowest border border-outline-variant rounded-xl py-2.5 px-4 text-body-md focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all placeholder:text-on-surface-variant/60 h-11"
                   placeholder="e.g. 27AAAAA1111A1Z1"
                   value={gstNumber}
                   onChange={(e) => setGstNumber(e.target.value)}
@@ -650,7 +650,7 @@ export default function CustomersPage() {
                   PAN
                 </label>
                 <input
-                  className="w-full bg-white border border-outline-variant rounded-xl py-2.5 px-4 text-body-md focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all placeholder:text-outline-variant h-11"
+                  className="w-full bg-surface-container-lowest border border-outline-variant rounded-xl py-2.5 px-4 text-body-md focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all placeholder:text-on-surface-variant/60 h-11"
                   placeholder="e.g. ABCDE1234F"
                   value={panNumber}
                   onChange={(e) => setPanNumber(e.target.value)}
@@ -681,7 +681,7 @@ export default function CustomersPage() {
                     City
                   </label>
                   <input
-                    className="w-full bg-white border border-outline-variant rounded-xl py-2.5 px-4 text-body-md focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all placeholder:text-outline-variant h-11"
+                    className="w-full bg-surface-container-lowest border border-outline-variant rounded-xl py-2.5 px-4 text-body-md focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all placeholder:text-on-surface-variant/60 h-11"
                     placeholder="Mumbai"
                     value={billingCity}
                     onChange={(e) => setBillingCity(e.target.value)}
@@ -692,7 +692,7 @@ export default function CustomersPage() {
                     State
                   </label>
                   <input
-                    className="w-full bg-white border border-outline-variant rounded-xl py-2.5 px-4 text-body-md focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all placeholder:text-outline-variant h-11"
+                    className="w-full bg-surface-container-lowest border border-outline-variant rounded-xl py-2.5 px-4 text-body-md focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all placeholder:text-on-surface-variant/60 h-11"
                     placeholder="Maharashtra"
                     value={billingState}
                     onChange={(e) => setBillingState(e.target.value)}
@@ -703,7 +703,7 @@ export default function CustomersPage() {
                     Zip/PIN Code
                   </label>
                   <input
-                    className="w-full bg-white border border-outline-variant rounded-xl py-2.5 px-4 text-body-md focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all placeholder:text-outline-variant h-11"
+                    className="w-full bg-surface-container-lowest border border-outline-variant rounded-xl py-2.5 px-4 text-body-md focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all placeholder:text-on-surface-variant/60 h-11"
                     placeholder="400001"
                     value={billingZip}
                     onChange={(e) => setBillingZip(e.target.value)}
@@ -719,7 +719,7 @@ export default function CustomersPage() {
               Notes / Remarks
             </label>
             <textarea
-              className="w-full rounded-xl border border-outline-variant bg-white px-4 py-2.5 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all"
+              className="w-full rounded-xl border border-outline-variant bg-surface-container-lowest px-4 py-2.5 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all placeholder:text-on-surface-variant/60"
               placeholder="Internal customer notes..."
               rows={3}
               value={notes}
@@ -727,7 +727,7 @@ export default function CustomersPage() {
             />
           </div>
 
-          <div className="flex justify-end gap-3 border-t border-outline-variant pt-4 sticky bottom-0 bg-white">
+          <div className="flex justify-end gap-3 border-t border-outline-variant pt-4 sticky bottom-0 bg-surface-container-lowest">
             <button
               type="button"
               onClick={handleClose}

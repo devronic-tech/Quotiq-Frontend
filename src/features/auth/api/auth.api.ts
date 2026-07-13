@@ -32,3 +32,23 @@ export async function logoutApi(refreshToken: string): Promise<void> {
 export async function forgotPasswordApi(email: string): Promise<void> {
   await api.post('/auth/forgot-password', { email });
 }
+
+export async function sendOtpApi(email: string, type: 'login' | 'signup' | 'forgot_password'): Promise<void> {
+  await api.post('/auth/send-otp', { email, type });
+}
+
+export async function verifyOtpApi(
+  email: string,
+  otp: string,
+  type: 'login' | 'signup' | 'forgot_password'
+): Promise<{ verificationToken?: string; user?: UserProfile; tokens?: AuthTokens }> {
+  const { data } = await api.post<ApiResponse<{ verificationToken?: string; user?: UserProfile; tokens?: AuthTokens }>>(
+    '/auth/verify-otp',
+    { email, otp, type }
+  );
+  return data.data;
+}
+
+export async function resetPasswordApi(input: any): Promise<void> {
+  await api.post('/auth/reset-password', input);
+}

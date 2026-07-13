@@ -19,11 +19,14 @@
     "lucide-react": "^0.513.0",
     "quotation-generator": "file:..",
     "react": "^19.1.0",
+    "react-countup": "^6.5.3",
     "react-dom": "^19.1.0",
     "react-hook-form": "^7.56.0",
     "react-hot-toast": "^2.5.0",
+    "react-intersection-observer": "^10.1.0",
     "react-router-dom": "^7.6.0",
     "recharts": "^2.15.0",
+    "tailwind-merge": "^3.6.0",
     "zod": "^3.25.0"
   },
   "devDependencies": {
