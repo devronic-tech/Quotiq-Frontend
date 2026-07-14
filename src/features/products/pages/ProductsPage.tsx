@@ -228,7 +228,7 @@ export default function ProductsPage() {
             <Package size={24} />
           </div>
           <h3 className="text-sm font-bold text-slate-800">No products found</h3>
-          <p className="text-xs text-slate-500 max-w-xs leading-relaxed mt-1">
+          <p className="text-xs text-slate-500 max-w-[320px] leading-relaxed mt-1">
             Create physical products to add to quotation item catalogs.
           </p>
           <Button variant="outline" size="sm" className="mt-6" icon={<Plus size={14} />} onClick={() => setIsOpen(true)}>
@@ -241,7 +241,7 @@ export default function ProductsPage() {
             <Briefcase size={24} />
           </div>
           <h3 className="text-sm font-bold text-slate-800">No services found</h3>
-          <p className="text-xs text-slate-500 max-w-xs leading-relaxed mt-1">
+          <p className="text-xs text-slate-500 max-w-[320px] leading-relaxed mt-1">
             Create consulting, maintenance, installation, or AMC contracts.
           </p>
           <Button variant="outline" size="sm" className="mt-6" icon={<Plus size={14} />} onClick={() => setIsOpen(true)}>

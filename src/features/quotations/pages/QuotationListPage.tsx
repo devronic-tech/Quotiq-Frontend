@@ -110,7 +110,7 @@ export default function QuotationListPage() {
             <FileText size={24} />
           </div>
           <h3 className="font-card-title text-card-title text-on-surface">No quotations found</h3>
-          <p className="text-body-sm text-on-surface-variant max-w-xs leading-relaxed mt-1">
+          <p className="text-body-sm text-on-surface-variant max-w-[320px] leading-relaxed mt-1">
             Create your first project quote manually, or use the AI voice requirement assistant.
           </p>
           <Link to="/quotations/new" className="mt-6">

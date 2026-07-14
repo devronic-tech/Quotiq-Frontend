@@ -191,7 +191,7 @@ export default function InvoiceListPage() {
             <Receipt size={24} />
           </div>
           <h3 className="text-sm font-bold text-on-surface">No invoices found</h3>
-          <p className="text-xs text-on-surface-variant max-w-xs leading-relaxed mt-1">
+          <p className="text-xs text-on-surface-variant max-w-[320px] leading-relaxed mt-1">
             Convert an existing approved quotation into an invoice, or build one manually.
           </p>
           <Button

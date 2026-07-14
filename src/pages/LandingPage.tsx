@@ -1,941 +1,1173 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 
-// ─── Keyframe injection ────────────────────────────────────────────────────────
-const LANDING_CSS = `
+// ─── Global CSS ───────────────────────────────────────────────────────────────
+const CSS = `
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap');
 
-  .lp-root { font-family:'Inter',sans-serif; background:#f0f2ff; color:#1a1d2e; overflow-x:hidden; }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-  /* ── Floating 3D Blobs ── */
-  @keyframes float3d {
-    0%,100% { transform: translateY(0px) rotateX(0deg) rotateY(0deg); }
-    25%      { transform: translateY(-18px) rotateX(8deg) rotateY(5deg); }
-    50%      { transform: translateY(-10px) rotateX(-4deg) rotateY(-8deg); }
-    75%      { transform: translateY(-22px) rotateX(5deg) rotateY(10deg); }
-  }
-  @keyframes float3dAlt {
-    0%,100% { transform: translateY(0px) rotateX(0deg) rotateY(0deg) scale(1); }
-    33%      { transform: translateY(-14px) rotateX(-6deg) rotateY(8deg) scale(1.04); }
-    66%      { transform: translateY(-20px) rotateX(6deg) rotateY(-5deg) scale(0.97); }
-  }
-  @keyframes spinSlow { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-  @keyframes spinSlowRev { from { transform: rotate(360deg); } to { transform: rotate(0deg); } }
-  @keyframes pulse3d {
-    0%,100% { transform: scale(1) rotateY(0deg); box-shadow: 0 20px 60px rgba(99,102,241,0.25); }
-    50%      { transform: scale(1.06) rotateY(10deg); box-shadow: 0 30px 80px rgba(99,102,241,0.4); }
-  }
-  @keyframes slideInCard {
-    from { opacity:0; transform: translateY(40px) rotateX(15deg); }
-    to   { opacity:1; transform: translateY(0)   rotateX(0deg); }
-  }
-  @keyframes fadeSlideUp {
-    from { opacity:0; transform:translateY(32px); }
-    to   { opacity:1; transform:translateY(0); }
-  }
-  @keyframes shimmerLine {
-    0%  { transform:translateX(-100%); }
-    100%{ transform:translateX(100%); }
-  }
-  @keyframes rotateCoin {
-    0%   { transform: rotateY(0deg); }
-    100% { transform: rotateY(360deg); }
-  }
-  @keyframes dashDraw {
-    from { stroke-dashoffset: 600; }
-    to   { stroke-dashoffset: 0; }
-  }
-  @keyframes chartGrow {
-    from { transform: scaleY(0); }
-    to   { transform: scaleY(1); }
-  }
-  @keyframes orbitDot {
-    from { transform: rotate(0deg) translateX(40px) rotate(0deg); }
-    to   { transform: rotate(360deg) translateX(40px) rotate(-360deg); }
-  }
-  @keyframes rocketLaunch {
-    0%,100% { transform: translateY(0px) rotate(-10deg); }
-    50%      { transform: translateY(-20px) rotate(-10deg); }
-  }
-  @keyframes glowPulse {
-    0%,100% { box-shadow:0 0 30px rgba(99,102,241,0.3); }
-    50%      { box-shadow:0 0 60px rgba(99,102,241,0.6); }
-  }
-  @keyframes typewriter {
-    from { width:0; }
-    to   { width:100%; }
-  }
-  @keyframes blinkCaret {
-    0%,100% { border-color:transparent; }
-    50%      { border-color:#6366f1; }
-  }
-  @keyframes starSpin {
-    0%   { transform: rotate(0deg) scale(1); }
-    50%  { transform: rotate(180deg) scale(1.2); }
-    100% { transform: rotate(360deg) scale(1); }
-  }
-  @keyframes progressFill {
-    from { width:0%; }
-    to   { width:var(--target-width); }
-  }
-  @keyframes countUp {
-    from { opacity:0; transform:translateY(10px); }
-    to   { opacity:1; transform:translateY(0); }
-  }
-  @keyframes checkmarkDraw {
-    0%  { stroke-dashoffset:30; }
-    100%{ stroke-dashoffset:0; }
-  }
-  @keyframes dropIn {
-    from { opacity:0; transform:translateY(-20px) scale(0.9); }
-    to   { opacity:1; transform:translateY(0) scale(1); }
-  }
-  @keyframes scanLine {
-    0%   { top:0%; }
-    100% { top:100%; }
-  }
-  @keyframes morphBlob {
-    0%,100% { border-radius:60% 40% 30% 70% / 60% 30% 70% 40%; }
-    25%      { border-radius:30% 60% 70% 40% / 50% 60% 30% 60%; }
-    50%      { border-radius:50% 60% 30% 60% / 40% 50% 60% 50%; }
-    75%      { border-radius:40% 70% 60% 30% / 60% 40% 50% 70%; }
-  }
+  .lp { font-family: 'Inter', sans-serif; background: #ffffff; color: #0f172a; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
 
-  .float-3d      { animation: float3d 6s ease-in-out infinite; }
-  .float-3d-alt  { animation: float3dAlt 7s ease-in-out infinite; }
-  .float-3d-slow { animation: float3d 9s ease-in-out infinite; }
-  .pulse-3d      { animation: pulse3d 4s ease-in-out infinite; }
-  .spin-slow     { animation: spinSlow 12s linear infinite; }
-  .spin-slow-rev { animation: spinSlowRev 10s linear infinite; }
-  .rocket-fly    { animation: rocketLaunch 3s ease-in-out infinite; }
-  .glow-pulse    { animation: glowPulse 3s ease-in-out infinite; }
-  .morph-blob    { animation: morphBlob 8s ease-in-out infinite; }
+  /* ── Typography ── */
+  .lp h1, .lp h2, .lp h3, .lp h4 { font-family: 'Plus Jakarta Sans', sans-serif; line-height: 1.15; letter-spacing: -0.02em; }
 
-  .card-3d { 
-    transform-style: preserve-3d;
-    transition: transform 0.4s cubic-bezier(0.4,0,0.2,1), box-shadow 0.4s;
-    animation: slideInCard 0.8s ease-out both;
+  /* ── Navbar ── */
+  .lp-nav {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(255,255,255,0.96);
+    border-bottom: 1px solid #e2e8f0;
+    backdrop-filter: blur(12px);
   }
-  .card-3d:hover {
-    transform: translateY(-6px) rotateX(4deg) rotateY(-4deg);
-    box-shadow: 0 40px 80px rgba(99,102,241,0.2), 0 20px 40px rgba(0,0,0,0.08);
+  .lp-nav-inner {
+    max-width: 1200px; margin: 0 auto; padding: 0 24px;
+    height: 64px; display: flex; align-items: center; gap: 40px;
   }
+  .lp-logo { display: flex; align-items: center; gap: 8px; text-decoration: none; flex-shrink: 0; }
+  .lp-logo-text { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 20px; font-weight: 800; color: #0f172a; letter-spacing: -0.03em; }
+  .lp-nav-links { display: flex; gap: 4px; flex: 1; justify-content: center; }
+  .lp-nav-link {
+    font-size: 14px; font-weight: 500; color: #475569;
+    padding: 6px 12px; border-radius: 8px; text-decoration: none;
+    transition: background 0.15s, color 0.15s;
+    display: flex; align-items: center; gap: 4px;
+  }
+  .lp-nav-link:hover { background: #f1f5f9; color: #0f172a; }
+  .lp-nav-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
 
+  /* ── Buttons ── */
   .btn-primary {
-    background: linear-gradient(135deg,#4f46e5,#7c3aed);
-    color:#fff;
-    padding:13px 28px;
-    border-radius:12px;
-    font-weight:600;
-    font-size:15px;
-    border:none;
-    cursor:pointer;
-    display:inline-flex;
-    align-items:center;
-    gap:8px;
-    transition:all 0.25s;
-    position:relative;
-    overflow:hidden;
-    white-space:nowrap;
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 10px 20px; border-radius: 10px;
+    background: #4f46e5; color: #fff;
+    font-size: 14px; font-weight: 600; border: none; cursor: pointer;
+    transition: background 0.15s, box-shadow 0.15s;
+    white-space: nowrap; text-decoration: none;
   }
-  .btn-primary::after {
-    content:'';
-    position:absolute;
-    top:-50%;left:-50%;
-    width:200%;height:200%;
-    background:linear-gradient(120deg,transparent 30%,rgba(255,255,255,0.2) 50%,transparent 70%);
-    animation:shimmerLine 2.5s ease-in-out infinite;
-  }
-  .btn-primary:hover { transform:translateY(-2px); box-shadow:0 16px 40px rgba(79,70,229,0.4); }
-
+  .btn-primary:hover { background: #4338ca; box-shadow: 0 4px 16px rgba(79,70,229,0.3); }
+  .btn-primary-lg { padding: 13px 28px; font-size: 15px; border-radius: 12px; }
   .btn-secondary {
-    background:#fff;
-    color:#4f46e5;
-    padding:13px 28px;
-    border-radius:12px;
-    font-weight:600;
-    font-size:15px;
-    border:2px solid #e8e9ff;
-    cursor:pointer;
-    display:inline-flex;
-    align-items:center;
-    gap:8px;
-    transition:all 0.25s;
-    white-space:nowrap;
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 10px 20px; border-radius: 10px;
+    background: #fff; color: #374151;
+    font-size: 14px; font-weight: 600;
+    border: 1.5px solid #e2e8f0; cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+    white-space: nowrap; text-decoration: none;
   }
-  .btn-secondary:hover { background:#f5f5ff; border-color:#c7c9ff; transform:translateY(-2px); box-shadow:0 8px 24px rgba(79,70,229,0.12); }
+  .btn-secondary:hover { border-color: #c7d2fe; background: #f8f9ff; }
+  .btn-secondary-lg { padding: 13px 28px; font-size: 15px; border-radius: 12px; }
+  .btn-ghost {
+    background: none; border: none; font-size: 14px; font-weight: 500; color: #475569;
+    cursor: pointer; padding: 6px 12px; border-radius: 8px;
+    transition: background 0.15s; text-decoration: none;
+  }
+  .btn-ghost:hover { background: #f1f5f9; color: #0f172a; }
 
-  .nav-link {
-    color:#64748b;
-    font-size:14px;
-    font-weight:500;
-    cursor:pointer;
-    padding:6px 4px;
-    transition:color 0.2s;
-    display:flex;align-items:center;gap:4px;
-    text-decoration:none;
-  }
-  .nav-link:hover { color:#4f46e5; }
+  /* ── Sections ── */
+  .lp-section { padding: 96px 24px; }
+  .lp-section-sm { padding: 64px 24px; }
+  .lp-container { max-width: 1200px; margin: 0 auto; }
+  .lp-container-sm { max-width: 900px; margin: 0 auto; }
 
-  .feature-card {
-    background:#fff;
-    border-radius:20px;
-    padding:28px;
-    border:1px solid #e8eaff;
-    transition:all 0.3s;
-    position:relative;
-    overflow:hidden;
+  /* ── Hero ── */
+  .hero { background: #fafafa; border-bottom: 1px solid #e2e8f0; }
+  .hero-inner {
+    max-width: 1200px; margin: 0 auto; padding: 80px 24px 72px;
+    display: grid; grid-template-columns: 1fr 1fr; gap: 72px; align-items: center;
   }
-  .feature-card::before {
-    content:'';
-    position:absolute;
-    inset:0;
-    background:linear-gradient(135deg,rgba(99,102,241,0.04),rgba(139,92,246,0.04));
-    opacity:0;
-    transition:opacity 0.3s;
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 5px 12px; border-radius: 100px;
+    background: #eff6ff; color: #3b82f6;
+    font-size: 12px; font-weight: 600; border: 1px solid #bfdbfe;
+    margin-bottom: 20px;
   }
-  .feature-card:hover { transform:translateY(-6px); box-shadow:0 24px 48px rgba(99,102,241,0.12); border-color:#c7c9ff; }
-  .feature-card:hover::before { opacity:1; }
+  .hero-title { font-size: 52px; font-weight: 800; color: #0f172a; margin-bottom: 20px; line-height: 1.08; }
+  .hero-title span { color: #4f46e5; }
+  .hero-desc { font-size: 17px; color: #64748b; line-height: 1.7; margin-bottom: 36px; max-width: 440px; }
+  .hero-actions { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 44px; }
+  .hero-chips { display: flex; gap: 20px; flex-wrap: wrap; }
+  .hero-chip { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #64748b; }
+  .hero-chip-icon {
+    width: 32px; height: 32px; border-radius: 8px;
+    background: #f1f5f9; border: 1px solid #e2e8f0;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .hero-chip-label { font-weight: 600; color: #374151; font-size: 13px; }
+  .hero-chip-sub { color: #94a3b8; font-size: 11px; }
 
-  .badge-pill {
-    display:inline-flex;
-    align-items:center;
-    gap:6px;
-    padding:6px 14px;
-    border-radius:100px;
-    font-size:12px;
-    font-weight:600;
-    background:rgba(99,102,241,0.08);
-    color:#4f46e5;
-    border:1px solid rgba(99,102,241,0.2);
-    letter-spacing:0.04em;
+  /* ── Hero card ── */
+  .hero-card {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 20px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.06), 0 1px 4px rgba(0,0,0,0.04);
+    position: relative;
   }
-
-  .stat-card {
-    background:#fff;
-    border-radius:16px;
-    padding:20px;
-    border:1px solid #eaecff;
-    box-shadow:0 4px 16px rgba(0,0,0,0.04);
-    transition:all 0.3s;
+  .hero-card-header {
+    padding: 18px 22px 14px;
+    border-bottom: 1px solid #f1f5f9;
+    display: flex; justify-content: space-between; align-items: center;
   }
-  .stat-card:hover { transform:translateY(-4px); box-shadow:0 16px 40px rgba(99,102,241,0.1); }
-
-  .glass-card {
-    background:rgba(255,255,255,0.85);
-    backdrop-filter:blur(24px);
-    border:1px solid rgba(255,255,255,0.9);
-    border-radius:24px;
-    box-shadow:0 24px 64px rgba(99,102,241,0.12), 0 8px 24px rgba(0,0,0,0.04);
+  .hero-card-body { padding: 18px 22px; }
+  .hero-stat-badge {
+    position: absolute; top: -40px; left: -48px; z-index: 10;
+    background: #fff; border: 1px solid #e2e8f0;
+    border-radius: 12px; padding: 12px 16px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+    min-width: 150px;
   }
-
-  .section-bg-alt {
-    background:linear-gradient(180deg,#f5f7ff 0%,#eef0ff 100%);
+  .ai-suggestion-badge {
+    position: absolute; bottom: 40px; right: -56px; z-index: 10;
+    background: #fff; border: 1px solid #e2e8f0;
+    border-radius: 14px; padding: 14px 18px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+    width: 180px;
   }
 
-  .tag-chip {
-    background:rgba(255,255,255,0.9);
-    border:1px solid #e2e4ff;
-    border-radius:12px;
-    padding:10px 16px;
-    font-size:13px;
-    font-weight:500;
-    display:flex;align-items:center;gap:8px;
-    transition:all 0.25s;
-    cursor:default;
+  /* ── Cards & Grid ── */
+  .card {
+    background: #fff; border: 1px solid #e2e8f0;
+    border-radius: 16px; padding: 28px;
+    transition: border-color 0.2s, box-shadow 0.2s;
   }
-  .tag-chip:hover { background:#fff; transform:translateY(-2px); box-shadow:0 8px 20px rgba(99,102,241,0.1); }
-
-  .progress-bar-inner {
-    height:100%;
-    border-radius:4px;
-    background:linear-gradient(90deg,#4f46e5,#7c3aed);
-    animation:progressFill 1.5s cubic-bezier(0.4,0,0.2,1) forwards;
-    animation-delay:0.3s;
-    width:0;
+  .card:hover { border-color: #c7d2fe; box-shadow: 0 4px 20px rgba(79,70,229,0.08); }
+  .card-sm { padding: 20px; border-radius: 14px; }
+  .glass {
+    background: rgba(255,255,255,0.8);
+    backdrop-filter: blur(12px);
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
   }
 
-  .ticket-tag { border-radius:6px; padding:2px 8px; font-size:10px; font-weight:700; letter-spacing:0.06em; }
+  /* ── Feature grid ── */
+  .feature-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 20px; }
+  .feature-icon-wrap {
+    width: 44px; height: 44px; border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 16px; flex-shrink: 0;
+  }
+  .feature-num { font-size: 11px; font-weight: 700; color: #cbd5e1; letter-spacing: 0.06em; }
 
-  .footer-link { color:#94a3b8; font-size:13px; cursor:pointer; transition:color 0.2s; text-decoration:none; display:block; margin-bottom:10px; }
-  .footer-link:hover { color:#4f46e5; }
-
-  .input-field {
-    background:rgba(255,255,255,0.9);
-    border:1px solid #e2e4ff;
-    border-radius:10px;
-    padding:11px 16px;
-    font-size:14px;
-    color:#1a1d2e;
-    outline:none;
-    width:100%;
-    transition:border-color 0.2s;
-    font-family:inherit;
+  /* ── Stats bar ── */
+  .stats-bar {
+    background: #fff; border: 1px solid #e2e8f0;
+    border-radius: 16px; padding: 24px 32px;
+    display: grid; grid-template-columns: repeat(5,1fr);
+    gap: 0;
   }
-  .input-field:focus { border-color:#4f46e5; box-shadow:0 0 0 3px rgba(79,70,229,0.1); }
-
-  .hero-section { 
-    background:linear-gradient(160deg,#f8f9ff 0%,#edf0ff 50%,#f4f0ff 100%);
-    min-height:90vh;
-    position:relative;
-    overflow:hidden;
+  .stat-item {
+    display: flex; align-items: center; gap: 14px;
+    padding: 8px 16px;
+    border-right: 1px solid #f1f5f9;
   }
-
-  /* ── 3D Illustrated Decoration Icons ── */
-  .deco-card-3d {
-    background:linear-gradient(145deg,#ffffff,#f0f2ff);
-    border-radius:24px;
-    box-shadow:
-      0 24px 60px rgba(99,102,241,0.18),
-      0 8px 20px rgba(0,0,0,0.06),
-      inset 0 2px 0 rgba(255,255,255,1),
-      inset 0 -1px 0 rgba(99,102,241,0.08);
-    position:relative;
-    overflow:hidden;
-    display:flex;align-items:center;justify-content:center;
-  }
-  .deco-card-3d::before {
-    content:'';
-    position:absolute;top:0;left:0;right:0;height:45%;
-    background:linear-gradient(180deg,rgba(255,255,255,0.7),transparent);
-    border-radius:24px 24px 0 0;
-    pointer-events:none;
-  }
-  .deco-card-3d::after {
-    content:'';
-    position:absolute;inset:0;
-    border-radius:24px;
-    border:1px solid rgba(255,255,255,0.8);
-    pointer-events:none;
-  }
-  .deco-cube-3d {
-    background:linear-gradient(145deg,rgba(140,158,255,0.35),rgba(99,102,241,0.25));
-    backdrop-filter:blur(20px);
-    border-radius:28px;
-    border:1px solid rgba(255,255,255,0.5);
-    box-shadow:
-      0 24px 60px rgba(99,102,241,0.25),
-      0 8px 20px rgba(0,0,0,0.06),
-      inset 0 1px 0 rgba(255,255,255,0.8);
-    position:relative;
-    overflow:hidden;
-    display:flex;align-items:center;justify-content:center;
-  }
-  .deco-cube-3d::before {
-    content:'';
-    position:absolute;top:0;left:0;right:0;height:50%;
-    background:linear-gradient(180deg,rgba(255,255,255,0.35),transparent);
-    border-radius:28px 28px 0 0;
-    pointer-events:none;
-  }
-  @keyframes coinSpin {
-    0%   { transform: rotateY(0deg) translateY(0px); }
-    50%  { transform: rotateY(180deg) translateY(-8px); }
-    100% { transform: rotateY(360deg) translateY(0px); }
-  }
-  .coin-spin { animation: coinSpin 4s ease-in-out infinite; }
-
-  /* 3D Icon containers */
-  .icon-3d {
-    background:linear-gradient(135deg,#fff 0%,#f0f2ff 100%);
-    border-radius:20px;
-    box-shadow:
-      0 20px 50px rgba(99,102,241,0.15),
-      0 8px 20px rgba(0,0,0,0.06),
-      inset 0 1px 0 rgba(255,255,255,1);
-    display:flex;align-items:center;justify-content:center;
-    position:relative;
-    overflow:hidden;
-  }
-  .icon-3d::before {
-    content:'';position:absolute;
-    top:0;left:0;right:0;height:40%;
-    background:linear-gradient(180deg,rgba(255,255,255,0.6),transparent);
-    border-radius:20px 20px 0 0;
+  .stat-item:last-child { border-right: none; }
+  .stat-icon {
+    width: 40px; height: 40px; border-radius: 10px;
+    background: #f8fafc; border: 1px solid #f1f5f9;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
   }
 
+  /* ── Section heading ── */
   .section-label {
-    font-size:11px;
-    font-weight:700;
-    letter-spacing:0.12em;
-    text-transform:uppercase;
-    color:#4f46e5;
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 12px; font-weight: 600; color: #4f46e5;
+    letter-spacing: 0.06em; text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+  .section-title { font-size: 40px; font-weight: 800; color: #0f172a; margin-bottom: 16px; }
+  .section-desc { font-size: 16px; color: #64748b; line-height: 1.7; }
+
+  /* ── Finance dashboard preview ── */
+  .finance-preview {
+    background: #fff; border: 1px solid #e2e8f0;
+    border-radius: 20px; overflow: hidden;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+  }
+  .finance-header {
+    padding: 18px 22px; border-bottom: 1px solid #f1f5f9;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .stat-mini { text-align: left; }
+  .stat-mini-label { font-size: 11px; color: #94a3b8; font-weight: 500; margin-bottom: 2px; }
+  .stat-mini-val { font-size: 20px; font-weight: 800; color: #0f172a; letter-spacing: -0.02em; }
+  .stat-mini-change { font-size: 11px; font-weight: 600; margin-top: 2px; }
+  .up { color: #10b981; }
+  .warn { color: #f59e0b; }
+
+  /* ── Donut ── */
+  .donut-seg { stroke-linecap: butt; transition: stroke-dashoffset 0.3s ease; }
+
+  /* ── AI insight cards ── */
+  .insight-card {
+    background: #fff; border: 1px solid #e2e8f0;
+    border-radius: 14px; padding: 20px;
+    transition: border-color 0.2s;
+  }
+  .insight-card:hover { border-color: #c7d2fe; }
+  .insight-icon {
+    width: 36px; height: 36px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center; margin-bottom: 12px;
   }
 
-  .ai-badge {
-    display:inline-flex;align-items:center;gap:6px;
-    padding:4px 10px;
-    border-radius:100px;
-    font-size:11px;font-weight:600;
-    background:linear-gradient(135deg,rgba(99,102,241,0.12),rgba(139,92,246,0.12));
-    color:#6366f1;
-    border:1px solid rgba(99,102,241,0.25);
+  /* ── Tab row ── */
+  .tab-row {
+    display: flex; gap: 2px;
+    background: #f8fafc; border-radius: 10px; padding: 3px;
+    width: fit-content; margin-bottom: 24px;
+  }
+  .tab-btn {
+    padding: 7px 18px; border-radius: 8px;
+    font-size: 13px; font-weight: 600; border: none; cursor: pointer;
+    transition: all 0.15s; background: transparent; color: #64748b;
+  }
+  .tab-btn.active { background: #fff; color: #0f172a; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+
+  /* ── Demo app ── */
+  .demo-shell {
+    background: #fff; border: 1px solid #e2e8f0;
+    border-radius: 20px; overflow: hidden;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+    display: flex;
+  }
+  .demo-sidebar {
+    width: 200px; flex-shrink: 0;
+    background: #fafafa; border-right: 1px solid #e2e8f0;
+    padding: 20px 0;
+  }
+  .demo-sidebar-logo { padding: 0 16px 16px; border-bottom: 1px solid #f1f5f9; margin-bottom: 8px; }
+  .demo-nav-item {
+    display: flex; align-items: center; gap: 8px;
+    padding: 9px 16px; font-size: 13px; font-weight: 500; color: #64748b;
+    cursor: pointer; transition: background 0.15s;
+    border-left: 2px solid transparent; width: 100%; text-align: left; background: none; border: none;
+  }
+  .demo-nav-item.active {
+    color: #4f46e5; background: #eff6ff;
+    border-left-color: #4f46e5; font-weight: 600;
+  }
+  .demo-nav-item:hover:not(.active) { background: #f8fafc; }
+  .demo-main { flex: 1; padding: 24px; background: #f8fafc; overflow: hidden; }
+  .demo-preview { width: 240px; flex-shrink: 0; background: #fff; border-left: 1px solid #e2e8f0; padding: 20px; overflow: hidden; }
+
+  /* ── Kanban ── */
+  .kanban-col { flex: 1; min-width: 0; }
+  .kanban-col-header { font-size: 12px; font-weight: 700; color: #374151; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+  .kanban-count { width: 18px; height: 18px; border-radius: 50%; background: #f1f5f9; font-size: 10px; font-weight: 700; color: #64748b; display: flex; align-items: center; justify-content: center; }
+  .kanban-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px; margin-bottom: 8px; cursor: pointer; transition: transform 0.1s, border-color 0.15s; }
+  .kanban-card:hover { border-color: #c7d2fe; transform: translateY(-1px); }
+  .priority { display: inline-block; padding: 2px 7px; border-radius: 100px; font-size: 10px; font-weight: 700; }
+
+  /* ── Ticket ── */
+  .ticket-type { display: inline-block; padding: 2px 7px; border-radius: 5px; font-size: 10px; font-weight: 700; letter-spacing: 0.05em; }
+  .ticket-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 14px; padding: 16px; cursor: pointer; transition: border-color 0.15s; }
+  .ticket-card:hover { border-color: #c7d2fe; }
+  .ticket-status { display: inline-block; padding: 4px 10px; border-radius: 7px; font-size: 11px; font-weight: 700; margin-top: 12px; }
+
+  /* ── CTA ── */
+  .cta-box {
+    background: linear-gradient(135deg, #f8f9ff 0%, #eff6ff 50%, #faf5ff 100%);
+    border: 1px solid #e0e7ff; border-radius: 24px; padding: 60px 48px;
+    display: grid; grid-template-columns: 1fr auto; gap: 48px; align-items: center;
+  }
+  .cta-title { font-size: 36px; font-weight: 800; color: #0f172a; margin-bottom: 12px; }
+  .cta-title span { color: #4f46e5; }
+  .cta-desc { font-size: 15px; color: #64748b; line-height: 1.7; margin-bottom: 28px; max-width: 480px; }
+
+  /* ── Trust row ── */
+  .trust-row { display: grid; grid-template-columns: repeat(5,1fr); gap: 16px; }
+  .trust-item { display: flex; align-items: center; gap: 12px; padding: 16px; background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; }
+  .trust-icon { width: 36px; height: 36px; border-radius: 9px; background: #f8fafc; border: 1px solid #f1f5f9; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+
+  /* ── Footer ── */
+  .footer { border-top: 1px solid #e2e8f0; background: #fff; }
+  .footer-inner { max-width: 1200px; margin: 0 auto; padding: 56px 24px 0; }
+  .footer-grid { display: flex; justify-content: space-between; gap: 32px; padding-bottom: 40px; border-bottom: 1px solid #f1f5f9; flex-wrap: wrap; }
+  .footer-link { display: block; font-size: 13px; color: #64748b; text-decoration: none; margin-bottom: 10px; transition: color 0.15s; }
+  .footer-link:hover { color: #4f46e5; }
+  .footer-col-title { font-size: 13px; font-weight: 700; color: #0f172a; margin-bottom: 14px; }
+  .footer-bottom { display: flex; justify-content: space-between; align-items: center; padding: 20px 0; flex-wrap: wrap; gap: 12px; }
+  .footer-bottom-text { font-size: 12px; color: #94a3b8; }
+  .status-dot { width: 7px; height: 7px; border-radius: 50%; background: #10b981; display: inline-block; margin-right: 6px; }
+
+  /* ── Table ── */
+  .q-table { width: 100%; border-collapse: collapse; }
+  .q-table th { font-size: 11px; font-weight: 600; color: #94a3b8; text-align: left; padding: 6px 0; border-bottom: 1px solid #f1f5f9; }
+  .q-table th:not(:first-child) { text-align: right; }
+  .q-table td { font-size: 12px; color: #374151; padding: 8px 0; border-bottom: 1px solid #f8fafc; }
+  .q-table td:not(:first-child) { text-align: right; }
+  .q-table tr:last-child td { border-bottom: none; }
+
+  /* ── Progress bar ── */
+  .progress-track { height: 5px; background: #f1f5f9; border-radius: 3px; overflow: hidden; margin: 8px 0; }
+  .progress-fill { height: 100%; border-radius: 3px; background: linear-gradient(90deg, #4f46e5, #7c3aed); }
+
+  /* ── Divider ── */
+  .divider { height: 1px; background: #f1f5f9; margin: 0; }
+
+  /* ── Input ── */
+  .lp-input {
+    background: #fff; border: 1.5px solid #e2e8f0;
+    border-radius: 10px; padding: 10px 14px;
+    font-size: 14px; color: #0f172a;
+    outline: none; font-family: inherit; width: 100%;
+    transition: border-color 0.15s;
+  }
+  .lp-input:focus { border-color: #4f46e5; }
+  .lp-input::placeholder { color: #94a3b8; }
+
+  /* ── Mobile hamburger ── */
+  .mobile-menu-btn {
+    display: none; background: none; border: none; cursor: pointer;
+    padding: 6px; border-radius: 8px; color: #374151;
+  }
+  .mobile-menu-btn:hover { background: #f1f5f9; }
+  .mobile-nav {
+    position: fixed; inset: 0; top: 64px; z-index: 99;
+    background: #fff; border-top: 1px solid #e2e8f0;
+    padding: 16px; display: flex; flex-direction: column; gap: 4px;
+  }
+  .mobile-nav-link {
+    display: block; padding: 12px 16px; border-radius: 10px;
+    font-size: 15px; font-weight: 500; color: #374151; text-decoration: none;
+    transition: background 0.15s;
+  }
+  .mobile-nav-link:hover { background: #f8fafc; }
+
+  /* ── Toast Alert ── */
+  .toast {
+    position: fixed; bottom: 24px; right: 24px; z-index: 1000;
+    background: #0f172a; color: #fff;
+    padding: 12px 20px; border-radius: 10px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+    display: flex; align-items: center; gap: 10px;
+    font-size: 14px; font-weight: 500;
+    animation: slideInUp 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+  @keyframes slideInUp {
+    from { transform: translateY(24px) scale(0.95); opacity: 0; }
+    to { transform: translateY(0) scale(1); opacity: 1; }
   }
 
-  /* Dashed orbit ring */
-  .orbit-ring {
-    border:2px dashed rgba(99,102,241,0.25);
-    border-radius:50%;
-    position:absolute;
-    animation:spinSlow 20s linear infinite;
+  /* ── RESPONSIVE ── */
+  @media (max-width: 1100px) {
+    .trust-row { grid-template-columns: repeat(3, 1fr); }
+    .cta-box { grid-template-columns: 1fr; gap: 32px; }
+    .hero-inner { gap: 40px; }
+    .hero-title { font-size: 42px; }
+    .feature-grid { grid-template-columns: repeat(2,1fr); }
   }
 
-  /* Recharts-style line for finance */
-  .chart-line {
-    stroke-dasharray:600;
-    stroke-dashoffset:600;
-    animation:dashDraw 2s ease-out 0.5s forwards;
+  @media (max-width: 900px) {
+    .hero-inner { grid-template-columns: 1fr; gap: 40px; }
+    .hero-title { font-size: 38px; }
+    .hero-desc { max-width: 100%; }
+    .hero-card-wrap { position: relative !important; }
+    .hero-stat-badge { display: none; }
+    .ai-suggestion-badge { display: none; }
+    .finance-layout { flex-direction: column !important; }
+    .ai-section-layout { flex-direction: column !important; }
+    .payroll-layout { flex-direction: column !important; }
+    .collab-layout { flex-direction: column !important; }
+    .stats-bar { grid-template-columns: repeat(3,1fr); }
+    .stat-item { border-right: none; border-bottom: 1px solid #f1f5f9; }
+    .stat-item:nth-child(3n) { border-bottom: none; }
+    .section-title { font-size: 32px; }
+    .cta-title { font-size: 28px; }
+    .cta-box { padding: 40px 28px; }
+    .demo-shell { flex-direction: column; }
+    .demo-sidebar { width: 100%; border-right: none; border-bottom: 1px solid #e2e8f0; padding: 12px 0; }
+    .demo-preview { display: none; }
+    .kanban-layout { overflow-x: auto; }
+    .kanban-inner { min-width: 600px; }
+    .ticket-grid { grid-template-columns: repeat(2,1fr) !important; }
+    .trust-row { grid-template-columns: repeat(2, 1fr); }
+    .section-label-row { flex-direction: column; gap: 20px; align-items: flex-start !important; }
+    .feature-grid { grid-template-columns: 1fr 1fr; }
   }
 
-  /* Tooltip popups */
-  .tooltip-popup {
-    animation:dropIn 0.5s cubic-bezier(0.34,1.56,0.64,1) both;
+  @media (max-width: 640px) {
+    .lp-nav-links { display: none; }
+    .mobile-menu-btn { display: flex; align-items: center; justify-content: center; }
+    .lp-section { padding: 64px 16px; }
+    .lp-section-sm { padding: 40px 16px; }
+    .hero { padding: 0; }
+    .hero-inner { padding: 48px 16px 40px; gap: 32px; }
+    .hero-title { font-size: 32px; }
+    .hero-actions { flex-direction: column; }
+    .btn-primary-lg, .btn-secondary-lg { width: 100%; justify-content: center; padding: 13px 24px; }
+    .hero-chips { gap: 12px; }
+    .feature-grid { grid-template-columns: 1fr; }
+    .stats-bar { grid-template-columns: 1fr 1fr; padding: 16px; }
+    .trust-row { grid-template-columns: 1fr; }
+    .section-title { font-size: 26px; }
+    .cta-box { padding: 32px 20px; }
+    .cta-title { font-size: 24px; }
+    .ticket-grid { grid-template-columns: 1fr !important; }
+    .hide-mobile { display: none !important; }
+    .finance-stats-grid { grid-template-columns: 1fr 1fr !important; }
+    .finance-charts-row { flex-direction: column !important; }
+    .insight-grid { grid-template-columns: 1fr !important; }
+    .payroll-data-grid { grid-template-columns: 1fr !important; }
   }
 
-  /* Scan effect for AI section */
-  .ai-scan::after {
-    content:'';
-    position:absolute;
-    left:0;right:0;height:2px;
-    background:linear-gradient(90deg,transparent,rgba(99,102,241,0.8),transparent);
-    animation:scanLine 3s ease-in-out infinite;
-    animation-delay:1s;
-  }
-
-  /* Donut chart segments */
-  .donut-seg {
-    stroke-linecap:round;
-    transition:stroke-dashoffset 1s cubic-bezier(0.4,0,0.2,1);
-  }
-
-  /* Kanban card hover */
-  .kanban-card {
-    background:#fff;
-    border:1px solid #eef0ff;
-    border-radius:14px;
-    padding:14px;
-    margin-bottom:10px;
-    box-shadow:0 2px 8px rgba(0,0,0,0.04);
-    transition:all 0.25s;
-    cursor:pointer;
-  }
-  .kanban-card:hover { transform:translateX(3px); border-color:#c7caff; box-shadow:0 4px 16px rgba(99,102,241,0.1); }
-
-  /* Nav scrolled effect */
-  .nav-scrolled {
-    box-shadow:0 4px 24px rgba(99,102,241,0.08);
-    background:rgba(255,255,255,0.97) !important;
-  }
-
-  @media (max-width:768px) {
-    .hero-grid { flex-direction:column !important; }
-    .hide-mobile { display:none !important; }
-    .features-grid { grid-template-columns:1fr !important; }
+  @media (max-width: 400px) {
+    .hero-title { font-size: 28px; }
+    .stats-bar { grid-template-columns: 1fr; }
   }
 `;
 
-// ─── SVG 3D Icons ─────────────────────────────────────────────────────────────
-const QuotiqLogo: React.FC<{ size?: number }> = ({ size = 36 }) => (
-  <svg width={size} height={size} viewBox="0 0 36 36" fill="none">
-    <defs>
-      <linearGradient id="logo-g" x1="0" y1="0" x2="36" y2="36" gradientUnits="userSpaceOnUse">
-        <stop stopColor="#4f46e5" />
-        <stop offset="1" stopColor="#7c3aed" />
-      </linearGradient>
-    </defs>
-    <circle cx="18" cy="18" r="18" fill="url(#logo-g)" />
-    <circle cx="18" cy="18" r="11" stroke="white" strokeWidth="2.5" fill="none" />
-    <circle cx="18" cy="18" r="4" fill="white" />
-    <line x1="26" y1="26" x2="31" y2="31" stroke="white" strokeWidth="2.5" strokeLinecap="round" />
+// ─── Small SVG helpers ────────────────────────────────────────────────────────
+const Logo: React.FC<{ size?: number }> = ({ size = 32 }) => (
+  <svg width={size} height={size} viewBox="0 0 32 32" fill="none">
+    <rect width="32" height="32" rx="10" fill="#4f46e5" />
+    <circle cx="16" cy="16" r="9" stroke="white" strokeWidth="2.2" fill="none" />
+    <circle cx="16" cy="16" r="3.5" fill="white" />
+    <line x1="22.5" y1="22.5" x2="27" y2="27" stroke="white" strokeWidth="2.2" strokeLinecap="round" />
   </svg>
 );
 
-const StarIcon: React.FC<{ size?: number; color?: string }> = ({ size = 16, color = '#4f46e5' }) => (
-  <svg width={size} height={size} viewBox="0 0 16 16" fill={color}>
-    <path d="M8 0l1.8 5.4h5.7l-4.6 3.3 1.8 5.4L8 11l-4.7 3.1 1.8-5.4L.6 5.4h5.6L8 0z" />
-  </svg>
-);
-
-const SparkleIcon: React.FC<{ size?: number; color?: string }> = ({ size = 16, color = '#4f46e5' }) => (
-  <svg width={size} height={size} viewBox="0 0 16 16" fill="none">
-    <path d="M8 1v4M8 11v4M1 8h4M11 8h4M3.05 3.05l2.83 2.83M10.12 10.12l2.83 2.83M12.95 3.05l-2.83 2.83M5.88 10.12l-2.83 2.83" stroke={color} strokeWidth="1.8" strokeLinecap="round" />
-    <circle cx="8" cy="8" r="2" fill={color} />
-  </svg>
-);
-
-const BoltIcon: React.FC<{ size?: number }> = ({ size = 16 }) => (
-  <svg width={size} height={size} viewBox="0 0 16 16" fill="none">
-    <path d="M9.5 1.5L4 9h5.5L6.5 14.5L12 7H6.5L9.5 1.5z" fill="white" />
-  </svg>
-);
-
-const PlayIcon: React.FC<{ size?: number }> = ({ size = 18 }) => (
-  <svg width={size} height={size} viewBox="0 0 18 18" fill="none">
-    <circle cx="9" cy="9" r="8.5" stroke="#4f46e5" strokeWidth="1.5" />
-    <path d="M7 6l5 3-5 3V6z" fill="#4f46e5" />
-  </svg>
-);
-
-const ArrowRightIcon: React.FC<{ size?: number }> = ({ size = 18 }) => (
-  <svg width={size} height={size} viewBox="0 0 18 18" fill="none">
-    <path d="M3.75 9h10.5M9.75 4.5L14.25 9l-4.5 4.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-  </svg>
-);
-
-const CheckIcon: React.FC<{ size?: number; color?: string }> = ({ size = 14, color = '#10b981' }) => (
-  <svg width={size} height={size} viewBox="0 0 14 14" fill="none">
-    <circle cx="7" cy="7" r="7" fill={color} fillOpacity="0.12" />
-    <path d="M4 7l2 2 4-4" stroke={color} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
-  </svg>
-);
-
-// ─── 3D Hero Quotation Card ────────────────────────────────────────────────────
-const HeroQuotationCard: React.FC = () => (
-  <div className="glass-card card-3d" style={{ width: 380, padding: '28px', position: 'relative', zIndex: 2 }}>
-    {/* Header */}
-    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-        <div style={{ width: 28, height: 28, borderRadius: '50%', background: 'linear-gradient(135deg,#e0e7ff,#c7d2fe)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-            <circle cx="7" cy="7" r="6" stroke="#6366f1" strokeWidth="1.5" />
-            <path d="M7 4v3l2 1" stroke="#6366f1" strokeWidth="1.3" strokeLinecap="round" />
-          </svg>
-        </div>
-        <span style={{ fontSize: 14, fontWeight: 700, color: '#1a1d2e' }}>New Quotation</span>
-      </div>
-      <div className="ai-badge">
-        <SparkleIcon size={12} color="#6366f1" />
-        AI Assistant
-      </div>
-    </div>
-
-    {/* Client */}
-    <div style={{ marginBottom: 18 }}>
-      <div style={{ fontSize: 10, fontWeight: 600, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 4 }}>Client</div>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-        <div style={{ width: 30, height: 30, borderRadius: '50%', background: 'linear-gradient(135deg,#818cf8,#4f46e5)', color: '#fff', fontSize: 11, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>AC</div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-          <span style={{ fontSize: 14, fontWeight: 600, color: '#1a1d2e' }}>Acme Corporation</span>
-          <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M4 5.5l3 3 3-3" stroke="#94a3b8" strokeWidth="1.5" strokeLinecap="round" /></svg>
-        </div>
-      </div>
-    </div>
-
-    {/* Table */}
-    <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: 16 }}>
-      <thead>
-        <tr style={{ borderBottom: '1px solid #f1f3ff' }}>
-          {['Item', 'Qty', 'Price', 'Total'].map((h) => (
-            <th key={h} style={{ textAlign: h === 'Item' ? 'left' : 'right', fontSize: 11, fontWeight: 600, color: '#94a3b8', padding: '6px 0', paddingRight: h !== 'Total' ? 8 : 0 }}>{h}</th>
-          ))}
-        </tr>
-      </thead>
-      <tbody>
-        {[
-          { item: 'Website Development', qty: 1, price: '$2,500', total: '$2,500' },
-          { item: 'UI/UX Design',         qty: 1, price: '$1,200', total: '$1,200' },
-          { item: 'API Integration',      qty: 1, price: '$800',   total: '$800'   },
-          { item: 'Maintenance (6 Mo.)',  qty: 1, price: '$600',   total: '$600'   },
-        ].map((row, i) => (
-          <tr key={i} style={{ borderBottom: '1px solid #f8f9ff' }}>
-            <td style={{ fontSize: 12, color: '#374151', padding: '7px 0' }}>{row.item}</td>
-            <td style={{ fontSize: 12, color: '#374151', textAlign: 'right', paddingRight: 8 }}>{row.qty}</td>
-            <td style={{ fontSize: 12, color: '#374151', textAlign: 'right', paddingRight: 8 }}>{row.price}</td>
-            <td style={{ fontSize: 12, color: '#374151', textAlign: 'right' }}>{row.total}</td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
-
-    {/* Totals */}
-    <div style={{ borderTop: '1px solid #eef0ff', paddingTop: 12, marginBottom: 18 }}>
-      {[
-        { label: 'Subtotal', value: '$5,100', bold: false },
-        { label: 'Tax (18%)', value: '$918', bold: false },
-        { label: 'Total', value: '$6,018', bold: true },
-      ].map((row) => (
-        <div key={row.label} style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
-          <span style={{ fontSize: 12, color: row.bold ? '#1a1d2e' : '#64748b', fontWeight: row.bold ? 700 : 400 }}>{row.label}</span>
-          <span style={{ fontSize: 12, color: row.bold ? '#4f46e5' : '#374151', fontWeight: row.bold ? 800 : 500 }}>{row.value}</span>
-        </div>
-      ))}
-    </div>
-
-    {/* Convert button */}
-    <button className="btn-primary" style={{ width: '100%', justifyContent: 'center', borderRadius: 12 }}>
-      Convert to Invoice
-    </button>
-
-    {/* PDF badge */}
-    <div style={{ position: 'absolute', bottom: 28, right: -18, background: '#fff', borderRadius: 12, padding: '10px 12px', boxShadow: '0 8px 24px rgba(0,0,0,0.1)', border: '1px solid #eef0ff', display: 'flex', alignItems: 'center', gap: 6 }}>
-      <div style={{ width: 30, height: 36, background: 'linear-gradient(135deg,#ef4444,#dc2626)', borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <span style={{ fontSize: 8, fontWeight: 800, color: '#fff' }}>PDF</span>
-      </div>
-    </div>
-  </div>
-);
-
-// ─── AI Suggestion Popup ───────────────────────────────────────────────────────
-const AISuggestionCard: React.FC = () => (
-  <div className="glass-card tooltip-popup" style={{ padding: '16px 20px', width: 200, position: 'absolute', bottom: 60, right: -40, zIndex: 3, animationDelay: '1.2s' }}>
-    <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10 }}>
-      <SparkleIcon size={14} color="#6366f1" />
-      <span style={{ fontSize: 12, fontWeight: 700, color: '#4f46e5' }}>AI Suggestion</span>
-    </div>
-    <p style={{ fontSize: 12, color: '#64748b', marginBottom: 12, lineHeight: 1.5 }}>Add maintenance package?</p>
-    <button style={{ fontSize: 12, fontWeight: 600, color: '#4f46e5', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>Add to Quote →</button>
-  </div>
-);
-
-// ─── Finance Chart (SVG) ──────────────────────────────────────────────────────
-const FinanceChart: React.FC = () => {
-  const incomePts = "20,120 50,100 80,85 110,90 140,70 170,65 200,55 230,50 260,45";
-  const expensePts = "20,130 50,125 80,115 110,120 140,108 170,115 200,105 230,100 260,95";
+const Icon: React.FC<{ name: string; size?: number; color?: string }> = ({ name, size = 16, color = 'currentColor' }) => {
+  const paths: Record<string, React.ReactNode> = {
+    bolt:       <path d="M13 2L4.09 13H11L10 22l8.91-11H13L13 2z" stroke={color} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" fill="none" />,
+    play:       <><circle cx="12" cy="12" r="10" stroke={color} strokeWidth="1.6" fill="none"/><path d="M10 8.5l6 3.5-6 3.5V8.5z" fill={color}/></>,
+    arrow:      <path d="M5 12h14M14 7l5 5-5 5" stroke={color} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" fill="none" />,
+    check:      <><circle cx="12" cy="12" r="10" stroke={color} strokeWidth="1.6" fill="none"/><path d="M8 12l3 3 5-5" stroke={color} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" /></>,
+    sparkle:    <path d="M12 2v4M12 18v4M2 12h4M18 12h4M5.6 5.6l2.8 2.8M15.6 15.6l2.8 2.8M15.6 5.6l-2.8 2.8M8.4 15.6l-2.8 2.8" stroke={color} strokeWidth="1.6" strokeLinecap="round" />,
+    shield:     <path d="M12 2L4 6v6c0 5.25 3.5 9.74 8 10 4.5-.26 8-4.75 8-10V6L12 2z" stroke={color} strokeWidth="1.6" fill="none" strokeLinejoin="round"/>,
+    lock:       <><rect x="5" y="11" width="14" height="10" rx="2" stroke={color} strokeWidth="1.6" fill="none"/><path d="M8 11V7a4 4 0 0 1 8 0v4" stroke={color} strokeWidth="1.6" strokeLinecap="round"/></>,
+    cloud:      <path d="M18 10a6 6 0 0 0-11.7 2.1A4 4 0 1 0 6 20h12a4 4 0 0 0 0-8" stroke={color} strokeWidth="1.6" fill="none" strokeLinejoin="round"/>,
+    headphone:  <><path d="M3 18v-6a9 9 0 0 1 18 0v6" stroke={color} strokeWidth="1.6" strokeLinecap="round" fill="none"/><rect x="3" y="16" width="3" height="5" rx="1.5" stroke={color} strokeWidth="1.6" fill="none"/><rect x="18" y="16" width="3" height="5" rx="1.5" stroke={color} strokeWidth="1.6" fill="none"/></>,
+    heart:      <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" stroke={color} strokeWidth="1.6" fill="none"/>,
+    chart:      <><polyline points="22 12 18 12 15 21 9 3 6 12 2 12" stroke={color} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" fill="none"/></>,
+    mail:       <><rect x="2" y="4" width="20" height="16" rx="2" stroke={color} strokeWidth="1.6" fill="none"/><path d="M2 8l10 7 10-7" stroke={color} strokeWidth="1.6" strokeLinecap="round" fill="none"/></>,
+    send:       <><path d="M22 2L11 13" stroke={color} strokeWidth="1.6" strokeLinecap="round" fill="none"/><path d="M22 2L15 22 11 13 2 9l20-7z" stroke={color} strokeWidth="1.6" strokeLinejoin="round" fill="none"/></>,
+    refresh:    <path d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" stroke={color} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" fill="none"/>,
+    brain:      <path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96-.46 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24A2.5 2.5 0 0 1 9.5 2z" stroke={color} strokeWidth="1.6" fill="none"/>,
+    users:      <><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" stroke={color} strokeWidth="1.6" strokeLinecap="round" fill="none"/><circle cx="9" cy="7" r="4" stroke={color} strokeWidth="1.6" fill="none"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" stroke={color} strokeWidth="1.6" strokeLinecap="round" fill="none"/></>,
+    file:       <><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" stroke={color} strokeWidth="1.6" fill="none"/><polyline points="14 2 14 8 20 8" stroke={color} strokeWidth="1.6" fill="none"/></>,
+    barChart:   <><line x1="12" y1="20" x2="12" y2="10" stroke={color} strokeWidth="1.6" strokeLinecap="round"/><line x1="18" y1="20" x2="18" y2="4" stroke={color} strokeWidth="1.6" strokeLinecap="round"/><line x1="6" y1="20" x2="6" y2="16" stroke={color} strokeWidth="1.6" strokeLinecap="round"/></>,
+    ticket:     <><path d="M3 7v4a2 2 0 0 1 0 4v4h18v-4a2 2 0 0 1 0-4V7H3z" stroke={color} strokeWidth="1.6" fill="none"/><line x1="12" y1="7" x2="12" y2="17" stroke={color} strokeWidth="1.6" strokeDasharray="2 2"/></>,
+    chat:       <><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" stroke={color} strokeWidth="1.6" fill="none"/></>,
+    settings:   <><circle cx="12" cy="12" r="3" stroke={color} strokeWidth="1.6" fill="none"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" stroke={color} strokeWidth="1.4" fill="none"/></>,
+    chevron:    <path d="M6 9l6 6 6-6" stroke={color} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" fill="none"/>,
+    menu:       <><line x1="3" y1="6" x2="21" y2="6" stroke={color} strokeWidth="1.8" strokeLinecap="round"/><line x1="3" y1="12" x2="21" y2="12" stroke={color} strokeWidth="1.8" strokeLinecap="round"/><line x1="3" y1="18" x2="21" y2="18" stroke={color} strokeWidth="1.8" strokeLinecap="round"/></>,
+    close:      <><line x1="18" y1="6" x2="6" y2="18" stroke={color} strokeWidth="1.8" strokeLinecap="round"/><line x1="6" y1="6" x2="18" y2="18" stroke={color} strokeWidth="1.8" strokeLinecap="round"/></>,
+  };
   return (
-    <div style={{ background: '#fff', borderRadius: 16, padding: 20, border: '1px solid #eef0ff', flex: 1 }}>
-      <div style={{ fontSize: 13, fontWeight: 700, color: '#1a1d2e', marginBottom: 4 }}>Cash Flow Trend</div>
-      <svg width="100%" height="160" viewBox="0 0 280 150" preserveAspectRatio="none">
-        <defs>
-          <linearGradient id="income-grad" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#4f46e5" stopOpacity="0.3" />
-            <stop offset="100%" stopColor="#4f46e5" stopOpacity="0.01" />
-          </linearGradient>
-          <linearGradient id="expense-grad" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#e879f9" stopOpacity="0.3" />
-            <stop offset="100%" stopColor="#e879f9" stopOpacity="0.01" />
-          </linearGradient>
-        </defs>
-        {/* Grid */}
-        {[30,60,90,120].map(y => <line key={y} x1="0" y1={y} x2="280" y2={y} stroke="#f1f3ff" strokeWidth="1" />)}
-        {/* Income area */}
-        <polyline points={incomePts} fill="none" stroke="#4f46e5" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="chart-line" />
-        {/* Expense area */}
-        <polyline points={expensePts} fill="none" stroke="#e879f9" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="chart-line" style={{ animationDelay: '0.3s' }} />
-        {/* Dots */}
-        {[[260, 45], [260, 95]].map(([x, y], i) => (
-          <circle key={i} cx={x} cy={y} r="4" fill={i === 0 ? '#4f46e5' : '#e879f9'} />
-        ))}
-      </svg>
-      <div style={{ display: 'flex', gap: 16, marginTop: 8 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}><div style={{ width: 24, height: 3, background: '#4f46e5', borderRadius: 2 }} /><span style={{ fontSize: 11, color: '#64748b' }}>Income</span></div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}><div style={{ width: 24, height: 3, background: '#e879f9', borderRadius: 2 }} /><span style={{ fontSize: 11, color: '#64748b' }}>Expenses</span></div>
-      </div>
-    </div>
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      {paths[name]}
+    </svg>
   );
 };
 
 // ─── Donut Chart ──────────────────────────────────────────────────────────────
-const DonutChart: React.FC<{ size?: number }> = ({ size = 120 }) => {
-  const cx = size / 2, cy = size / 2, r = size * 0.4;
+const DonutChart: React.FC<{ size?: number }> = ({ size = 96 }) => {
+  const cx = size / 2, cy = size / 2, r = size * 0.38;
   const circ = 2 * Math.PI * r;
   const segs = [
-    { pct: 35, color: '#4f46e5', label: 'Team' },
-    { pct: 28, color: '#7c3aed', label: 'Operations' },
-    { pct: 18, color: '#06b6d4', label: 'Marketing' },
-    { pct: 12, color: '#f59e0b', label: 'Software' },
-    { pct: 7,  color: '#e2e8f0', label: 'Others' },
+    { pct: 35, color: '#4f46e5' }, { pct: 28, color: '#7c3aed' },
+    { pct: 18, color: '#06b6d4' }, { pct: 12, color: '#f59e0b' }, { pct: 7, color: '#e2e8f0' },
   ];
-  let cumulative = 0;
+  let cum = 0;
   return (
     <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} style={{ transform: 'rotate(-90deg)' }}>
-      {segs.map((seg, i) => {
-        const dashLen = (seg.pct / 100) * circ;
-        const offset = circ - dashLen;
-        const rotOffset = (cumulative / 100) * 360;
-        cumulative += seg.pct;
-        return (
-          <circle
-            key={i}
-            cx={cx} cy={cy} r={r}
-            fill="none"
-            stroke={seg.color}
-            strokeWidth={size * 0.15}
-            strokeDasharray={`${dashLen} ${circ - dashLen}`}
-            strokeDashoffset={circ - dashLen - (circ * (cumulative - seg.pct) / 100) + circ}
-            style={{ transform: `rotate(${rotOffset}deg)`, transformOrigin: `${cx}px ${cy}px` }}
-            className="donut-seg"
-          />
-        );
+      {segs.map((s, i) => {
+        const dash = (s.pct / 100) * circ;
+        const offset = circ - (cum / 100) * circ - dash;
+        cum += s.pct;
+        return <circle key={i} cx={cx} cy={cy} r={r} fill="none" stroke={s.color} strokeWidth={size * 0.14} strokeDasharray={`${dash} ${circ - dash}`} strokeDashoffset={-((cum - s.pct) / 100) * circ} className="donut-seg" />;
       })}
     </svg>
   );
 };
 
-// ─── Main LandingPage Component ───────────────────────────────────────────────
+// ─── Liabilities Donut Chart ──────────────────────────────────────────────────
+const LiabilitiesDonutChart: React.FC<{ size?: number; items: Array<{ amount: number; paid: boolean; color: string }> }> = ({ size = 80, items }) => {
+  const cx = size / 2, cy = size / 2, r = size * 0.38;
+  const circ = 2 * Math.PI * r;
+  const activeItems = items.filter(i => !i.paid);
+  const total = activeItems.reduce((acc, curr) => acc + curr.amount, 0);
+
+  if (total === 0) {
+    return (
+      <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
+        <circle cx={cx} cy={cy} r={r} fill="none" stroke="#e2e8f0" strokeWidth={size * 0.14} />
+      </svg>
+    );
+  }
+
+  let cum = 0;
+  return (
+    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} style={{ transform: 'rotate(-90deg)' }}>
+      {activeItems.map((s, i) => {
+        const pct = (s.amount / total) * 100;
+        const dash = (pct / 100) * circ;
+        const offset = circ - (cum / 100) * circ - dash;
+        cum += pct;
+        return <circle key={i} cx={cx} cy={cy} r={r} fill="none" stroke={s.color} strokeWidth={size * 0.14} strokeDasharray={`${dash} ${circ - dash}`} strokeDashoffset={-((cum - pct) / 100) * circ} className="donut-seg" />;
+      })}
+    </svg>
+  );
+};
+
+// ─── Expenses Donut Chart ─────────────────────────────────────────────────────
+const ExpensesDonutChart: React.FC<{ size?: number; expenses: Array<{ cat: string; amount: number }> }> = ({ size = 90, expenses }) => {
+  const cx = size / 2, cy = size / 2, r = size * 0.38;
+  const circ = 2 * Math.PI * r;
+
+  const colors: Record<string, string> = {
+    Team: '#4f46e5',
+    Operations: '#7c3aed',
+    Marketing: '#06b6d4',
+    Software: '#f59e0b',
+    Others: '#e2e8f0',
+  };
+
+  const categories = ['Team', 'Operations', 'Marketing', 'Software', 'Others'];
+  const totals = categories.reduce((acc, cat) => {
+    acc[cat] = expenses.filter(e => e.cat === cat).reduce((sum, item) => sum + item.amount, 0);
+    return acc;
+  }, {} as Record<string, number>);
+
+  totals.Team = (totals.Team || 0) + 23947;
+  totals.Operations = (totals.Operations || 0) + 19157;
+  totals.Marketing = (totals.Marketing || 0) + 12315;
+  totals.Software = (totals.Software || 0) + 8210;
+  totals.Others = (totals.Others || 0) + 4791;
+
+  const grandTotal = Object.values(totals).reduce((sum, val) => sum + val, 0);
+
+  let cum = 0;
+  return (
+    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} style={{ transform: 'rotate(-90deg)' }}>
+      {categories.map((cat, i) => {
+        const amt = totals[cat] || 0;
+        const pct = grandTotal > 0 ? (amt / grandTotal) * 100 : 0;
+        const dash = (pct / 100) * circ;
+        const offset = circ - (cum / 100) * circ - dash;
+        cum += pct;
+        return <circle key={i} cx={cx} cy={cy} r={r} fill="none" stroke={colors[cat]} strokeWidth={size * 0.14} strokeDasharray={`${dash} ${circ - dash}`} strokeDashoffset={-((cum - pct) / 100) * circ} className="donut-seg" />;
+      })}
+    </svg>
+  );
+};
+
+// ─── Finance SVG Line Chart ───────────────────────────────────────────────────
+const LineChart: React.FC = () => (
+  <svg width="100%" height="100" viewBox="0 0 280 100" preserveAspectRatio="none">
+    <defs>
+      <linearGradient id="ig" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#4f46e5" stopOpacity=".15"/><stop offset="100%" stopColor="#4f46e5" stopOpacity="0"/></linearGradient>
+      <linearGradient id="eg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#e879f9" stopOpacity=".12"/><stop offset="100%" stopColor="#e879f9" stopOpacity="0"/></linearGradient>
+    </defs>
+    {[20,45,70,95].map(y => <line key={y} x1="0" y1={y} x2="280" y2={y} stroke="#f1f5f9" strokeWidth="1"/>)}
+    <polyline points="0,80 40,68 80,55 120,60 160,44 200,40 240,30 280,22" fill="none" stroke="#4f46e5" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    <polyline points="0,88 40,82 80,75 120,78 160,70 200,74 240,64 280,58" fill="none" stroke="#e879f9" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
+
+// ─── Hero Quotation Card ──────────────────────────────────────────────────────
+const HeroCard: React.FC<{ onTriggerToast: (msg: string) => void }> = ({ onTriggerToast }) => {
+  const [hasMaintenance, setHasMaintenance] = useState(false);
+  const [buttonState, setButtonState] = useState<'idle' | 'loading' | 'success'>('idle');
+
+  const items = [
+    { name: 'Website Development', qty: 1, price: 2500 },
+    { name: 'UI/UX Design', qty: 1, price: 1200 },
+    { name: 'API Integration', qty: 1, price: 800 },
+  ];
+
+  if (hasMaintenance) {
+    items.push({ name: 'Maintenance (6 Mo.)', qty: 1, price: 600 });
+  }
+
+  const subtotal = items.reduce((sum, item) => sum + item.qty * item.price, 0);
+  const tax = Math.round(subtotal * 0.18);
+  const total = subtotal + tax;
+
+  const handleConvert = () => {
+    if (buttonState !== 'idle') return;
+    setButtonState('loading');
+    setTimeout(() => {
+      setButtonState('success');
+      onTriggerToast('✓ Quotation successfully converted to invoice #INV-250513-01!');
+    }, 1200);
+  };
+
+  return (
+    <div className="hero-card" style={{ position: 'relative' }}>
+      {/* Revenue badge */}
+      <div className="hero-stat-badge">
+        <div style={{ fontSize: 10, color: '#94a3b8', fontWeight: 600, marginBottom: 2 }}>Revenue · This Month</div>
+        <div style={{ fontSize: 20, fontWeight: 800, color: '#0f172a', letterSpacing: '-0.02em' }}>$24,680</div>
+        <div style={{ fontSize: 11, fontWeight: 600, color: '#10b981', marginTop: 2 }}>↑ 32.4% vs last month</div>
+      </div>
+
+      {/* Card header */}
+      <div className="hero-card-header">
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <div style={{ width: 26, height: 26, borderRadius: 8, background: '#f1f5f9', border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <Icon name="file" size={13} color="#64748b" />
+          </div>
+          <span style={{ fontSize: 14, fontWeight: 700, color: '#0f172a' }}>New Quotation</span>
+        </div>
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '4px 10px', borderRadius: 100, background: '#eff6ff', border: '1px solid #bfdbfe', fontSize: 11, fontWeight: 600, color: '#3b82f6' }}>
+          <Icon name="sparkle" size={11} color="#3b82f6" /> AI Assistant
+        </div>
+      </div>
+
+      <div className="hero-card-body">
+        {/* Client */}
+        <div style={{ marginBottom: 16 }}>
+          <div style={{ fontSize: 10, fontWeight: 600, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 6 }}>Client</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <div style={{ width: 28, height: 28, borderRadius: '50%', background: '#4f46e5', color: '#fff', fontSize: 10, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>AC</div>
+            <span style={{ fontSize: 13, fontWeight: 600, color: '#0f172a' }}>Acme Corporation</span>
+            <Icon name="chevron" size={14} color="#94a3b8" />
+          </div>
+        </div>
+
+        {/* Items table */}
+        <table className="q-table" style={{ marginBottom: 12 }}>
+          <thead>
+            <tr><th>Item</th><th>Qty</th><th>Price</th><th>Total</th></tr>
+          </thead>
+          <tbody>
+            {items.map((item) => (
+              <tr key={item.name}>
+                <td style={{ fontWeight: 500 }}>{item.name}</td>
+                <td>{item.qty}</td>
+                <td>${item.price.toLocaleString()}</td>
+                <td>${(item.qty * item.price).toLocaleString()}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+
+        {/* Totals */}
+        <div style={{ borderTop: '1px solid #f1f5f9', paddingTop: 10, marginBottom: 14 }}>
+          {[
+            ['Subtotal', `$${subtotal.toLocaleString()}`, false],
+            ['Tax (18%)', `$${tax.toLocaleString()}`, false],
+            ['Total', `$${total.toLocaleString()}`, true]
+          ].map(([l, v, bold]) => (
+            <div key={String(l)} style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+              <span style={{ fontSize: 12, color: bold ? '#0f172a' : '#64748b', fontWeight: bold ? 700 : 400 }}>{l}</span>
+              <span style={{ fontSize: 12, color: bold ? '#4f46e5' : '#374151', fontWeight: bold ? 800 : 500 }}>{v}</span>
+            </div>
+          ))}
+        </div>
+
+        {/* CTA */}
+        <button
+          className="btn-primary"
+          onClick={handleConvert}
+          disabled={buttonState !== 'idle'}
+          style={{
+            width: '100%',
+            justifyContent: 'center',
+            fontSize: 13,
+            padding: '11px',
+            background: buttonState === 'success' ? '#10b981' : buttonState === 'loading' ? '#818cf8' : '#4f46e5'
+          }}
+        >
+          {buttonState === 'loading' ? 'Converting...' : buttonState === 'success' ? '✓ Invoiced' : 'Convert to Invoice'}
+        </button>
+      </div>
+
+      {/* AI Suggestion */}
+      {!hasMaintenance && (
+        <div className="ai-suggestion-badge">
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8 }}>
+            <Icon name="sparkle" size={13} color="#4f46e5" />
+            <span style={{ fontSize: 12, fontWeight: 700, color: '#4f46e5' }}>AI Suggestion</span>
+          </div>
+          <p style={{ fontSize: 12, color: '#64748b', marginBottom: 10, lineHeight: 1.5 }}>Add maintenance package?</p>
+          <button
+            style={{ fontSize: 12, fontWeight: 600, color: '#4f46e5', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+            onClick={() => {
+              setHasMaintenance(true);
+              onTriggerToast('✓ Maintenance package added to quote.');
+            }}
+          >
+            Add to Quote →
+          </button>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// ─── Main Component ───────────────────────────────────────────────────────────
 export default function LandingPage() {
-  const [navScrolled, setNavScrolled] = useState(false);
+  // Mobile Nav State
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  // Global Toast Alert State
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'info' } | null>(null);
+
+  const showToast = (message: string, type: 'success' | 'info' = 'success') => {
+    setToast({ message, type });
+    setTimeout(() => {
+      setToast(null);
+    }, 3000);
+  };
+
+  // 1. Finance / Payroll Section States
+  const [activeTicket, setActiveTicket] = useState('All Tickets');
   const [activeTab, setActiveTab] = useState<'payroll' | 'expenses' | 'liabilities'>('payroll');
-  const [activeTicketTab, setActiveTicketTab] = useState('All Tickets');
+  const [payrollState, setPayrollState] = useState<'idle' | 'processing' | 'processed'>('idle');
+  const [expenses, setExpenses] = useState([
+    { label: 'Office Supplies', cat: 'Operations', date: 'May 12', amount: 320 },
+    { label: 'Software Subscription', cat: 'Software', date: 'May 11', amount: 1250 },
+    { label: 'Travel Expense', cat: 'Marketing', date: 'May 09', amount: 560 },
+    { label: 'Client Meeting', cat: 'Marketing', date: 'May 08', amount: 245 },
+  ]);
+  const [expenseFilter, setExpenseFilter] = useState<'All' | 'Team' | 'Operations' | 'Marketing' | 'Software'>('All');
+  const [newExpLabel, setNewExpLabel] = useState('');
+  const [newExpAmount, setNewExpAmount] = useState('');
+  const [newExpCat, setNewExpCat] = useState<'Team' | 'Operations' | 'Marketing' | 'Software'>('Operations');
+
+  const [liabilities, setLiabilities] = useState([
+    { id: '1', label: 'Loans Payable', amount: 18500, paid: false, color: '#4f46e5' },
+    { id: '2', label: 'Vendor Payables', amount: 15200, paid: false, color: '#7c3aed' },
+    { id: '3', label: 'Tax Payable', amount: 6100, paid: false, color: '#06b6d4' },
+    { id: '4', label: 'Other Liabilities', amount: 3000, paid: false, color: '#f59e0b' },
+  ]);
+
+  const handleRunPayroll = () => {
+    if (payrollState !== 'idle') return;
+    setPayrollState('processing');
+    setTimeout(() => {
+      setPayrollState('processed');
+      showToast('Payroll processed successfully for 24 employees!', 'success');
+    }, 1500);
+  };
+
+  const handleResetPayroll = () => {
+    setPayrollState('idle');
+  };
+
+  const handleAddExpense = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newExpLabel.trim() || !newExpAmount) return;
+    const amt = parseFloat(newExpAmount);
+    if (isNaN(amt) || amt <= 0) return;
+
+    const newExp = {
+      label: newExpLabel,
+      cat: newExpCat,
+      date: 'May 14',
+      amount: amt,
+    };
+    setExpenses([newExp, ...expenses]);
+    setNewExpLabel('');
+    setNewExpAmount('');
+    showToast(`Logged expense: ${newExpLabel} ($${amt.toLocaleString()})`, 'success');
+  };
+
+  const handlePayLiability = (id: string, label: string, amt: number) => {
+    setLiabilities(liabilities.map(l => l.id === id ? { ...l, paid: true } : l));
+    showToast(`Paid liability: ${label} ($${amt.toLocaleString()})`, 'success');
+  };
+
+  // Calculate dynamic liabilities total
+  const liabilitiesTotal = liabilities.filter(l => !l.paid).reduce((sum, item) => sum + item.amount, 0);
+
+  // 2. See Quotiq in Action (Demo Shell Builder) States
+  const [activeSidebarTab, setActiveSidebarTab] = useState<'dashboard' | 'quotes' | 'invoices' | 'clients' | 'reports' | 'settings'>('quotes');
+  const [quoteStep, setQuoteStep] = useState<1 | 2 | 3>(1);
+  const [clientName, setClientName] = useState('Acme Corporation');
+  const [clientEmail, setClientEmail] = useState('contact@acme.com');
+  const [quoteCurrency, setQuoteCurrency] = useState('USD');
+  const [quoteItems, setQuoteItems] = useState([
+    { name: 'Website Development', desc: 'Full website with responsive design', qty: 1, price: 2500 },
+    { name: 'UI/UX Design', desc: 'User interface and experience design', qty: 1, price: 1200 },
+  ]);
+  const [quotesHistory, setQuotesHistory] = useState<Array<{ id: string; client: string; email: string; itemsCount: number; total: number; date: string; status: string }>>([
+    { id: 'QT-250510-02', client: 'Stark Industries', email: 'tony@stark.com', itemsCount: 3, total: 18400, date: 'May 10, 2025', status: 'Approved' },
+    { id: 'QT-250508-01', client: 'Wayne Enterprises', email: 'bruce@wayne.com', itemsCount: 1, total: 5000, date: 'May 08, 2025', status: 'Sent' },
+  ]);
+
+  const handleAddBuilderItem = () => {
+    setQuoteItems([...quoteItems, { name: 'API Custom Integration', desc: 'Custom backend service', qty: 1, price: 800 }]);
+  };
+
+  const handleRemoveBuilderItem = (index: number) => {
+    setQuoteItems(quoteItems.filter((_, i) => i !== index));
+  };
+
+  const handleUpdateBuilderItem = (index: number, key: 'name' | 'qty' | 'price', val: any) => {
+    setQuoteItems(quoteItems.map((item, i) => i === index ? { ...item, [key]: val } : item));
+  };
+
+  const calculateSubtotal = () => quoteItems.reduce((acc, curr) => acc + curr.qty * curr.price, 0);
+  const calculateTax = () => Math.round(calculateSubtotal() * 0.18);
+  const calculateTotal = () => calculateSubtotal() + calculateTax();
+
+  const [isSendingQuote, setIsSendingQuote] = useState(false);
+  const handleSendQuote = () => {
+    setIsSendingQuote(true);
+    setTimeout(() => {
+      setIsSendingQuote(false);
+      const newQuoteId = `QT-250514-${Math.floor(10 + Math.random() * 90)}`;
+      const newQuote = {
+        id: newQuoteId,
+        client: clientName,
+        email: clientEmail,
+        itemsCount: quoteItems.length,
+        total: calculateTotal(),
+        date: 'May 14, 2025',
+        status: 'Sent'
+      };
+      setQuotesHistory([newQuote, ...quotesHistory]);
+      showToast(`Quote ${newQuoteId} sent to client!`, 'success');
+      setQuoteStep(1);
+      setActiveSidebarTab('dashboard'); // Redirect to dashboard to show it!
+    }, 1200);
+  };
+
+  // 3. Project Workspace Kanban & Collaboration States
+  const [activeCollabTab, setActiveCollabTab] = useState<'Overview' | 'Tasks' | 'Chat' | 'Files' | 'Tickets' | 'Reports'>('Tasks');
+  const [kanbanTasks, setKanbanTasks] = useState([
+    { id: 't1', title: 'Create wireframes for landing page', prio: 'High', pc: '#ef4444', column: 'todo' },
+    { id: 't2', title: 'Set up analytics events', prio: 'Medium', pc: '#f59e0b', column: 'todo' },
+    { id: 't3', title: 'Prepare UI style guide', prio: 'Low', pc: '#10b981', column: 'todo' },
+    { id: 't4', title: 'Design homepage UI', prio: 'High', pc: '#ef4444', column: 'progress', prog: 60 },
+    { id: 't5', title: 'Develop API integration', prio: 'Medium', pc: '#f59e0b', column: 'progress', prog: 40 },
+    { id: 't6', title: 'Review homepage design', prio: 'High', pc: '#ef4444', column: 'review' },
+    { id: 't7', title: 'Code review & refactoring', prio: 'Medium', pc: '#f59e0b', column: 'review' },
+    { id: 't8', title: 'Project kickoff meeting', column: 'done' },
+    { id: 't9', title: 'Market & user research', column: 'done' },
+    { id: 't10', title: 'Information architecture', column: 'done' }
+  ]);
+  const [showAddTaskInput, setShowAddTaskInput] = useState<string | null>(null);
+  const [addTaskTitle, setAddTaskTitle] = useState('');
+
+  const [chatMessages, setChatMessages] = useState([
+    { sender: 'Alice', avatar: 'A', msg: "Hey everyone, did we finish the homepage wireframes?", time: "10:24 AM" },
+    { sender: 'Bob', avatar: 'B', msg: "Yes, they are in the 'Review' column of the Kanban board now.", time: "10:26 AM" }
+  ]);
+  const [chatInput, setChatInput] = useState('');
+
+  const [sharedFiles, setSharedFiles] = useState([
+    { name: 'website_wireframes_v2.pdf', size: '4.2 MB', date: 'May 12', by: 'Alice' },
+    { name: 'project_brief.docx', size: '1.8 MB', date: 'May 08', by: 'Bob' }
+  ]);
+  const [isUploading, setIsUploading] = useState(false);
+
+  const handleMoveTask = (taskId: string) => {
+    setKanbanTasks(kanbanTasks.map(task => {
+      if (task.id !== taskId) return task;
+      let nextCol = 'todo';
+      if (task.column === 'todo') nextCol = 'progress';
+      else if (task.column === 'progress') nextCol = 'review';
+      else if (task.column === 'review') nextCol = 'done';
+      else if (task.column === 'done') nextCol = 'todo';
+      return { ...task, column: nextCol };
+    }));
+    showToast('Task moved to next stage!', 'info');
+  };
+
+  const handleAddTask = (column: string) => {
+    if (!addTaskTitle.trim()) return;
+    const colors = ['#ef4444', '#f59e0b', '#10b981'];
+    const prios = ['High', 'Medium', 'Low'];
+    const r = Math.floor(Math.random() * 3);
+    const newTask = {
+      id: `t${Date.now()}`,
+      title: addTaskTitle,
+      prio: prios[r]!,
+      pc: colors[r]!,
+      column: column
+    };
+    setKanbanTasks([...kanbanTasks, newTask]);
+    setAddTaskTitle('');
+    setShowAddTaskInput(null);
+    showToast('Task added successfully!', 'success');
+  };
+
+  const handleSendChatMessage = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!chatInput.trim()) return;
+    const userMsg = {
+      sender: 'You',
+      avatar: 'Y',
+      msg: chatInput,
+      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    };
+    setChatMessages(prev => [...prev, userMsg]);
+    setChatInput('');
+
+    setTimeout(() => {
+      const responses = [
+        "Sounds good! I'll take a look at it.",
+        "Got it, thanks for updating the team.",
+        "Perfect, let's keep pressing forward.",
+        "I'll verify this changes right now.",
+        "Awesome! Let me review the invoice builder first."
+      ];
+      const botMsg = {
+        sender: 'Bob',
+        avatar: 'B',
+        msg: responses[Math.floor(Math.random() * responses.length)]!,
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      };
+      setChatMessages(prev => [...prev, botMsg]);
+    }, 1200);
+  };
+
+  const handleFileUploadSimulation = () => {
+    if (isUploading) return;
+    setIsUploading(true);
+    setTimeout(() => {
+      const newFile = {
+        name: `quotation_spec_v${Math.floor(Math.random() * 10)}.pdf`,
+        size: `${(2 + Math.random() * 5).toFixed(1)} MB`,
+        date: 'Today',
+        by: 'You'
+      };
+      setSharedFiles([newFile, ...sharedFiles]);
+      setIsUploading(false);
+      showToast('File uploaded successfully!', 'success');
+    }, 1500);
+  };
+
+  // 4. Ticket Section States & Actions
+  const [tickets, setTickets] = useState([
+    { type: 'BUG', id: '#TK-1249', title: 'Mobile menu not working on Safari', prio: 'High', pc: '#ef4444', status: 'In Progress', sc: '#f59e0b' },
+    { type: 'FEATURE', id: '#TK-1247', title: 'Add dark mode support', prio: 'Medium', pc: '#f59e0b', status: 'To Do', sc: '#94a3b8' },
+    { type: 'BUG', id: '#TK-1248', title: 'Form validation error messages', prio: 'Medium', pc: '#f59e0b', status: 'In Progress', sc: '#f59e0b' },
+    { type: 'SUPPORT', id: '#TK-1245', title: 'Server error on file upload', prio: 'High', pc: '#ef4444', status: 'Open', sc: '#3b82f6' },
+    { type: 'IMPROVEMENT', id: '#TK-1244', title: 'Improve page loading speed', prio: 'Low', pc: '#10b981', status: 'Review', sc: '#8b5cf6' },
+  ]);
+  const [showCreateTicketModal, setShowCreateTicketModal] = useState(false);
+  const [newTicketTitle, setNewTicketTitle] = useState('');
+  const [newTicketType, setNewTicketType] = useState('BUG');
+  const [newTicketPrio, setNewTicketPrio] = useState('Medium');
+
+  const handleCreateTicket = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newTicketTitle.trim()) return;
+    const colors = { BUG: '#ef4444', FEATURE: '#10b981', IMPROVEMENT: '#8b5cf6', SUPPORT: '#3b82f6' };
+    const newTk = {
+      type: newTicketType,
+      id: `#TK-${Math.floor(1200 + Math.random() * 50)}`,
+      title: newTicketTitle,
+      prio: newTicketPrio,
+      pc: newTicketPrio === 'High' ? '#ef4444' : newTicketPrio === 'Medium' ? '#f59e0b' : '#10b981',
+      status: 'Open',
+      sc: '#3b82f6'
+    };
+    setTickets([newTk, ...tickets]);
+    setNewTicketTitle('');
+    setShowCreateTicketModal(false);
+    showToast(`Ticket ${newTk.id} raised successfully!`, 'success');
+  };
+
+  // Filtered Tickets List
+  const filteredTickets = tickets.filter(tk => {
+    if (activeTicket === 'All Tickets') return true;
+    return tk.type.toLowerCase() === activeTicket.toLowerCase();
+  });
 
   useEffect(() => {
-    const onScroll = () => setNavScrolled(window.scrollY > 20);
-    window.addEventListener('scroll', onScroll);
-    return () => window.removeEventListener('scroll', onScroll);
+    const close = () => setMobileOpen(false);
+    window.addEventListener('resize', close);
+    return () => window.removeEventListener('resize', close);
   }, []);
 
   return (
     <>
-      <style>{LANDING_CSS}</style>
-      <div className="lp-root">
+      <style>{CSS}</style>
+      <div className="lp">
 
-        {/* ══════════════════════════════════════════════════════════════
-            NAVBAR
-        ══════════════════════════════════════════════════════════════ */}
-        <nav
-          style={{
-            position: 'sticky', top: 0, zIndex: 100,
-            background: navScrolled ? 'rgba(255,255,255,0.97)' : 'rgba(255,255,255,0.95)',
-            backdropFilter: 'blur(20px)',
-            borderBottom: '1px solid rgba(99,102,241,0.1)',
-            transition: 'all 0.3s',
-            boxShadow: navScrolled ? '0 4px 24px rgba(99,102,241,0.08)' : 'none',
-          }}
-        >
-          <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 32px', display: 'flex', alignItems: 'center', height: 68, gap: 32 }}>
-            {/* Logo */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
-              <QuotiqLogo size={34} />
-              <span style={{ fontSize: 20, fontWeight: 800, color: '#1a1d2e', fontFamily: "'Plus Jakarta Sans',sans-serif", letterSpacing: '-0.02em' }}>Quotiq</span>
-            </div>
+        {/* ══════ NAVBAR ══════ */}
+        <nav className="lp-nav">
+          <div className="lp-nav-inner">
+            <a href="#" className="lp-logo">
+              <Logo size={30} />
+              <span className="lp-logo-text">Quotiq</span>
+            </a>
 
-            {/* Nav links */}
-            <div style={{ display: 'flex', gap: 28, flex: 1, justifyContent: 'center' }} className="hide-mobile">
-              {['Product', 'Features', 'Templates', 'Integrations', 'Pricing', 'Resources'].map((item) => (
-                <a key={item} href="#" className="nav-link">
+            <div className="lp-nav-links">
+              {['Product', 'Features', 'Templates', 'Integrations', 'Pricing', 'Resources'].map(item => (
+                <a key={item} href="#" className="lp-nav-link">
                   {item}
-                  {(item === 'Product' || item === 'Resources') && (
-                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 4l4 4 4-4" stroke="#94a3b8" strokeWidth="1.5" strokeLinecap="round" /></svg>
-                  )}
+                  {(item === 'Product' || item === 'Resources') && <Icon name="chevron" size={13} color="#94a3b8" />}
                 </a>
               ))}
             </div>
 
-            {/* Actions */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexShrink: 0 }}>
-              <a href="#" className="nav-link" style={{ color: '#374151', fontWeight: 600 }}>Log in</a>
-              <button className="btn-primary" style={{ padding: '10px 20px', fontSize: 14 }}>
-                Start Free Trial <ArrowRightIcon size={16} />
+            <div className="lp-nav-actions">
+              <Link to="/login" className="btn-ghost">Log in</Link>
+              <Link to="/register" className="btn-primary">Start Free Trial <Icon name="arrow" size={15} color="white" /></Link>
+              <button className="mobile-menu-btn" onClick={() => setMobileOpen(v => !v)} aria-label="Menu">
+                <Icon name={mobileOpen ? 'close' : 'menu'} size={22} color="#374151" />
               </button>
             </div>
           </div>
         </nav>
 
-        {/* ══════════════════════════════════════════════════════════════
-            HERO SECTION
-        ══════════════════════════════════════════════════════════════ */}
-        <section className="hero-section">
-          {/* 3D Illustrated decorations */}
-          <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', pointerEvents: 'none' }}>
-            {/* Paper plane 3D card — top right */}
-            <div className="float-3d-alt" style={{ position: 'absolute', top: '8%', right: '4%', animationDelay: '0.5s' }}>
-              <div className="deco-card-3d" style={{ width: 72, height: 72 }}>
-                <svg width="38" height="38" viewBox="0 0 38 38" fill="none">
-                  <defs><linearGradient id="plane-g" x1="0" y1="0" x2="38" y2="38" gradientUnits="userSpaceOnUse"><stop stopColor="#818cf8" /><stop offset="1" stopColor="#4f46e5" /></linearGradient></defs>
-                  <path d="M3 19L35 5 21 34 17 21 3 19z" fill="url(#plane-g)" />
-                  <path d="M17 21l4-16" stroke="white" strokeWidth="1.8" strokeLinecap="round" opacity="0.45" />
-                </svg>
-              </div>
-            </div>
-            {/* Sparkle 3D card — bottom right area */}
-            <div className="float-3d" style={{ position: 'absolute', top: '22%', right: '1%', animationDelay: '1.5s' }}>
-              <div className="deco-card-3d" style={{ width: 54, height: 54 }}>
-                <SparkleIcon size={26} color="#4f46e5" />
-              </div>
-            </div>
-            {/* Mini bar chart 3D cube — bottom left */}
-            <div className="float-3d-slow" style={{ position: 'absolute', bottom: '12%', left: '3%', animationDelay: '2s' }}>
-              <div className="deco-cube-3d" style={{ width: 68, height: 68 }}>
-                <svg width="36" height="32" viewBox="0 0 36 32" fill="none">
-                  <rect x="2" y="18" width="7" height="12" rx="2" fill="#818cf8" opacity="0.9"/>
-                  <rect x="13" y="10" width="7" height="20" rx="2" fill="#6366f1"/>
-                  <rect x="24" y="4" width="7" height="26" rx="2" fill="#4f46e5"/>
-                  <rect x="0" y="30" width="36" height="1.5" rx="0.75" fill="rgba(255,255,255,0.4)"/>
-                </svg>
-              </div>
-            </div>
-            {/* Small sparkle — bottom left corner */}
-            <div className="float-3d" style={{ position: 'absolute', top: '62%', left: '1%', animationDelay: '0.8s' }}>
-              <div className="deco-card-3d" style={{ width: 42, height: 42 }}>
-                <SparkleIcon size={20} color="#7c3aed" />
-              </div>
-            </div>
+        {/* Mobile nav */}
+        {mobileOpen && (
+          <div className="mobile-nav">
+            {['Product', 'Features', 'Templates', 'Integrations', 'Pricing', 'Resources'].map(item => (
+              <a key={item} href="#" className="mobile-nav-link" onClick={() => setMobileOpen(false)}>{item}</a>
+            ))}
+            <div style={{ height: 1, background: '#f1f5f9', margin: '8px 0' }} />
+            <Link to="/login" className="mobile-nav-link">Log in</Link>
+            <Link to="/register" className="btn-primary" style={{ margin: '4px 0', justifyContent: 'center' }}>Start Free Trial</Link>
           </div>
+        )}
 
-          <div style={{ maxWidth: 1200, margin: '0 auto', padding: '80px 32px 100px', display: 'flex', alignItems: 'center', gap: 64, position: 'relative' }} className="hero-grid">
-
-            {/* Left content */}
-            <div style={{ flex: 1, maxWidth: 520 }}>
-              <div className="badge-pill" style={{ marginBottom: 24, animation: 'fadeSlideUp 0.6s ease-out both' }}>
-                <SparkleIcon size={13} color="#4f46e5" />
+        {/* ══════ HERO ══════ */}
+        <section className="hero">
+          <div className="hero-inner">
+            {/* Left */}
+            <div>
+              <div className="hero-badge">
+                <Icon name="sparkle" size={12} color="#3b82f6" />
                 AI-Powered Quotation Generator
               </div>
 
-              <h1 style={{ fontSize: 58, fontWeight: 800, lineHeight: 1.05, letterSpacing: '-0.03em', fontFamily: "'Plus Jakarta Sans',sans-serif", color: '#0f172a', animation: 'fadeSlideUp 0.6s ease-out 0.1s both' }}>
+              <h1 className="hero-title">
                 Create Quotes.<br />
                 Win Deals.<br />
-                <span style={{ background: 'linear-gradient(135deg,#4f46e5,#7c3aed,#ec4899)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
-                  Get Paid.
-                </span>
+                <span>Get Paid.</span>
               </h1>
 
-              <p style={{ fontSize: 16, color: '#64748b', lineHeight: 1.7, maxWidth: 440, marginTop: 20, marginBottom: 36, animation: 'fadeSlideUp 0.6s ease-out 0.2s both' }}>
+              <p className="hero-desc">
                 Quotiq helps modern businesses generate professional quotations in seconds, manage clients, track approvals, and convert quotes to invoices — effortlessly.
               </p>
 
-              <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap', animation: 'fadeSlideUp 0.6s ease-out 0.3s both' }}>
-                <button className="btn-primary" style={{ fontSize: 15, padding: '14px 28px' }}>
-                  <BoltIcon size={16} /> Generate Quote Now
-                </button>
-                <button className="btn-secondary" style={{ fontSize: 15, padding: '14px 28px' }}>
-                  <PlayIcon size={18} /> Watch Demo
+              <div className="hero-actions">
+                <a href="#demo-section" className="btn-primary btn-primary-lg">
+                  <Icon name="bolt" size={16} color="white" /> Generate Quote Now
+                </a>
+                <button className="btn-secondary btn-secondary-lg">
+                  <Icon name="play" size={16} color="#374151" /> Watch Demo
                 </button>
               </div>
 
-              {/* Feature chips */}
-              <div style={{ display: 'flex', gap: 24, marginTop: 40, flexWrap: 'wrap', animation: 'fadeSlideUp 0.6s ease-out 0.4s both' }}>
+              <div className="hero-chips">
                 {[
-                  { icon: '⚡', title: 'AI-Powered', sub: 'Auto Fill' },
-                  { icon: '🔄', title: 'Convert to', sub: 'Invoice in 1 Click' },
-                  { icon: '✨', title: 'Beautiful', sub: 'PDF Export' },
-                ].map((f, i) => (
-                  <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <div style={{ width: 36, height: 36, background: '#f0f2ff', borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, border: '1px solid #e0e4ff', flexShrink: 0 }}>{f.icon}</div>
+                  { icon: 'bolt', label: 'AI-Powered', sub: 'Auto Fill' },
+                  { icon: 'refresh', label: 'Convert to', sub: 'Invoice in 1 Click' },
+                  { icon: 'file', label: 'Beautiful', sub: 'PDF Export' },
+                ].map((c, i) => (
+                  <div key={i} className="hero-chip">
+                    <div className="hero-chip-icon"><Icon name={c.icon} size={15} color="#64748b" /></div>
                     <div>
-                      <div style={{ fontSize: 13, fontWeight: 700, color: '#1a1d2e' }}>{f.title}</div>
-                      <div style={{ fontSize: 11, color: '#94a3b8' }}>{f.sub}</div>
+                      <div className="hero-chip-label">{c.label}</div>
+                      <div className="hero-chip-sub">{c.sub}</div>
                     </div>
                   </div>
                 ))}
               </div>
             </div>
 
-            {/* Right: Quotation card + decorations */}
-            <div style={{ flex: 1, position: 'relative', display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 500 }}>
-              {/* Orbit ring */}
-              <div className="orbit-ring" style={{ width: 500, height: 500, top: '50%', left: '50%', transform: 'translate(-50%,-50%)', opacity: 0.4 }} />
-
-              <HeroQuotationCard />
-              <AISuggestionCard />
-
-              {/* Floating stat badges */}
-              <div className="tooltip-popup" style={{ position: 'absolute', top: '8%', left: '-5%', background: '#fff', borderRadius: 14, padding: '12px 16px', boxShadow: '0 12px 36px rgba(99,102,241,0.15)', border: '1px solid #eef0ff', animationDelay: '0.8s' }}>
-                <div style={{ fontSize: 10, color: '#94a3b8', fontWeight: 600, marginBottom: 2 }}>This Month</div>
-                <div style={{ fontSize: 20, fontWeight: 800, color: '#4f46e5' }}>$24,680</div>
-                <div style={{ fontSize: 11, color: '#10b981', fontWeight: 600 }}>↑ 32.4% vs last month</div>
-              </div>
+            {/* Right — product preview */}
+            <div className="hero-card-wrap" style={{ position: 'relative', paddingTop: 40, paddingRight: 56 }}>
+              <HeroCard onTriggerToast={(msg) => showToast(msg, 'success')} />
             </div>
           </div>
         </section>
 
-        {/* ══════════════════════════════════════════════════════════════
-            FINANCE MANAGEMENT SECTION
-        ══════════════════════════════════════════════════════════════ */}
-        <section style={{ padding: '100px 32px', background: 'linear-gradient(160deg,#f8f9ff,#eef0ff,#f5f0ff)', position: 'relative', overflow: 'hidden' }}>
-          {/* 3D Wallet decoration — top right */}
-          <div className="float-3d-alt" style={{ position: 'absolute', top: '3%', right: '1%', pointerEvents: 'none', animationDelay: '0.4s' }}>
-            <div style={{ position: 'relative', width: 120, height: 110 }}>
-              {/* Wallet body */}
-              <div style={{ width: 100, height: 80, background: 'linear-gradient(135deg,#818cf8 0%,#4f46e5 60%,#7c3aed 100%)', borderRadius: 18, position: 'absolute', bottom: 0, left: 10, boxShadow: '0 16px 40px rgba(79,70,229,0.4), inset 0 2px 0 rgba(255,255,255,0.2)' }}>
-                {/* Wallet clasp */}
-                <div style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', width: 24, height: 24, background: 'linear-gradient(135deg,#e0e7ff,#c7d2fe)', borderRadius: '50%', boxShadow: 'inset -2px -2px 6px rgba(0,0,0,0.15)' }} />
-                {/* Card slots */}
-                <div style={{ position: 'absolute', top: 12, left: 12, width: 40, height: 6, background: 'rgba(255,255,255,0.25)', borderRadius: 3 }} />
-                <div style={{ position: 'absolute', top: 22, left: 12, width: 28, height: 4, background: 'rgba(255,255,255,0.15)', borderRadius: 2 }} />
-              </div>
-              {/* Cards sticking out */}
-              <div style={{ position: 'absolute', top: 0, left: 0, width: 75, height: 46, background: 'linear-gradient(135deg,#c084fc,#9333ea)', borderRadius: 12, transform: 'rotate(-12deg)', boxShadow: '0 8px 24px rgba(147,51,234,0.3)', border: '1px solid rgba(255,255,255,0.2)' }} />
-              <div style={{ position: 'absolute', top: 5, left: 18, width: 75, height: 46, background: 'linear-gradient(135deg,#67e8f9,#06b6d4)', borderRadius: 12, transform: 'rotate(-4deg)', boxShadow: '0 8px 24px rgba(6,182,212,0.3)', border: '1px solid rgba(255,255,255,0.2)' }} />
-            </div>
-          </div>
-          {/* Gold coin — bottom right */}
-          <div className="float-3d" style={{ position: 'absolute', bottom: '12%', right: '6%', pointerEvents: 'none', animationDelay: '1s' }}>
-            <div className="coin-spin" style={{ width: 52, height: 52, background: 'radial-gradient(circle at 35% 30%, #fde68a 0%, #f59e0b 50%, #b45309 100%)', borderRadius: '50%', boxShadow: 'inset -5px -5px 14px rgba(0,0,0,0.2), inset 3px 3px 8px rgba(255,255,255,0.4), 0 12px 32px rgba(245,158,11,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, fontWeight: 800, color: '#92400e' }}>$</div>
-          </div>
+        {/* ══════ FINANCE MANAGEMENT ══════ */}
+        <section className="lp-section" style={{ background: '#fafafa', borderBottom: '1px solid #e2e8f0' }}>
+          <div className="lp-container">
+            <div className="finance-layout" style={{ display: 'flex', gap: 64, alignItems: 'flex-start' }}>
 
-          <div style={{ maxWidth: 1200, margin: '0 auto' }}>
-            {/* Section header */}
-            <div style={{ display: 'flex', gap: 80, alignItems: 'flex-start', marginBottom: 56 }}>
-              <div style={{ flex: '0 0 340px' }}>
-                <div className="badge-pill" style={{ marginBottom: 16 }}>
-                  <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><rect x="1" y="1" width="5" height="5" rx="1.2" fill="#4f46e5" /><rect x="7" y="1" width="5" height="5" rx="1.2" fill="#7c3aed" opacity="0.5" /><rect x="1" y="7" width="5" height="5" rx="1.2" fill="#7c3aed" opacity="0.5" /><rect x="7" y="7" width="5" height="5" rx="1.2" fill="#4f46e5" /></svg>
-                  Finance Management
+              {/* Left copy */}
+              <div style={{ flex: '0 0 320px' }}>
+                <div className="section-label">
+                  <Icon name="barChart" size={14} color="#4f46e5" /> Finance Management
                 </div>
-                <h2 style={{ fontSize: 40, fontWeight: 800, lineHeight: 1.1, letterSpacing: '-0.02em', fontFamily: "'Plus Jakarta Sans',sans-serif", color: '#0f172a', marginBottom: 16 }}>
-                  Take Control of<br />
-                  <span style={{ background: 'linear-gradient(135deg,#4f46e5,#7c3aed)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>Your Finances</span>
-                </h2>
-                <p style={{ fontSize: 15, color: '#64748b', lineHeight: 1.7, marginBottom: 28 }}>
+                <h2 className="section-title">Take Control of<br /><span style={{ color: '#4f46e5' }}>Your Finances</span></h2>
+                <p className="section-desc" style={{ marginBottom: 28 }}>
                   Get a real-time overview of your cash flow, income, expenses, and profitability — all in one place.
                 </p>
-                <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-                  {['Real-time Overview', 'Cash Flow Tracking', 'Profitability Insights'].map((t, i) => (
-                    <div key={i} className="tag-chip">
-                      <div style={{ width: 22, height: 22, borderRadius: 6, background: 'linear-gradient(135deg,#e0e7ff,#c7d2fe)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11 }}>
-                        {['📊', '💰', '📈'][i]}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                  {[
+                    { icon: 'chart', label: 'Real-time Overview' },
+                    { icon: 'barChart', label: 'Cash Flow Tracking' },
+                    { icon: 'sparkle', label: 'Profitability Insights' },
+                  ].map((f, i) => (
+                    <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px', background: '#fff', border: '1px solid #e2e8f0', borderRadius: 10 }}>
+                      <div style={{ width: 30, height: 30, borderRadius: 8, background: '#eff6ff', border: '1px solid #dbeafe', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                        <Icon name={f.icon} size={15} color="#4f46e5" />
                       </div>
-                      <span style={{ fontSize: 12, color: '#374151', fontWeight: 600 }}>{t}</span>
+                      <span style={{ fontSize: 13, fontWeight: 600, color: '#374151' }}>{f.label}</span>
                     </div>
                   ))}
                 </div>
               </div>
 
-              {/* Finance Overview Card */}
-              <div style={{ flex: 1 }}>
-                <div className="glass-card card-3d" style={{ padding: 28 }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
-                    <span style={{ fontSize: 16, fontWeight: 700, color: '#1a1d2e' }}>Finance Overview</span>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, background: '#f8f9ff', border: '1px solid #eef0ff', borderRadius: 8, padding: '6px 12px', fontSize: 12, fontWeight: 600, color: '#374151', cursor: 'pointer' }}>
-                      <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><rect x="1" y="2" width="10" height="8" rx="1.5" stroke="#94a3b8" strokeWidth="1.2" /><path d="M1 5h10" stroke="#94a3b8" strokeWidth="1.2" /></svg>
-                      This Month <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 4l3 3 3-3" stroke="#94a3b8" strokeWidth="1.2" strokeLinecap="round" /></svg>
+              {/* Right — finance overview */}
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div className="finance-preview">
+                  <div className="finance-header">
+                    <span style={{ fontSize: 15, fontWeight: 700, color: '#0f172a' }}>Finance Overview</span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 12px', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 8, fontSize: 12, fontWeight: 500, color: '#374151', cursor: 'pointer' }}>
+                      <Icon name="file" size={12} color="#94a3b8" /> This Month <Icon name="chevron" size={12} color="#94a3b8" />
                     </div>
                   </div>
-                  {/* Stats row */}
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 16, marginBottom: 24 }}>
-                    {[
-                      { label: 'Total Revenue', val: '$124,850', change: '+15.6%' },
-                      { label: 'Total Expenses', val: '$68,420', change: '+8.3%', warn: true },
-                      { label: 'Net Profit', val: '$56,430', change: '+23.7%' },
-                      { label: 'Cash Balance', val: '$42,380', change: '+11.2%' },
-                    ].map((s, i) => (
-                      <div key={i} className="stat-card">
-                        <div style={{ fontSize: 11, color: '#94a3b8', fontWeight: 600, marginBottom: 6 }}>{s.label}</div>
-                        <div style={{ fontSize: 18, fontWeight: 800, color: '#1a1d2e', letterSpacing: '-0.02em', marginBottom: 4 }}>{s.val}</div>
-                        <div style={{ fontSize: 11, fontWeight: 600, color: s.warn ? '#f59e0b' : '#10b981' }}>
-                          {s.change} <span style={{ color: '#94a3b8', fontWeight: 400 }}>vs last month</span>
+                  <div style={{ padding: '20px 22px' }}>
+                    {/* Stats */}
+                    <div className="finance-stats-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 14, marginBottom: 20 }}>
+                      {[
+                        { label: 'Total Revenue', val: `$${(124850 + (expenses.length - 4) * 500).toLocaleString()}`, change: '+15.6%', up: true },
+                        { label: 'Total Expenses', val: `$${(68420 + expenses.slice(4).reduce((a,b)=>a+b.amount, 0)).toLocaleString()}`, change: '+8.3%', up: false },
+                        { label: 'Net Profit', val: `$${(56430 - expenses.slice(4).reduce((a,b)=>a+b.amount,0)).toLocaleString()}`, change: '+23.7%', up: true },
+                        { label: 'Cash Balance', val: `$${(42380 - expenses.slice(4).reduce((a,b)=>a+b.amount,0)).toLocaleString()}`, change: '+11.2%', up: true },
+                      ].map((s, i) => (
+                        <div key={i} style={{ padding: '14px', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 12 }}>
+                          <div style={{ fontSize: 11, color: '#94a3b8', fontWeight: 500, marginBottom: 4 }}>{s.label}</div>
+                          <div style={{ fontSize: 17, fontWeight: 800, color: '#0f172a', letterSpacing: '-0.02em', marginBottom: 2 }}>{s.val}</div>
+                          <div className={`stat-mini-change ${s.up ? 'up' : 'warn'}`}>{s.change} <span style={{ color: '#94a3b8', fontWeight: 400 }}>vs last month</span></div>
                         </div>
-                      </div>
-                    ))}
-                  </div>
+                      ))}
+                    </div>
 
-                  {/* Charts row */}
-                  <div style={{ display: 'flex', gap: 16 }}>
-                    <FinanceChart />
-                    {/* Expense Breakdown donut */}
-                    <div style={{ background: '#fff', borderRadius: 16, padding: 20, border: '1px solid #eef0ff', flex: '0 0 220px' }}>
-                      <div style={{ fontSize: 13, fontWeight: 700, color: '#1a1d2e', marginBottom: 12 }}>Expense Breakdown</div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-                        <div style={{ position: 'relative', width: 100, height: 100, flexShrink: 0 }}>
-                          <DonutChart size={100} />
-                          <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-                            <div style={{ fontSize: 12, fontWeight: 800, color: '#1a1d2e' }}>$68,420</div>
-                            <div style={{ fontSize: 9, color: '#94a3b8' }}>Total</div>
-                          </div>
-                        </div>
-                        <div style={{ flex: 1 }}>
-                          {[
-                            { label: 'Team', pct: '35%', color: '#4f46e5' },
-                            { label: 'Operations', pct: '28%', color: '#7c3aed' },
-                            { label: 'Marketing', pct: '18%', color: '#06b6d4' },
-                            { label: 'Software', pct: '12%', color: '#f59e0b' },
-                            { label: 'Others', pct: '7%', color: '#e2e8f0' },
-                          ].map((item, i) => (
-                            <div key={i} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: '#374151', marginBottom: 4 }}>
-                              <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-                                <div style={{ width: 8, height: 8, borderRadius: '50%', background: item.color, flexShrink: 0 }} />
-                                {item.label}
-                              </div>
-                              <span style={{ fontWeight: 600 }}>{item.pct}</span>
+                    {/* Charts */}
+                    <div className="finance-charts-row" style={{ display: 'flex', gap: 16 }}>
+                      <div style={{ flex: 1, background: '#fff', border: '1px solid #e2e8f0', borderRadius: 12, padding: 16 }}>
+                        <div style={{ fontSize: 13, fontWeight: 700, color: '#0f172a', marginBottom: 10 }}>Cash Flow Trend</div>
+                        <LineChart />
+                        <div style={{ display: 'flex', gap: 16, marginTop: 10 }}>
+                          {[['#4f46e5','Income'],['#e879f9','Expenses']].map(([c,l]) => (
+                            <div key={l} style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+                              <div style={{ width: 20, height: 2, background: c, borderRadius: 1 }} />
+                              <span style={{ fontSize: 11, color: '#64748b' }}>{l}</span>
                             </div>
                           ))}
+                        </div>
+                      </div>
+                      <div style={{ width: 280, flexShrink: 0, background: '#fff', border: '1px solid #e2e8f0', borderRadius: 12, padding: 16 }} className="hide-mobile">
+                        <div style={{ fontSize: 13, fontWeight: 700, color: '#0f172a', marginBottom: 12 }}>Expense Breakdown</div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+                          <div style={{ position: 'relative', width: 90, height: 90, flexShrink: 0 }}>
+                            <ExpensesDonutChart size={90} expenses={expenses} />
+                            <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+                              <div style={{ fontSize: 11, fontWeight: 800, color: '#0f172a' }}>
+                                ${(68.4 + expenses.slice(4).reduce((a,b)=>a+b.amount,0)/1000).toFixed(1)}K
+                              </div>
+                              <div style={{ fontSize: 8, color: '#94a3b8' }}>Total</div>
+                            </div>
+                          </div>
+                          <div style={{ flex: 1 }}>
+                            {[['Team','35%','#4f46e5'],['Operations','28%','#7c3aed'],['Marketing','18%','#06b6d4'],['Software','12%','#f59e0b'],['Others','7%','#e2e8f0']].map(([l,p,c]) => (
+                              <div key={l} style={{ display: 'flex', justifyContent: 'space-between', gap: 10, fontSize: 11, marginBottom: 4 }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+                                  <div style={{ width: 7, height: 7, borderRadius: '50%', background: c }} />
+                                  <span style={{ color: '#64748b' }}>{l}</span>
+                                </div>
+                                <span style={{ fontWeight: 600, color: '#374151' }}>{p}</span>
+                              </div>
+                            ))}
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -944,76 +1176,28 @@ export default function LandingPage() {
               </div>
             </div>
 
-            {/* ── AI Insights row ── */}
-            <div style={{ display: 'flex', gap: 32, alignItems: 'stretch', marginBottom: 48 }}>
-              {/* 3D AI Robot illustration */}
-              <div style={{ flex: '0 0 200px', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <div className="pulse-3d" style={{ position: 'relative', width: 180, height: 180 }}>
-                  {/* Platform base */}
-                  <div style={{ position: 'absolute', bottom: 0, left: '50%', transform: 'translateX(-50%)', width: 120, height: 22, background: 'linear-gradient(135deg,#c7d2fe,#a5b4fc)', borderRadius: '50%', boxShadow: '0 8px 24px rgba(99,102,241,0.3)' }} />
-                  <div style={{ position: 'absolute', bottom: 10, left: '50%', transform: 'translateX(-50%)', width: 80, height: 18, background: 'linear-gradient(135deg,#ddd6fe,#c4b5fd)', borderRadius: '50%' }} />
-                  {/* Robot sphere body */}
-                  <div style={{ position: 'absolute', top: 14, left: '50%', transform: 'translateX(-50%)', width: 120, height: 120, background: 'radial-gradient(circle at 38% 32%, #f1f5f9 0%, #e2e8f0 40%, #cbd5e1 100%)', borderRadius: '50%', boxShadow: 'inset -10px -10px 24px rgba(0,0,0,0.12), inset 5px 5px 16px rgba(255,255,255,0.9), 0 20px 50px rgba(99,102,241,0.25)' }}>
-                    {/* Screen face */}
-                    <div style={{ position: 'absolute', top: '28%', left: '18%', right: '18%', height: '36%', background: 'linear-gradient(135deg,#1e1b4b,#312e81)', borderRadius: 12, boxShadow: '0 0 20px rgba(99,102,241,0.6), inset 0 0 10px rgba(99,102,241,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
-                      {/* Waveform */}
-                      <svg width="60" height="20" viewBox="0 0 60 20" fill="none">
-                        <path d="M0 10 Q5 2 10 10 Q15 18 20 10 Q25 2 30 10 Q35 18 40 10 Q45 2 50 10 Q55 18 60 10" stroke="#818cf8" strokeWidth="2" fill="none" strokeLinecap="round">
-                          <animate attributeName="d" dur="1.2s" repeatCount="indefinite"
-                            values="M0 10 Q5 2 10 10 Q15 18 20 10 Q25 2 30 10 Q35 18 40 10 Q45 2 50 10 Q55 18 60 10;M0 10 Q5 16 10 10 Q15 4 20 10 Q25 16 30 10 Q35 4 40 10 Q45 16 50 10 Q55 4 60 10;M0 10 Q5 2 10 10 Q15 18 20 10 Q25 2 30 10 Q35 18 40 10 Q45 2 50 10 Q55 18 60 10" />
-                        </path>
-                      </svg>
-                    </div>
-                    {/* Ear dots */}
-                    <div style={{ position: 'absolute', left: 4, top: '45%', width: 10, height: 18, background: 'linear-gradient(135deg,#e2e8f0,#cbd5e1)', borderRadius: 5, boxShadow: 'inset -2px -2px 4px rgba(0,0,0,0.1)' }} />
-                    <div style={{ position: 'absolute', right: 4, top: '45%', width: 10, height: 18, background: 'linear-gradient(135deg,#e2e8f0,#cbd5e1)', borderRadius: 5, boxShadow: 'inset -2px -2px 4px rgba(0,0,0,0.1)' }} />
-                    {/* Pink accent dot */}
-                    <div style={{ position: 'absolute', bottom: '18%', left: '50%', transform: 'translateX(-50%)', width: 14, height: 14, background: 'radial-gradient(circle at 35% 35%,#f9a8d4,#ec4899)', borderRadius: '50%', boxShadow: '0 0 10px rgba(236,72,153,0.5)' }} />
-                  </div>
-                  {/* Floating sparkle/chart cards around robot */}
-                  <div className="float-3d" style={{ position: 'absolute', top: 10, left: -10, animationDelay: '0s' }}>
-                    <div className="deco-card-3d" style={{ width: 40, height: 40 }}><SparkleIcon size={18} color="#6366f1" /></div>
-                  </div>
-                  <div className="float-3d" style={{ position: 'absolute', top: 10, right: -8, animationDelay: '0.6s' }}>
-                    <div className="deco-card-3d" style={{ width: 40, height: 40 }}>
-                      <svg width="20" height="18" viewBox="0 0 20 18" fill="none"><rect x="1" y="9" width="4" height="8" rx="1.5" fill="#818cf8"/><rect x="7" y="5" width="4" height="12" rx="1.5" fill="#6366f1"/><rect x="13" y="1" width="4" height="16" rx="1.5" fill="#4f46e5"/></svg>
-                    </div>
-                  </div>
-                  <div className="float-3d-alt" style={{ position: 'absolute', bottom: 30, left: -14, animationDelay: '1.2s' }}>
-                    <SparkleIcon size={14} color="#a78bfa" />
-                  </div>
-                  <div className="float-3d" style={{ position: 'absolute', bottom: 40, right: -12, animationDelay: '0.9s' }}>
-                    <SparkleIcon size={12} color="#818cf8" />
-                  </div>
-                </div>
-              </div>
-
-              {/* AI Insights Card */}
-              <div className="glass-card" style={{ flex: 1, padding: 28 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
-                  <span style={{ fontSize: 16, fontWeight: 700, color: '#1a1d2e' }}>AI Insights</span>
-                  <button style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 600, color: '#4f46e5', background: 'none', border: 'none', cursor: 'pointer' }}>
-                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7a5 5 0 1 0 10 0A5 5 0 0 0 2 7z" stroke="#4f46e5" strokeWidth="1.3" /><path d="M7 4v3l2 1" stroke="#4f46e5" strokeWidth="1.3" strokeLinecap="round" /></svg>
-                    Refresh Insights
+            {/* ── AI Insights ── */}
+            <div className="ai-section-layout" style={{ display: 'flex', gap: 40, marginTop: 48, alignItems: 'stretch' }}>
+              <div style={{ flex: 1, background: '#fff', border: '1px solid #e2e8f0', borderRadius: 16, padding: 24 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+                  <span style={{ fontSize: 15, fontWeight: 700, color: '#0f172a' }}>AI Insights</span>
+                  <button style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 12, fontWeight: 600, color: '#4f46e5', background: 'none', border: 'none', cursor: 'pointer' }} onClick={() => showToast('AI insights refreshed with real-time logs.', 'info')}>
+                    <Icon name="refresh" size={13} color="#4f46e5" /> Refresh
                   </button>
                 </div>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 20 }}>
+                <div className="insight-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 16 }}>
                   {[
-                    { icon: '↑', color: '#10b981', title: 'Revenue Opportunity', desc: 'Your revenue could increase by 24% if you close 5 pending proposals.', action: 'View Details' },
-                    { icon: '⚠', color: '#f59e0b', title: 'Expense Alert', desc: 'Marketing spend is 18% higher than usual. Consider optimizing your campaigns.', action: 'View Suggestions' },
-                    { icon: '📈', color: '#4f46e5', title: 'Cash Flow Forecast', desc: "You're projected to have a cash surplus of $12,400 in the next 30 days.", action: 'See Forecast' },
-                  ].map((insight, i) => (
-                    <div key={i} style={{ background: '#fff', borderRadius: 16, padding: '20px', border: '1px solid #eef0ff', transition: 'all 0.25s' }}>
-                      <div style={{ width: 36, height: 36, borderRadius: 10, background: `${insight.color}15`, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 12, fontSize: 18 }}>
-                        {insight.icon === '↑' ? <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M9 14V4M4 9l5-5 5 5" stroke="#10b981" strokeWidth="2" strokeLinecap="round" /></svg> :
-                         insight.icon === '⚠' ? <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M9 2L2 16h14L9 2z" stroke="#f59e0b" strokeWidth="1.5" /><path d="M9 8v4M9 13.5v.5" stroke="#f59e0b" strokeWidth="1.5" strokeLinecap="round" /></svg> :
-                         <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M2 14l4-4 3 2 4-6 3 2" stroke="#4f46e5" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" /></svg>}
+                    { color: '#10b981', bg: '#f0fdf4', icon: 'barChart', title: 'Revenue Opportunity', desc: 'Your revenue could increase by 24% if you close 5 pending proposals.', action: 'View Details' },
+                    { color: '#f59e0b', bg: '#fffbeb', icon: 'chart', title: 'Expense Alert', desc: 'Marketing spend is 18% higher than usual. Consider optimizing your campaigns.', action: 'View Suggestions' },
+                    { color: '#4f46e5', bg: '#eff6ff', icon: 'sparkle', title: 'Cash Flow Forecast', desc: "You're projected to have a cash surplus of $12,400 in the next 30 days.", action: 'See Forecast' },
+                  ].map((ins, i) => (
+                    <div key={i} className="insight-card">
+                      <div className="insight-icon" style={{ background: ins.bg }}>
+                        <Icon name={ins.icon} size={18} color={ins.color} />
                       </div>
-                      <div style={{ fontSize: 14, fontWeight: 700, color: '#1a1d2e', marginBottom: 6 }}>{insight.title}</div>
-                      <p style={{ fontSize: 12, color: '#64748b', lineHeight: 1.6, marginBottom: 16 }}>{insight.desc}</p>
-                      <button style={{ fontSize: 12, fontWeight: 600, color: insight.color, background: 'none', border: `1px solid ${insight.color}30`, borderRadius: 8, padding: '6px 14px', cursor: 'pointer', transition: 'all 0.2s' }}>
-                        {insight.action}
-                      </button>
+                      <div style={{ fontSize: 14, fontWeight: 700, color: '#0f172a', marginBottom: 6 }}>{ins.title}</div>
+                      <p style={{ fontSize: 12, color: '#64748b', lineHeight: 1.6, marginBottom: 14 }}>{ins.desc}</p>
+                      <button style={{ fontSize: 12, fontWeight: 600, color: ins.color, background: 'none', border: `1px solid ${ins.color}30`, borderRadius: 7, padding: '5px 12px', cursor: 'pointer' }} onClick={() => showToast(`Opening insight: ${ins.title}`, 'info')}>{ins.action}</button>
                     </div>
                   ))}
                 </div>
@@ -1021,240 +1205,259 @@ export default function LandingPage() {
 
               {/* Right copy */}
               <div style={{ flex: '0 0 260px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-                <div className="badge-pill" style={{ marginBottom: 16, width: 'fit-content' }}>
-                  <SparkleIcon size={12} color="#4f46e5" />
-                  AI Insights
-                </div>
-                <h3 style={{ fontSize: 28, fontWeight: 800, lineHeight: 1.2, letterSpacing: '-0.02em', fontFamily: "'Plus Jakarta Sans',sans-serif", color: '#0f172a', marginBottom: 14 }}>
+                <div className="section-label"><Icon name="sparkle" size={14} color="#4f46e5" /> AI Insights</div>
+                <h3 style={{ fontSize: 26, fontWeight: 800, color: '#0f172a', marginBottom: 12, letterSpacing: '-0.02em', fontFamily: "'Plus Jakarta Sans',sans-serif", lineHeight: 1.2 }}>
                   AI-Powered Insights that Drive Decisions
                 </h3>
-                <p style={{ fontSize: 13, color: '#64748b', lineHeight: 1.7, marginBottom: 20 }}>
+                <p style={{ fontSize: 14, color: '#64748b', lineHeight: 1.7, marginBottom: 20 }}>
                   Let AI analyze your data and surface opportunities, risks, and recommendations to grow your business.
                 </p>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                   {['Smart Analysis', 'Opportunity Detection', 'Risk Alerts', 'Actionable Recommendations'].map((f, i) => (
                     <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                      <CheckIcon size={16} color="#4f46e5" />
-                      <span style={{ fontSize: 12, color: '#374151', fontWeight: 500 }}>{f}</span>
+                      <Icon name="check" size={16} color="#4f46e5" />
+                      <span style={{ fontSize: 13, color: '#374151', fontWeight: 500 }}>{f}</span>
                     </div>
                   ))}
                 </div>
               </div>
             </div>
 
-            {/* ── Payroll & Expenses row ── */}
-            <div style={{ display: 'flex', gap: 32, alignItems: 'stretch' }}>
+            {/* ── Payroll & Expenses ── */}
+            <div className="payroll-layout" style={{ display: 'flex', gap: 40, marginTop: 48, alignItems: 'flex-start' }}>
               {/* Left copy */}
-              <div style={{ flex: '0 0 280px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-                <div className="badge-pill" style={{ marginBottom: 16, width: 'fit-content' }}>
-                  <SparkleIcon size={12} color="#4f46e5" />
-                  Payroll & Expenses
-                </div>
-                <h3 style={{ fontSize: 32, fontWeight: 800, lineHeight: 1.2, letterSpacing: '-0.02em', fontFamily: "'Plus Jakarta Sans',sans-serif", color: '#0f172a', marginBottom: 12 }}>
-                  Manage Payroll,<br />
-                  <span style={{ background: 'linear-gradient(135deg,#4f46e5,#7c3aed)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>Expenses & Liabilities</span>
+              <div style={{ flex: '0 0 280px' }}>
+                <div className="section-label"><Icon name="users" size={14} color="#4f46e5" /> Payroll & Expenses</div>
+                <h3 style={{ fontSize: 30, fontWeight: 800, color: '#0f172a', marginBottom: 12, letterSpacing: '-0.02em', fontFamily: "'Plus Jakarta Sans',sans-serif" }}>
+                  Manage Payroll,<br /><span style={{ color: '#4f46e5' }}>Expenses & Liabilities</span>
                 </h3>
                 <p style={{ fontSize: 14, color: '#64748b', lineHeight: 1.7, marginBottom: 20 }}>
                   Simplify payouts, track expenses, and manage liabilities with accuracy and ease.
                 </p>
-                <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-                  {[
-                    { icon: '🤖', label: 'Payroll Automation' },
-                    { icon: '📋', label: 'Expense Tracking' },
-                    { icon: '📌', label: 'Liability Management' },
-                  ].map((t, i) => (
-                    <div key={i} className="tag-chip" style={{ flexDirection: 'column', alignItems: 'center', gap: 4, padding: '10px 14px', minWidth: 80, textAlign: 'center' }}>
-                      <span style={{ fontSize: 18 }}>{t.icon}</span>
-                      <span style={{ fontSize: 10, color: '#374151', fontWeight: 600 }}>{t.label}</span>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                  {[['Payroll Automation','bolt'],['Expense Tracking','file'],['Liability Management','shield']].map(([l,ic]) => (
+                    <div key={l} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <Icon name={ic!} size={16} color="#4f46e5" />
+                      <span style={{ fontSize: 13, fontWeight: 600, color: '#374151' }}>{l}</span>
                     </div>
                   ))}
                 </div>
               </div>
 
-              {/* Payroll Card */}
-              <div className="glass-card" style={{ flex: 1, padding: 28 }}>
-                {/* Tabs */}
-                <div style={{ display: 'flex', gap: 4, background: '#f8f9ff', borderRadius: 10, padding: 4, marginBottom: 20, width: 'fit-content' }}>
-                  {(['payroll', 'expenses', 'liabilities'] as const).map((tab) => (
-                    <button
-                      key={tab}
-                      onClick={() => setActiveTab(tab)}
-                      style={{
-                        padding: '7px 20px', borderRadius: 8, fontSize: 13, fontWeight: 600, border: 'none', cursor: 'pointer',
-                        background: activeTab === tab ? '#fff' : 'transparent',
-                        color: activeTab === tab ? '#1a1d2e' : '#94a3b8',
-                        boxShadow: activeTab === tab ? '0 2px 8px rgba(0,0,0,0.06)' : 'none',
-                        transition: 'all 0.2s',
-                        textTransform: 'capitalize',
-                      }}
-                    >
-                      {tab.charAt(0).toUpperCase() + tab.slice(1)}
+              {/* Payroll card */}
+              <div style={{ flex: 1, background: '#fff', border: '1px solid #e2e8f0', borderRadius: 16, padding: 24 }}>
+                <div className="tab-row">
+                  {(['payroll','expenses','liabilities'] as const).map(t => (
+                    <button key={t} className={`tab-btn ${activeTab === t ? 'active' : ''}`} onClick={() => setActiveTab(t)}>
+                      {t.charAt(0).toUpperCase() + t.slice(1)}
                     </button>
                   ))}
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 20 }}>
-                  {/* Upcoming Payroll */}
-                  <div>
-                    <div style={{ fontSize: 12, fontWeight: 700, color: '#94a3b8', marginBottom: 12 }}>Upcoming Payroll</div>
-                    <div style={{ fontSize: 11, color: '#94a3b8', marginBottom: 4 }}>May 31, 2025</div>
-                    <div style={{ fontSize: 24, fontWeight: 800, color: '#1a1d2e', marginBottom: 4, letterSpacing: '-0.02em' }}>$28,450</div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 20 }}>
-                      <div style={{ display: 'flex' }}>
-                        {[0,1,2].map(i => <div key={i} style={{ width: 24, height: 24, borderRadius: '50%', background: `hsl(${230 + i * 30},70%,60%)`, border: '2px solid #fff', marginLeft: i > 0 ? -8 : 0 }} />)}
+                {/* DYNAMIC CARD CONTENT */}
+                {activeTab === 'payroll' && (
+                  <div style={{ display: 'grid', gridTemplateColumns: '200px 1fr', gap: 32 }}>
+                    <div>
+                      <div style={{ fontSize: 11, fontWeight: 600, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 10 }}>Upcoming Payroll</div>
+                      <div style={{ fontSize: 11, color: '#94a3b8', marginBottom: 4 }}>May 31, 2025</div>
+                      <div style={{ fontSize: 24, fontWeight: 800, color: '#0f172a', marginBottom: 8, letterSpacing: '-0.02em' }}>
+                        {payrollState === 'processed' ? '$0' : '$28,450'}
                       </div>
-                      <span style={{ fontSize: 12, color: '#64748b' }}>24 Employees</span>
-                    </div>
-                    <button className="btn-secondary" style={{ fontSize: 12, padding: '8px 20px' }}>Run Payroll</button>
-                  </div>
-
-                  {/* Recent Expenses */}
-                  <div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12 }}>
-                      <span style={{ fontSize: 12, fontWeight: 700, color: '#94a3b8' }}>Recent Expenses</span>
-                      <span style={{ fontSize: 11, color: '#4f46e5', fontWeight: 600, cursor: 'pointer' }}>View All</span>
-                    </div>
-                    {[
-                      { icon: '🖥', label: 'Office Supplies', date: 'May 12, 2025', amount: '$320.00' },
-                      { icon: '💻', label: 'Software Subscription', date: 'May 11, 2025', amount: '$1,250.00' },
-                      { icon: '✈', label: 'Travel Expense', date: 'May 09, 2025', amount: '$560.00' },
-                      { icon: '👥', label: 'Client Meeting', date: 'May 08, 2025', amount: '$245.00' },
-                    ].map((exp, i) => (
-                      <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                          <div style={{ width: 30, height: 30, borderRadius: 8, background: '#f0f2ff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14 }}>{exp.icon}</div>
-                          <div>
-                            <div style={{ fontSize: 12, fontWeight: 600, color: '#1a1d2e' }}>{exp.label}</div>
-                            <div style={{ fontSize: 10, color: '#94a3b8' }}>{exp.date}</div>
-                          </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 18 }}>
+                        <div style={{ display: 'flex' }}>
+                          {[0,1,2].map(i => <div key={i} style={{ width: 22, height: 22, borderRadius: '50%', background: `hsl(${230 + i*30},65%,58%)`, border: '2px solid #fff', marginLeft: i > 0 ? -7 : 0 }} />)}
                         </div>
-                        <span style={{ fontSize: 13, fontWeight: 700, color: '#1a1d2e' }}>{exp.amount}</span>
+                        <span style={{ fontSize: 12, color: '#64748b' }}>24 Employees</span>
                       </div>
-                    ))}
-                  </div>
-
-                  {/* Liabilities Overview */}
-                  <div>
-                    <div style={{ fontSize: 12, fontWeight: 700, color: '#94a3b8', marginBottom: 12 }}>Liabilities Overview</div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
-                      <div style={{ position: 'relative', width: 80, height: 80, flexShrink: 0 }}>
-                        <DonutChart size={80} />
-                        <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-                          <div style={{ fontSize: 9, fontWeight: 800, color: '#1a1d2e' }}>$42,800</div>
-                          <div style={{ fontSize: 7, color: '#94a3b8' }}>Total</div>
+                      {payrollState === 'processed' ? (
+                        <div>
+                          <div style={{ fontSize: 12, fontWeight: 600, color: '#10b981', marginBottom: 8 }}>✓ May Payroll Paid</div>
+                          <button className="btn-secondary" onClick={handleResetPayroll} style={{ fontSize: 12, padding: '6px 14px' }}>Reset</button>
                         </div>
-                      </div>
-                      <div>
-                        {[
-                          { label: 'Loans Payable', val: '$18,500' },
-                          { label: 'Vendor Payables', val: '$15,200' },
-                          { label: 'Tax Payable', val: '$6,100' },
-                          { label: 'Other Liabilities', val: '$3,000' },
-                        ].map((l, i) => (
-                          <div key={i} style={{ display: 'flex', justifyContent: 'space-between', gap: 12, fontSize: 10, color: '#374151', marginBottom: 4 }}>
-                            <span style={{ color: '#94a3b8' }}>{l.label}</span>
-                            <span style={{ fontWeight: 600 }}>{l.val}</span>
-                          </div>
+                      ) : (
+                        <button
+                          className="btn-primary"
+                          onClick={handleRunPayroll}
+                          disabled={payrollState === 'processing'}
+                          style={{ fontSize: 13, padding: '8px 18px', background: payrollState === 'processing' ? '#818cf8' : '#4f46e5' }}
+                        >
+                          {payrollState === 'processing' ? 'Running...' : 'Run Payroll'}
+                        </button>
+                      )}
+                    </div>
+                    <div>
+                      <div style={{ fontSize: 11, fontWeight: 600, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 10 }}>Employee Status</div>
+                      <table className="q-table">
+                        <thead>
+                          <tr><th>Name</th><th>Role</th><th>Salary</th><th>Status</th></tr>
+                        </thead>
+                        <tbody>
+                          {[
+                            { name: 'Alice Johnson', role: 'UX Designer', sal: '$7,500' },
+                            { name: 'Bob Smith', role: 'Software Engineer', sal: '$9,200' },
+                            { name: 'Charlie Brown', role: 'Product Manager', sal: '$8,400' },
+                            { name: 'David Miller', role: 'Support Specialist', sal: '$3,350' },
+                          ].map((emp) => (
+                            <tr key={emp.name}>
+                              <td style={{ fontWeight: 600 }}>{emp.name}</td>
+                              <td>{emp.role}</td>
+                              <td>{emp.sal}</td>
+                              <td style={{ fontWeight: 700, color: payrollState === 'processed' ? '#10b981' : '#f59e0b' }}>
+                                {payrollState === 'processed' ? 'Paid' : 'Pending'}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                )}
+
+                {activeTab === 'expenses' && (
+                  <div style={{ display: 'grid', gridTemplateColumns: '240px 1fr', gap: 32 }}>
+                    <div>
+                      <div style={{ fontSize: 11, fontWeight: 600, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 12 }}>Filter &amp; Log</div>
+                      <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', marginBottom: 16 }}>
+                        {['All','Team','Operations','Marketing','Software'].map(cat => (
+                          <button
+                            key={cat}
+                            onClick={() => setExpenseFilter(cat as any)}
+                            style={{
+                              padding: '5px 10px', fontSize: 11, fontWeight: 600, borderRadius: 6, border: 'none', cursor: 'pointer',
+                              background: expenseFilter === cat ? '#4f46e5' : '#f1f5f9',
+                              color: expenseFilter === cat ? '#fff' : '#64748b'
+                            }}
+                          >
+                            {cat}
+                          </button>
                         ))}
                       </div>
+
+                      <form onSubmit={handleAddExpense} style={{ background: '#f8fafc', padding: 12, borderRadius: 10, border: '1px solid #e2e8f0' }}>
+                        <div style={{ fontSize: 11, fontWeight: 700, color: '#475569', marginBottom: 8 }}>Quick Log Expense</div>
+                        <input className="lp-input" placeholder="Title (e.g. Figma)" value={newExpLabel} onChange={(e) => setNewExpLabel(e.target.value)} style={{ fontSize: 12, padding: 8, marginBottom: 8 }} />
+                        <input className="lp-input" type="number" placeholder="Amount ($)" value={newExpAmount} onChange={(e) => setNewExpAmount(e.target.value)} style={{ fontSize: 12, padding: 8, marginBottom: 8 }} />
+                        <select className="lp-input" value={newExpCat} onChange={(e) => setNewExpCat(e.target.value as any)} style={{ fontSize: 12, padding: 8, marginBottom: 8 }}>
+                          <option value="Operations">Operations</option>
+                          <option value="Software">Software</option>
+                          <option value="Marketing">Marketing</option>
+                          <option value="Team">Team</option>
+                        </select>
+                        <button className="btn-primary" type="submit" style={{ width: '100%', fontSize: 12, padding: '7px', justifyContent: 'center' }}>Add Expense</button>
+                      </form>
+                    </div>
+                    <div>
+                      <div style={{ fontSize: 11, fontWeight: 600, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 10 }}>Expense Log</div>
+                      <table className="q-table">
+                        <thead>
+                          <tr><th>Description</th><th>Category</th><th>Date</th><th>Amount</th></tr>
+                        </thead>
+                        <tbody>
+                          {expenses.filter(e => expenseFilter === 'All' || e.cat === expenseFilter).map((exp, idx) => (
+                            <tr key={idx}>
+                              <td style={{ fontWeight: 600 }}>{exp.label}</td>
+                              <td><span style={{ fontSize: 10, background: '#f1f5f9', padding: '2px 6px', borderRadius: 4, color: '#475569', fontWeight: 600 }}>{exp.cat}</span></td>
+                              <td>{exp.date}</td>
+                              <td style={{ fontWeight: 700 }}>${exp.amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
                     </div>
                   </div>
-                </div>
-              </div>
+                )}
 
-              {/* 3D Calculator/clipboard decoration */}
-              <div style={{ flex: '0 0 160px', position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 12 }}>
-                {/* Clipboard icon */}
-                <div className="float-3d-alt" style={{ animationDelay: '0.3s' }}>
-                  <div className="deco-cube-3d" style={{ width: 90, height: 90 }}>
-                    <svg width="48" height="52" viewBox="0 0 48 52" fill="none">
-                      <rect x="4" y="8" width="40" height="44" rx="6" fill="rgba(255,255,255,0.4)" stroke="rgba(255,255,255,0.7)" strokeWidth="1.5"/>
-                      <rect x="16" y="2" width="16" height="12" rx="4" fill="rgba(255,255,255,0.6)" stroke="rgba(255,255,255,0.8)" strokeWidth="1"/>
-                      <line x1="12" y1="22" x2="36" y2="22" stroke="rgba(255,255,255,0.6)" strokeWidth="1.5" strokeLinecap="round"/>
-                      <line x1="12" y1="29" x2="36" y2="29" stroke="rgba(255,255,255,0.5)" strokeWidth="1.5" strokeLinecap="round"/>
-                      <line x1="12" y1="36" x2="28" y2="36" stroke="rgba(255,255,255,0.4)" strokeWidth="1.5" strokeLinecap="round"/>
-                      <circle cx="38" cy="44" r="7" fill="#10b981" opacity="0.9"/>
-                      <path d="M35 44l2 2 4-4" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
+                {activeTab === 'liabilities' && (
+                  <div style={{ display: 'grid', gridTemplateColumns: '220px 1fr', gap: 32 }}>
+                    <div>
+                      <div style={{ fontSize: 11, fontWeight: 600, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 10 }}>Liabilities Breakdown</div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+                        <div style={{ position: 'relative', width: 80, height: 80, flexShrink: 0 }}>
+                          <LiabilitiesDonutChart size={80} items={liabilities} />
+                          <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+                            <div style={{ fontSize: 10, fontWeight: 800, color: '#0f172a' }}>
+                              ${(liabilitiesTotal / 1000).toFixed(1)}K
+                            </div>
+                          </div>
+                        </div>
+                        <div style={{ flex: 1 }}>
+                          {liabilities.map((l) => (
+                            <div key={l.id} style={{ display: 'flex', justifyContent: 'space-between', gap: 8, fontSize: 10, marginBottom: 4, textDecoration: l.paid ? 'line-through' : 'none', opacity: l.paid ? 0.5 : 1 }}>
+                              <span style={{ color: '#94a3b8' }}>{l.label}</span>
+                              <span style={{ fontWeight: 600, color: '#374151' }}>${l.amount.toLocaleString()}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                    <div>
+                      <div style={{ fontSize: 11, fontWeight: 600, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 10 }}>Pending Liabilities</div>
+                      <table className="q-table">
+                        <thead>
+                          <tr><th>Name</th><th>Amount</th><th>Status</th><th>Action</th></tr>
+                        </thead>
+                        <tbody>
+                          {liabilities.map((l) => (
+                            <tr key={l.id}>
+                              <td style={{ fontWeight: 600 }}>{l.label}</td>
+                              <td style={{ fontWeight: 700 }}>${l.amount.toLocaleString()}</td>
+                              <td style={{ fontWeight: 700, color: l.paid ? '#10b981' : '#dc2626' }}>
+                                {l.paid ? 'Paid' : 'Unpaid'}
+                              </td>
+                              <td>
+                                {!l.paid && (
+                                  <button
+                                    className="btn-secondary"
+                                    onClick={() => handlePayLiability(l.id, l.label, l.amount)}
+                                    style={{ fontSize: 10, padding: '3px 8px', borderRadius: 4 }}
+                                  >
+                                    Pay
+                                  </button>
+                                )}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
                   </div>
-                </div>
-                {/* Mini gold coin */}
-                <div className="coin-spin" style={{ width: 38, height: 38, background: 'radial-gradient(circle at 35% 30%,#fde68a,#f59e0b,#b45309)', borderRadius: '50%', boxShadow: 'inset -4px -4px 10px rgba(0,0,0,0.2), inset 2px 2px 6px rgba(255,255,255,0.4), 0 8px 20px rgba(245,158,11,0.35)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, fontWeight: 800, color: '#92400e', animationDelay: '0.5s' }}>$</div>
+                )}
+
               </div>
             </div>
           </div>
         </section>
 
-        {/* ══════════════════════════════════════════════════════════════
-            FEATURES SECTION
-        ══════════════════════════════════════════════════════════════ */}
-        <section style={{ padding: '100px 32px', background: '#f8f9ff', position: 'relative', overflow: 'hidden' }}>
-          {/* 3D Bar chart cube — top left */}
-          <div className="float-3d" style={{ position: 'absolute', top: '3%', left: '1%', pointerEvents: 'none' }}>
-            <div className="deco-cube-3d" style={{ width: 76, height: 76 }}>
-              <svg width="44" height="40" viewBox="0 0 44 40" fill="none">
-                <rect x="2" y="22" width="9" height="16" rx="3" fill="rgba(255,255,255,0.55)"/>
-                <rect x="15" y="12" width="9" height="26" rx="3" fill="rgba(255,255,255,0.75)"/>
-                <rect x="28" y="4" width="9" height="34" rx="3" fill="rgba(255,255,255,0.9)"/>
-                <line x1="0" y1="38.5" x2="44" y2="38.5" stroke="rgba(255,255,255,0.5)" strokeWidth="1.5"/>
-              </svg>
-            </div>
-          </div>
-          {/* 3D Sparkle card — bottom left */}
-          <div className="float-3d-alt" style={{ position: 'absolute', bottom: '8%', left: '4%', pointerEvents: 'none', animationDelay: '1.5s' }}>
-            <div className="deco-card-3d" style={{ width: 52, height: 52 }}>
-              <SparkleIcon size={24} color="#7c3aed" />
-            </div>
-          </div>
-
-          <div style={{ maxWidth: 1200, margin: '0 auto' }}>
-            <div style={{ display: 'flex', gap: 80, alignItems: 'flex-start', marginBottom: 64 }}>
-              {/* Left: headline + 3D blobs */}
-              <div style={{ flex: '0 0 380px', position: 'relative' }}>
-                <div className="badge-pill" style={{ marginBottom: 16 }}>
-                  <SparkleIcon size={12} color="#4f46e5" />
-                  Smart. Fast. Accurate.
-                </div>
-                <h2 style={{ fontSize: 40, fontWeight: 800, lineHeight: 1.1, letterSpacing: '-0.02em', fontFamily: "'Plus Jakarta Sans',sans-serif", color: '#0f172a', marginBottom: 16 }}>
-                  Everything you need to<br />
-                  <span style={{ background: 'linear-gradient(135deg,#4f46e5,#7c3aed,#ec4899)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>create, manage & close.</span>
-                </h2>
-                <p style={{ fontSize: 15, color: '#64748b', lineHeight: 1.7, marginBottom: 32 }}>
-                  Quotiq brings all the tools you need to generate quotes, manage clients, track approvals, and convert them into invoices — in one place.
-                </p>
-                {/* 3D donut blob */}
-                <div style={{ display: 'flex', gap: 20, alignItems: 'center' }}>
-                  <div className="float-3d-alt" style={{ position: 'relative', width: 100, height: 100 }}>
-                    <div style={{ width: 100, height: 100, borderRadius: '50%', background: 'conic-gradient(#4f46e5 0deg 126deg, #7c3aed 126deg 226deg, #ec4899 226deg 291deg, #e2e8f0 291deg 360deg)', boxShadow: '0 20px 50px rgba(79,70,229,0.3)' }} />
-                    <div style={{ position: 'absolute', inset: '22px', borderRadius: '50%', background: '#f8f9ff' }} />
-                  </div>
-                  <div className="float-3d" style={{ animationDelay: '1s' }}>
-                    <div className="icon-3d" style={{ width: 60, height: 60 }}>
-                      <SparkleIcon size={28} color="#4f46e5" />
-                    </div>
-                  </div>
-                </div>
+        {/* ══════ FEATURES ══════ */}
+        <section className="lp-section">
+          <div className="lp-container">
+            <div style={{ display: 'flex', gap: 64, alignItems: 'flex-start' }}>
+              {/* Left */}
+              <div style={{ flex: '0 0 340px' }}>
+                <div className="section-label"><Icon name="sparkle" size={14} color="#4f46e5" /> Smart. Fast. Accurate.</div>
+                <h2 className="section-title">Everything you need to <span style={{ color: '#4f46e5' }}>create, manage &amp; close.</span></h2>
+                <p className="section-desc">Quotiq brings all the tools you need to generate quotes, manage clients, track approvals, and convert them into invoices — in one place.</p>
               </div>
 
-              {/* Feature cards grid */}
+              {/* Features grid */}
               <div style={{ flex: 1 }}>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 20 }} className="features-grid">
+                <div className="feature-grid">
                   {[
-                    { num: '01', emoji: '🤖', color: '#818cf8', bg: '#eef0ff', title: 'AI Auto-Fill', desc: 'AI scans your inputs and auto-generates line items, pricing & terms instantly.' },
-                    { num: '02', emoji: '📄', color: '#06b6d4', bg: '#e0f9ff', title: 'Custom Templates', desc: 'Create branded templates that match your business and reuse with ease.' },
-                    { num: '03', emoji: '🔄', color: '#10b981', bg: '#e0fdf4', title: 'One-Click Convert', desc: 'Turn quotes into professional invoices in one click and get paid faster.' },
-                    { num: '04', emoji: '✅', color: '#f59e0b', bg: '#fffbeb', title: 'Track & Approve', desc: 'Real-time tracking for views, approvals, comments and client actions.' },
-                    { num: '05', emoji: '👥', color: '#8b5cf6', bg: '#f5f0ff', title: 'Client Management', desc: 'Keep all your clients, contacts & history organized in one beautiful dashboard.' },
-                    { num: '06', emoji: '📊', color: '#3b82f6', bg: '#eff6ff', title: 'Insights & Reports', desc: 'Powerful analytics to track quotes, revenue, conversions and team performance.' },
+                    { num: '01', icon: 'brain', color: '#4f46e5', bg: '#eff6ff', title: 'AI Auto-Fill', desc: 'AI scans your inputs and auto-generates line items, pricing & terms instantly.' },
+                    { num: '02', icon: 'file', color: '#06b6d4', bg: '#ecfeff', title: 'Custom Templates', desc: 'Create branded templates that match your business and reuse with ease.' },
+                    { num: '03', icon: 'refresh', color: '#10b981', bg: '#f0fdf4', title: 'One-Click Convert', desc: 'Turn quotes into professional invoices in one click and get paid faster.' },
+                    { num: '04', icon: 'check', color: '#f59e0b', bg: '#fffbeb', title: 'Track & Approve', desc: 'Real-time tracking for views, approvals, comments and client actions.' },
+                    { num: '05', icon: 'users', color: '#8b5cf6', bg: '#f5f3ff', title: 'Client Management', desc: 'Keep all your clients, contacts & history organized in one beautiful dashboard.' },
+                    { num: '06', icon: 'barChart', color: '#3b82f6', bg: '#eff6ff', title: 'Insights & Reports', desc: 'Powerful analytics to track quotes, revenue, conversions and team performance.' },
                   ].map((f, i) => (
-                    <div key={i} className="feature-card" style={{ animationDelay: `${i * 0.08}s` }}>
+                    <div key={i} className="card">
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 }}>
-                        <div style={{ width: 44, height: 44, borderRadius: 14, background: f.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22, boxShadow: `0 8px 20px ${f.color}20` }}>
-                          {f.emoji}
+                        <div className="feature-icon-wrap" style={{ background: f.bg, marginBottom: 0 }}>
+                          <Icon name={f.icon} size={20} color={f.color} />
                         </div>
-                        <span style={{ fontSize: 11, fontWeight: 700, color: '#d4d6ff', letterSpacing: '0.04em' }}>{f.num}</span>
+                        <span className="feature-num">{f.num}</span>
                       </div>
-                      <h4 style={{ fontSize: 16, fontWeight: 700, color: '#1a1d2e', marginBottom: 8, fontFamily: "'Plus Jakarta Sans',sans-serif" }}>{f.title}</h4>
+                      <h4 style={{ fontSize: 15, fontWeight: 700, color: '#0f172a', marginBottom: 8, fontFamily: "'Plus Jakarta Sans',sans-serif" }}>{f.title}</h4>
                       <p style={{ fontSize: 13, color: '#64748b', lineHeight: 1.6 }}>{f.desc}</p>
                     </div>
                   ))}
@@ -1262,187 +1465,357 @@ export default function LandingPage() {
               </div>
             </div>
 
-            {/* ── See Quotiq in Action ── */}
-            <div style={{ textAlign: 'center', marginBottom: 40 }}>
-              <h2 style={{ fontSize: 36, fontWeight: 800, letterSpacing: '-0.02em', fontFamily: "'Plus Jakarta Sans',sans-serif", color: '#0f172a', marginBottom: 8 }}>See Quotiq in Action</h2>
-              <p style={{ fontSize: 16, color: '#64748b' }}>Create a quote, customize, and send — all in under 60 seconds.</p>
-            </div>
+            {/* ── See Quotiq in Action (Demo Section) ── */}
+            <div style={{ marginTop: 64 }} id="demo-section">
+              <div style={{ textAlign: 'center', marginBottom: 32 }}>
+                <h2 style={{ fontSize: 32, fontWeight: 800, color: '#0f172a', marginBottom: 8, fontFamily: "'Plus Jakarta Sans',sans-serif", letterSpacing: '-0.02em' }}>See Quotiq in Action</h2>
+                <p style={{ fontSize: 15, color: '#64748b' }}>Create a quote, customize, and send — all in under 60 seconds.</p>
+              </div>
 
-            {/* Demo card */}
-            <div className="glass-card" style={{ padding: 0, overflow: 'hidden' }}>
-              <div style={{ display: 'flex', height: 480 }}>
+              <div className="demo-shell" style={{ height: 460 }}>
                 {/* Sidebar */}
-                <div style={{ width: 200, background: '#fff', borderRight: '1px solid #eef0ff', padding: '20px 0', flexShrink: 0 }}>
-                  <div style={{ padding: '0 16px 20px', display: 'flex', alignItems: 'center', gap: 8, borderBottom: '1px solid #f1f3ff', marginBottom: 8 }}>
-                    <QuotiqLogo size={28} />
-                    <span style={{ fontSize: 16, fontWeight: 800, color: '#1a1d2e', fontFamily: "'Plus Jakarta Sans',sans-serif" }}>Quotiq</span>
+                <div className="demo-sidebar">
+                  <div className="demo-sidebar-logo">
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <Logo size={24} />
+                      <span style={{ fontSize: 15, fontWeight: 800, color: '#0f172a', fontFamily: "'Plus Jakarta Sans',sans-serif" }}>Quotiq</span>
+                    </div>
                   </div>
                   {[
-                    { icon: '⊟', label: 'Dashboard' },
-                    { icon: '📜', label: 'Quotes', active: true },
-                    { icon: '🧾', label: 'Invoices' },
-                    { icon: '👤', label: 'Clients' },
-                    { icon: '📦', label: 'Products' },
-                    { icon: '📋', label: 'Templates' },
-                    { icon: '📊', label: 'Reports' },
-                    { icon: '⚙', label: 'Settings' },
-                  ].map((item, i) => (
-                    <div
-                      key={i}
-                      style={{
-                        display: 'flex', alignItems: 'center', gap: 10,
-                        padding: '10px 16px', fontSize: 13, fontWeight: item.active ? 600 : 500,
-                        color: item.active ? '#4f46e5' : '#64748b',
-                        background: item.active ? '#f0f2ff' : 'transparent',
-                        borderLeft: item.active ? '3px solid #4f46e5' : '3px solid transparent',
-                        cursor: 'pointer', transition: 'all 0.2s',
-                      }}
+                    { key: 'dashboard', icon: 'barChart', label: 'Dashboard' },
+                    { key: 'quotes', icon: 'file', label: 'Quotes' },
+                    { key: 'invoices', icon: 'refresh', label: 'Invoices' },
+                    { key: 'clients', icon: 'users', label: 'Clients' },
+                    { key: 'reports', icon: 'barChart', label: 'Reports' },
+                    { key: 'settings', icon: 'settings', label: 'Settings' },
+                  ].map((item) => (
+                    <button
+                      key={item.key}
+                      onClick={() => setActiveSidebarTab(item.key as any)}
+                      className={`demo-nav-item ${activeSidebarTab === item.key ? 'active' : ''}`}
                     >
-                      <span style={{ fontSize: 16 }}>{item.icon}</span>
+                      <Icon name={item.icon} size={15} color={activeSidebarTab === item.key ? '#4f46e5' : '#94a3b8'} />
                       {item.label}
-                    </div>
+                    </button>
                   ))}
                 </div>
 
-                {/* Main content */}
-                <div style={{ flex: 1, padding: 28, background: '#f8f9ff', overflowY: 'auto' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
-                    <h3 style={{ fontSize: 20, fontWeight: 700, color: '#1a1d2e', fontFamily: "'Plus Jakarta Sans',sans-serif" }}>Create New Quotation</h3>
-                    <div className="ai-badge"><SparkleIcon size={11} color="#6366f1" /> AI Assistant</div>
-                  </div>
-
-                  {/* Steps */}
-                  <div style={{ display: 'flex', gap: 0, marginBottom: 24 }}>
-                    {[{ n: 1, label: 'Client Details', active: true }, { n: 2, label: 'Add Items', active: false }, { n: 3, label: 'Review & Send', active: false }].map((step, i) => (
-                      <React.Fragment key={i}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                          <div style={{
-                            width: 24, height: 24, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                            background: step.active ? '#4f46e5' : '#e2e8ff', fontSize: 12, fontWeight: 700, color: step.active ? '#fff' : '#94a3b8',
-                          }}>{step.n}</div>
-                          <span style={{ fontSize: 13, fontWeight: step.active ? 700 : 400, color: step.active ? '#1a1d2e' : '#94a3b8' }}>{step.label}</span>
+                {/* Main Pane */}
+                <div className="demo-main" style={{ overflowY: 'auto' }}>
+                  {activeSidebarTab === 'dashboard' && (
+                    <div>
+                      <h3 style={{ fontSize: 17, fontWeight: 700, color: '#0f172a', marginBottom: 14 }}>Dashboard Overview</h3>
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 20 }}>
+                        <div style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: 10, padding: 14 }}>
+                          <div style={{ fontSize: 11, color: '#94a3b8', fontWeight: 600, marginBottom: 2 }}>Sent Quotes Count</div>
+                          <div style={{ fontSize: 22, fontWeight: 800, color: '#0f172a' }}>{quotesHistory.length}</div>
                         </div>
-                        {i < 2 && <div style={{ flex: 1, height: 2, background: '#e2e8ff', margin: '0 12px', alignSelf: 'center' }} />}
-                      </React.Fragment>
-                    ))}
-                  </div>
-
-                  {/* Client Details */}
-                  <div style={{ background: '#fff', borderRadius: 14, padding: 20, marginBottom: 16, border: '1px solid #eef0ff' }}>
-                    <div style={{ fontSize: 13, fontWeight: 700, color: '#94a3b8', marginBottom: 12 }}>Client Details</div>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12, marginBottom: 16 }}>
-                      {[
-                        { label: 'Client Name', val: 'Acme Corporation' },
-                        { label: 'Email', val: 'contact@acme.com' },
-                        { label: 'Currency', val: 'USD – US Dollar ▾' },
-                      ].map((f, i) => (
-                        <div key={i}>
-                          <div style={{ fontSize: 11, color: '#94a3b8', marginBottom: 4 }}>{f.label}</div>
-                          <div style={{ background: '#f8f9ff', border: '1px solid #eef0ff', borderRadius: 8, padding: '8px 12px', fontSize: 13, color: '#1a1d2e' }}>{f.val}</div>
-                        </div>
-                      ))}
-                    </div>
-
-                    {/* Items table */}
-                    <div style={{ fontSize: 13, fontWeight: 700, color: '#94a3b8', marginBottom: 10 }}>Items</div>
-                    <div style={{ display: 'grid', gridTemplateColumns: '2fr 2fr 1fr 1fr 1fr auto', gap: 8, fontSize: 11, color: '#94a3b8', fontWeight: 600, marginBottom: 8, padding: '0 4px' }}>
-                      {['Item', 'Description', 'Qty', 'Price', 'Total', ''].map(h => <div key={h}>{h}</div>)}
-                    </div>
-                    {[
-                      { item: 'Website Development', desc: 'Full website with responsive design', qty: 1, price: '$2,500', total: '$2,500' },
-                      { item: 'UI/UX Design', desc: 'User interface and experience design', qty: 1, price: '$1,200', total: '$1,200' },
-                    ].map((row, i) => (
-                      <div key={i} style={{ display: 'grid', gridTemplateColumns: '2fr 2fr 1fr 1fr 1fr auto', gap: 8, background: '#f8f9ff', borderRadius: 8, padding: '10px 4px', marginBottom: 4, fontSize: 12, color: '#374151', alignItems: 'center' }}>
-                        <span style={{ fontWeight: 600 }}>{row.item}</span>
-                        <span style={{ color: '#94a3b8' }}>{row.desc}</span>
-                        <span>{row.qty}</span>
-                        <span>{row.price}</span>
-                        <span style={{ fontWeight: 600 }}>{row.total}</span>
-                        <div style={{ width: 20, height: 20, borderRadius: 6, background: '#fee2e2', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
-                          <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 2l6 6M8 2l-6 6" stroke="#ef4444" strokeWidth="1.5" strokeLinecap="round" /></svg>
+                        <div style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: 10, padding: 14 }}>
+                          <div style={{ fontSize: 11, color: '#94a3b8', fontWeight: 600, marginBottom: 2 }}>Value Pipeline</div>
+                          <div style={{ fontSize: 22, fontWeight: 800, color: '#4f46e5' }}>
+                            ${quotesHistory.reduce((sum, q) => sum + q.total, 0).toLocaleString()}
+                          </div>
                         </div>
                       </div>
-                    ))}
-                    <button style={{ display: 'flex', alignItems: 'center', gap: 6, color: '#4f46e5', fontSize: 13, fontWeight: 600, background: 'none', border: 'none', cursor: 'pointer', padding: '8px 0', marginTop: 4 }}>
-                      + Add Item
-                    </button>
 
-                    {/* Totals */}
-                    <div style={{ borderTop: '1px solid #eef0ff', paddingTop: 12, marginTop: 8 }}>
-                      {[
-                        { label: 'Subtotal', val: '$3,700' },
-                        { label: 'Tax (18%)', val: '$666' },
-                        { label: 'Total', val: '$4,366', bold: true },
-                      ].map((r) => (
-                        <div key={r.label} style={{ display: 'flex', justifyContent: 'flex-end', gap: 32, marginBottom: 4 }}>
-                          <span style={{ fontSize: 12, color: '#64748b' }}>{r.label}</span>
-                          <span style={{ fontSize: 12, fontWeight: r.bold ? 800 : 500, color: r.bold ? '#4f46e5' : '#374151', minWidth: 60, textAlign: 'right' }}>{r.val}</span>
-                        </div>
-                      ))}
+                      <div style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: 12, padding: 16 }}>
+                        <div style={{ fontSize: 12, fontWeight: 700, color: '#0f172a', marginBottom: 10 }}>Sent Quotation Logs</div>
+                        <table className="q-table">
+                          <thead>
+                            <tr><th>Quote ID</th><th>Client</th><th>Date</th><th>Total</th><th>Status</th></tr>
+                          </thead>
+                          <tbody>
+                            {quotesHistory.map((q) => (
+                              <tr key={q.id}>
+                                <td style={{ fontWeight: 600 }}>{q.id}</td>
+                                <td>{q.client}</td>
+                                <td>{q.date}</td>
+                                <td style={{ fontWeight: 700 }}>${q.total.toLocaleString()}</td>
+                                <td>
+                                  <span style={{
+                                    fontSize: 10, padding: '2px 6px', borderRadius: 4, fontWeight: 700,
+                                    background: q.status === 'Approved' ? '#d1fae5' : '#eff6ff',
+                                    color: q.status === 'Approved' ? '#059669' : '#2563eb'
+                                  }}>
+                                    {q.status}
+                                  </span>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
                     </div>
-                  </div>
+                  )}
+
+                  {activeSidebarTab === 'quotes' && (
+                    <div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+                        <h3 style={{ fontSize: 17, fontWeight: 700, color: '#0f172a', fontFamily: "'Plus Jakarta Sans',sans-serif" }}>Create New Quotation</h3>
+                        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '4px 10px', borderRadius: 100, background: '#eff6ff', border: '1px solid #bfdbfe', fontSize: 11, fontWeight: 600, color: '#3b82f6' }}>
+                          <Icon name="sparkle" size={11} color="#3b82f6" /> AI Assistant
+                        </div>
+                      </div>
+
+                      {/* Wizard Steps Navigation Bar */}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 0, marginBottom: 20 }}>
+                        {[[1, 'Client Details'], [2, 'Add Items'], [3, 'Review & Send']].map(([stepNum, stepLabel]) => {
+                          const num = stepNum as number;
+                          const active = quoteStep === num;
+                          return (
+                            <React.Fragment key={num}>
+                              <button
+                                onClick={() => setQuoteStep(num as any)}
+                                style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', cursor: 'pointer' }}
+                              >
+                                <div style={{
+                                  width: 22, height: 22, borderRadius: '50%',
+                                  background: active ? '#4f46e5' : '#e2e8f0',
+                                  color: active ? '#fff' : '#94a3b8',
+                                  fontSize: 11, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center'
+                                }}>
+                                  {num}
+                                </div>
+                                <span style={{ fontSize: 12, fontWeight: active ? 600 : 400, color: active ? '#0f172a' : '#94a3b8' }}>
+                                  {String(stepLabel)}
+                                </span>
+                              </button>
+                              {num < 3 && <div style={{ flex: 1, height: 1, background: '#e2e8f0', margin: '0 12px' }} />}
+                            </React.Fragment>
+                          );
+                        })}
+                      </div>
+
+                      {/* STEP 1: CLIENT DETAILS */}
+                      {quoteStep === 1 && (
+                        <div style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: 12, padding: 18, marginBottom: 14 }}>
+                          <div style={{ fontSize: 12, fontWeight: 600, color: '#94a3b8', marginBottom: 12 }}>Client Details</div>
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                            <div>
+                              <div style={{ fontSize: 11, color: '#64748b', marginBottom: 4 }}>Client Name</div>
+                              <input className="lp-input" value={clientName} onChange={(e) => setClientName(e.target.value)} placeholder="Acme Corporation" />
+                            </div>
+                            <div>
+                              <div style={{ fontSize: 11, color: '#64748b', marginBottom: 4 }}>Email Address</div>
+                              <input className="lp-input" value={clientEmail} onChange={(e) => setClientEmail(e.target.value)} placeholder="contact@acme.com" />
+                            </div>
+                            <div>
+                              <div style={{ fontSize: 11, color: '#64748b', marginBottom: 4 }}>Currency</div>
+                              <select className="lp-input" value={quoteCurrency} onChange={(e) => setQuoteCurrency(e.target.value)}>
+                                <option value="USD">USD – US Dollar ($)</option>
+                                <option value="EUR">EUR – Euro (€)</option>
+                                <option value="GBP">GBP – British Pound (£)</option>
+                              </select>
+                            </div>
+                            <button className="btn-primary" onClick={() => setQuoteStep(2)} style={{ alignSelf: 'flex-end', marginTop: 10 }}>
+                              Next Step: Add Items <Icon name="arrow" size={14} color="white" />
+                            </button>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* STEP 2: ADD ITEMS */}
+                      {quoteStep === 2 && (
+                        <div style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: 12, padding: 18, marginBottom: 14 }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+                            <span style={{ fontSize: 12, fontWeight: 600, color: '#94a3b8' }}>Line Items</span>
+                            <button className="btn-secondary" onClick={handleAddBuilderItem} style={{ fontSize: 11, padding: '4px 10px' }}>
+                              + Add Item
+                            </button>
+                          </div>
+
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 16 }}>
+                            {quoteItems.map((item, idx) => (
+                              <div key={idx} style={{ display: 'flex', gap: 8, alignItems: 'center', background: '#f8fafc', padding: 8, borderRadius: 8, border: '1px solid #e2e8f0' }}>
+                                <div style={{ flex: 2 }}>
+                                  <input className="lp-input" value={item.name} onChange={(e) => handleUpdateBuilderItem(idx, 'name', e.target.value)} style={{ fontSize: 12, padding: 6 }} placeholder="Item name" />
+                                </div>
+                                <div style={{ width: 60 }}>
+                                  <input className="lp-input" type="number" value={item.qty} onChange={(e) => handleUpdateBuilderItem(idx, 'qty', parseInt(e.target.value) || 0)} style={{ fontSize: 12, padding: 6, textAlign: 'center' }} placeholder="Qty" />
+                                </div>
+                                <div style={{ width: 90 }}>
+                                  <input className="lp-input" type="number" value={item.price} onChange={(e) => handleUpdateBuilderItem(idx, 'price', parseFloat(e.target.value) || 0)} style={{ fontSize: 12, padding: 6, textAlign: 'right' }} placeholder="Price" />
+                                </div>
+                                <button
+                                  onClick={() => handleRemoveBuilderItem(idx)}
+                                  style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#ef4444', padding: 4 }}
+                                >
+                                  <Icon name="close" size={16} color="#ef4444" />
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+
+                          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                            <button className="btn-secondary" onClick={() => setQuoteStep(1)}>Back</button>
+                            <button className="btn-primary" onClick={() => setQuoteStep(3)}>
+                              Next: Review &amp; Send <Icon name="arrow" size={14} color="white" />
+                            </button>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* STEP 3: REVIEW & SEND */}
+                      {quoteStep === 3 && (
+                        <div style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: 12, padding: 18, marginBottom: 14 }}>
+                          <div style={{ fontSize: 12, fontWeight: 600, color: '#94a3b8', marginBottom: 12 }}>Review &amp; Send</div>
+                          <div style={{ background: '#f8fafc', padding: 12, borderRadius: 8, border: '1px solid #e2e8f0', marginBottom: 16 }}>
+                            <div style={{ fontSize: 13, fontWeight: 700, color: '#0f172a', marginBottom: 4 }}>{clientName}</div>
+                            <div style={{ fontSize: 11, color: '#64748b' }}>{clientEmail}</div>
+                            <div style={{ height: 1, background: '#e2e8f0', margin: '8px 0' }} />
+                            <div style={{ fontSize: 12, fontWeight: 600, color: '#374151' }}>
+                              Total Items: {quoteItems.length} | Net Amount: ${calculateTotal().toLocaleString()} {quoteCurrency}
+                            </div>
+                          </div>
+
+                          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                            <button className="btn-secondary" onClick={() => setQuoteStep(2)}>Back</button>
+                            <button className="btn-primary" onClick={handleSendQuote} disabled={isSendingQuote}>
+                              {isSendingQuote ? 'Sending...' : 'Send Quote to Client'}
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {activeSidebarTab === 'invoices' && (
+                    <div>
+                      <h3 style={{ fontSize: 17, fontWeight: 700, color: '#0f172a', marginBottom: 14 }}>Invoices List</h3>
+                      <table className="q-table">
+                        <thead>
+                          <tr><th>Invoice</th><th>Client</th><th>Date</th><th>Amount</th><th>Status</th></tr>
+                        </thead>
+                        <tbody>
+                          {[
+                            { id: 'INV-250512-01', client: 'Acme Corporation', amount: 6018, date: 'May 12, 2025', status: 'Sent' },
+                            { id: 'INV-250505-03', client: 'Stark Industries', amount: 15300, date: 'May 05, 2025', status: 'Paid' },
+                            { id: 'INV-250501-01', client: 'Wayne Enterprises', amount: 8900, date: 'May 01, 2025', status: 'Overdue' },
+                          ].map((inv) => (
+                            <tr key={inv.id}>
+                              <td style={{ fontWeight: 600 }}>{inv.id}</td>
+                              <td>{inv.client}</td>
+                              <td>{inv.date}</td>
+                              <td style={{ fontWeight: 700 }}>${inv.amount.toLocaleString()}</td>
+                              <td>
+                                <span style={{
+                                  fontSize: 10, padding: '2px 6px', borderRadius: 4, fontWeight: 700,
+                                  background: inv.status === 'Paid' ? '#d1fae5' : inv.status === 'Overdue' ? '#fee2e2' : '#eff6ff',
+                                  color: inv.status === 'Paid' ? '#059669' : inv.status === 'Overdue' ? '#dc2626' : '#2563eb'
+                                }}>
+                                  {inv.status}
+                                </span>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+
+                  {activeSidebarTab === 'clients' && (
+                    <div>
+                      <h3 style={{ fontSize: 17, fontWeight: 700, color: '#0f172a', marginBottom: 14 }}>Active Client Directories</h3>
+                      <table className="q-table">
+                        <thead>
+                          <tr><th>Client</th><th>Contact Email</th><th>Status</th></tr>
+                        </thead>
+                        <tbody>
+                          {[
+                            { name: 'Acme Corporation', email: 'contact@acme.com', status: 'Active' },
+                            { name: 'Stark Industries', email: 'tony@stark.com', status: 'Active' },
+                            { name: 'Wayne Enterprises', email: 'bruce@wayne.com', status: 'Active' },
+                            { name: 'LexCorp', email: 'lex@lexcorp.com', status: 'Suspended' },
+                          ].map((c) => (
+                            <tr key={c.name}>
+                              <td style={{ fontWeight: 600 }}>{c.name}</td>
+                              <td>{c.email}</td>
+                              <td style={{ fontWeight: 700, color: c.status === 'Active' ? '#10b981' : '#dc2626' }}>{c.status}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+
+                  {activeSidebarTab === 'reports' && (
+                    <div>
+                      <h3 style={{ fontSize: 17, fontWeight: 700, color: '#0f172a', marginBottom: 14 }}>Activity Analytics</h3>
+                      <div style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: 10, padding: 16 }}>
+                        <div style={{ fontSize: 12, fontWeight: 700, color: '#0f172a', marginBottom: 10 }}>Conversion Rate Trend</div>
+                        <svg width="100%" height="80" viewBox="0 0 280 80" preserveAspectRatio="none">
+                          <polyline points="0,70 50,55 100,60 150,30 200,45 250,15 280,10" fill="none" stroke="#4f46e5" strokeWidth="2.5"/>
+                        </svg>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, color: '#94a3b8', marginTop: 6 }}>
+                          <span>Jan</span><span>Mar</span><span>May</span><span>Jul</span><span>Sep</span><span>Nov</span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {activeSidebarTab === 'settings' && (
+                    <div>
+                      <h3 style={{ fontSize: 17, fontWeight: 700, color: '#0f172a', marginBottom: 14 }}>Account Preferences</h3>
+                      <form onSubmit={(e) => { e.preventDefault(); showToast('Preferences updated successfully!', 'success'); }} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                        <div>
+                          <div style={{ fontSize: 11, color: '#64748b', marginBottom: 4 }}>Default Sender Name</div>
+                          <input className="lp-input" defaultValue="Quotiq Solutions" />
+                        </div>
+                        <div>
+                          <div style={{ fontSize: 11, color: '#64748b', marginBottom: 4 }}>Notification Email</div>
+                          <input className="lp-input" defaultValue="admin@quotiq.com" />
+                        </div>
+                        <button className="btn-primary" type="submit" style={{ width: 'fit-content', alignSelf: 'flex-start' }}>Save Changes</button>
+                      </form>
+                    </div>
+                  )}
                 </div>
 
-                {/* Preview panel */}
-                <div style={{ width: 260, background: '#fff', borderLeft: '1px solid #eef0ff', padding: 20, overflowY: 'auto', flexShrink: 0 }}>
-                  <div style={{ fontSize: 13, fontWeight: 700, color: '#94a3b8', marginBottom: 16 }}>Preview Quote</div>
-                  <div style={{ background: '#f8f9ff', borderRadius: 12, padding: 16, border: '1px solid #eef0ff', marginBottom: 16 }}>
+                {/* Right Live Preview Panel */}
+                <div className="demo-preview">
+                  <div style={{ fontSize: 12, fontWeight: 700, color: '#94a3b8', marginBottom: 14 }}>Preview Quote</div>
+                  <div style={{ background: '#f8fafc', borderRadius: 10, padding: 14, border: '1px solid #e2e8f0', marginBottom: 14 }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 }}>
-                      <QuotiqLogo size={28} />
+                      <Logo size={22} />
                       <div style={{ textAlign: 'right' }}>
-                        <div style={{ fontSize: 12, fontWeight: 800, color: '#1a1d2e' }}>QUOTATION</div>
-                        <div style={{ fontSize: 10, color: '#94a3b8' }}>#QT-250513-01</div>
+                        <div style={{ fontSize: 11, fontWeight: 800, color: '#0f172a' }}>QUOTATION</div>
+                        <div style={{ fontSize: 9, color: '#94a3b8' }}>#QT-250513-01</div>
                       </div>
                     </div>
                     <div style={{ marginBottom: 12 }}>
-                      <div style={{ fontSize: 13, fontWeight: 700, color: '#1a1d2e' }}>Acme Corporation</div>
-                      <div style={{ fontSize: 11, color: '#94a3b8' }}>contact@acme.com</div>
-                      <div style={{ fontSize: 11, color: '#94a3b8' }}>May 13, 2025</div>
+                      <div style={{ fontSize: 12, fontWeight: 700, color: '#0f172a' }}>{clientName || 'Client Name'}</div>
+                      <div style={{ fontSize: 10, color: '#94a3b8' }}>{clientEmail || 'client@email.com'}</div>
                     </div>
-                    <div style={{ borderTop: '1px solid #eef0ff', paddingTop: 10 }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, fontWeight: 600, color: '#94a3b8', marginBottom: 6 }}>
-                        <span>Item</span><span>Amount</span>
-                      </div>
+                    <table className="q-table">
+                      <thead><tr><th>Item</th><th>Amt</th></tr></thead>
+                      <tbody>
+                        {quoteItems.map((item, idx) => (
+                          <tr key={idx}>
+                            <td>{item.name || 'Untitled Line'}</td>
+                            <td>${(item.qty * item.price).toLocaleString()}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                    <div style={{ borderTop: '1px solid #f1f5f9', paddingTop: 8, marginTop: 6 }}>
                       {[
-                        { item: 'Website Development', amt: '$2,500' },
-                        { item: 'UI/UX Design', amt: '$1,200' },
-                      ].map((r, i) => (
-                        <div key={i} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: '#374151', marginBottom: 4 }}>
-                          <span>{r.item}</span>
-                          <span style={{ fontWeight: 600 }}>{r.amt}</span>
+                        ['Subtotal', `$${calculateSubtotal().toLocaleString()}`],
+                        ['Tax (18%)', `$${calculateTax().toLocaleString()}`],
+                        ['Total', `$${calculateTotal().toLocaleString()}`]
+                      ].map(([l, v], i) => (
+                        <div key={l} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, marginBottom: 3, fontWeight: i === 2 ? 700 : 400, color: i === 2 ? '#4f46e5' : '#374151' }}>
+                          <span style={{ color: '#64748b' }}>{l}</span><span>{v} {quoteCurrency}</span>
                         </div>
                       ))}
-                      <div style={{ borderTop: '1px solid #eef0ff', paddingTop: 8, marginTop: 6 }}>
-                        {[['Subtotal', '$3,700'], ['Tax (18%)', '$666'], ['Total', '$4,366']].map(([l, v], i) => (
-                          <div key={i} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, fontWeight: i === 2 ? 800 : 400, color: i === 2 ? '#4f46e5' : '#374151', marginBottom: 3 }}>
-                            <span style={{ color: '#64748b' }}>{l}</span>
-                            <span>{v}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                    {/* Signature */}
-                    <div style={{ borderTop: '1px solid #eef0ff', paddingTop: 8, marginTop: 8, display: 'flex', justifyContent: 'flex-end' }}>
-                      <span style={{ fontSize: 16, fontFamily: 'Georgia, serif', color: '#374151', fontStyle: 'italic' }}>Jean Aginn</span>
                     </div>
                   </div>
-
-                  {/* Mini revenue badge */}
-                  <div className="stat-card">
+                  <div style={{ background: '#f8fafc', borderRadius: 10, padding: 14, border: '1px solid #e2e8f0' }}>
                     <div style={{ fontSize: 10, color: '#94a3b8', marginBottom: 4 }}>Revenue This Month</div>
-                    <div style={{ fontSize: 20, fontWeight: 800, color: '#1a1d2e' }}>$24,680</div>
-                    <div style={{ fontSize: 11, color: '#10b981', fontWeight: 600 }}>↑ 32.4%</div>
-                    <div style={{ height: 40, marginTop: 8 }}>
-                      <svg width="100%" height="40" viewBox="0 0 160 40">
-                        <defs>
-                          <linearGradient id="mini-g" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="0%" stopColor="#4f46e5" stopOpacity="0.3" />
-                            <stop offset="100%" stopColor="#4f46e5" stopOpacity="0.01" />
-                          </linearGradient>
-                        </defs>
-                        <polyline points="0,35 26,30 53,25 80,18 106,22 133,10 160,5" fill="none" stroke="#4f46e5" strokeWidth="2" strokeLinecap="round" />
-                      </svg>
-                    </div>
+                    <div style={{ fontSize: 18, fontWeight: 800, color: '#0f172a', letterSpacing: '-0.02em' }}>$24,680</div>
+                    <div style={{ fontSize: 11, color: '#10b981', fontWeight: 600, marginBottom: 8 }}>↑ 32.4%</div>
+                    <svg width="100%" height="36" viewBox="0 0 160 36">
+                      <polyline points="0,32 26,27 53,22 80,16 106,19 133,9 160,4" fill="none" stroke="#4f46e5" strokeWidth="1.8" strokeLinecap="round"/>
+                    </svg>
                   </div>
                 </div>
               </div>
@@ -1450,323 +1823,310 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* ══════════════════════════════════════════════════════════════
-            TEAM COLLABORATION SECTION
-        ══════════════════════════════════════════════════════════════ */}
-        <section style={{ padding: '100px 32px', background: 'linear-gradient(160deg,#eef0ff,#f5f0ff,#f8f9ff)', position: 'relative', overflow: 'hidden' }}>
-          {/* 3D notification bell — bottom left */}
-          <div className="float-3d-alt" style={{ position: 'absolute', bottom: '3%', left: '1%', pointerEvents: 'none', animationDelay: '0.6s' }}>
-            <div className="deco-cube-3d" style={{ width: 80, height: 80 }}>
-              <svg width="40" height="42" viewBox="0 0 40 42" fill="none">
-                <path d="M20 4C12 4 8 10 8 18v8l-3 4h30l-3-4v-8C32 10 28 4 20 4z" fill="rgba(255,255,255,0.8)" stroke="rgba(255,255,255,0.9)" strokeWidth="1"/>
-                <rect x="15" y="34" width="10" height="4" rx="2" fill="rgba(255,255,255,0.7)"/>
-                <circle cx="30" cy="8" r="5" fill="#10b981"/>
-                <text x="30" y="11" textAnchor="middle" fontSize="6" fontWeight="800" fill="white">3</text>
-              </svg>
-            </div>
-          </div>
-
-          <div style={{ maxWidth: 1200, margin: '0 auto' }}>
-            <div style={{ display: 'flex', gap: 64, alignItems: 'flex-start', marginBottom: 48 }}>
+        {/* ══════ TEAM COLLABORATION ══════ */}
+        <section className="lp-section" style={{ background: '#fafafa', borderTop: '1px solid #e2e8f0', borderBottom: '1px solid #e2e8f0' }}>
+          <div className="lp-container">
+            <div className="collab-layout" style={{ display: 'flex', gap: 56, alignItems: 'flex-start' }}>
               {/* Left copy */}
-              <div style={{ flex: '0 0 300px' }}>
-                <div className="badge-pill" style={{ marginBottom: 16 }}>
-                  <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M6.5 1a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5z" fill="#4f46e5" /><path d="M1 12c0-3 2.5-4.5 5.5-4.5S12 9 12 12" stroke="#4f46e5" strokeWidth="1.3" strokeLinecap="round" /></svg>
-                  Team Collaboration
-                </div>
-                <h2 style={{ fontSize: 40, fontWeight: 800, lineHeight: 1.1, letterSpacing: '-0.02em', fontFamily: "'Plus Jakarta Sans',sans-serif", color: '#0f172a', marginBottom: 14 }}>
-                  Collaborate Better.<br />
-                  <span style={{ background: 'linear-gradient(135deg,#4f46e5,#7c3aed)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>Deliver Faster.</span>
+              <div style={{ flex: '0 0 280px' }}>
+                <div className="section-label"><Icon name="users" size={14} color="#4f46e5" /> Team Collaboration</div>
+                <h2 style={{ fontSize: 36, fontWeight: 800, color: '#0f172a', marginBottom: 12, fontFamily: "'Plus Jakarta Sans',sans-serif", letterSpacing: '-0.02em' }}>
+                  Collaborate Better.<br /><span style={{ color: '#4f46e5' }}>Deliver Faster.</span>
                 </h2>
-                <p style={{ fontSize: 15, color: '#64748b', lineHeight: 1.7, marginBottom: 28 }}>
-                  Bring your team, projects, tasks, and conversations together in one unified workspace. Align, communicate, and get things done.
+                <p className="section-desc" style={{ marginBottom: 28 }}>
+                  Bring your team, projects, tasks, and conversations together in one unified workspace.
                 </p>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 12 }}>
                   {[
-                    { icon: '✅', title: 'Task Assignment', desc: 'Assign tasks, set deadlines, and track progress.' },
-                    { icon: '💬', title: 'Team Chat', desc: 'Chat in real-time with your team or clients inside each project.' },
-                    { icon: '🎫', title: 'Raise Tickets', desc: 'Report issues, bugs, or requests and get faster resolutions.' },
-                    { icon: '🗂', title: 'Project Workspace', desc: 'Dedicated space for every project and all its activities.' },
+                    { icon: 'check', title: 'Task Assignment', desc: 'Assign tasks, set deadlines, and track progress.' },
+                    { icon: 'chat', title: 'Team Chat', desc: 'Chat in real-time with your team or clients.' },
+                    { icon: 'ticket', title: 'Raise Tickets', desc: 'Report issues and get faster resolutions.' },
+                    { icon: 'file', title: 'Project Workspace', desc: 'Dedicated space for every project.' },
                   ].map((f, i) => (
-                    <div key={i} style={{ background: '#fff', borderRadius: 14, padding: '16px', border: '1px solid #eef0ff', transition: 'all 0.25s' }}>
-                      <div style={{ width: 34, height: 34, borderRadius: 10, background: '#f0f2ff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, marginBottom: 8 }}>{f.icon}</div>
-                      <div style={{ fontSize: 13, fontWeight: 700, color: '#1a1d2e', marginBottom: 4 }}>{f.title}</div>
-                      <p style={{ fontSize: 11, color: '#94a3b8', lineHeight: 1.5 }}>{f.desc}</p>
+                    <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, padding: '12px 14px', background: '#fff', border: '1px solid #e2e8f0', borderRadius: 10 }}>
+                      <div style={{ width: 30, height: 30, borderRadius: 8, background: '#eff6ff', border: '1px solid #dbeafe', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 1 }}>
+                        <Icon name={f.icon} size={15} color="#4f46e5" />
+                      </div>
+                      <div>
+                        <div style={{ fontSize: 13, fontWeight: 700, color: '#0f172a', marginBottom: 2 }}>{f.title}</div>
+                        <div style={{ fontSize: 12, color: '#64748b' }}>{f.desc}</div>
+                      </div>
                     </div>
                   ))}
-                </div>
-
-                {/* 3D Team collaboration illustration */}
-                <div className="float-3d" style={{ marginTop: 32, position: 'relative', height: 120, display: 'flex', alignItems: 'flex-end' }}>
-                  {/* Platform */}
-                  <div style={{ position: 'absolute', bottom: 0, left: '50%', transform: 'translateX(-50%)', width: 160, height: 20, background: 'linear-gradient(135deg,#c7d2fe,#a5b4fc)', borderRadius: '50%', boxShadow: '0 6px 20px rgba(99,102,241,0.3)' }} />
-                  {/* Three people silhouettes */}
-                  {[
-                    { x: 18, scale: 0.85, color: '#818cf8', delay: '0.2s' },
-                    { x: 58, scale: 1,    color: '#4f46e5', delay: '0s'   },
-                    { x: 98, scale: 0.85, color: '#7c3aed', delay: '0.4s' },
-                  ].map((p, i) => (
-                    <div key={i} style={{ position: 'absolute', bottom: 14, left: p.x, transform: `scale(${p.scale})`, transformOrigin: 'bottom center' }}>
-                      {/* Body */}
-                      <div style={{ width: 32, height: 44, background: `linear-gradient(180deg,${p.color},${p.color}cc)`, borderRadius: '14px 14px 10px 10px', margin: '0 auto', boxShadow: `0 8px 20px ${p.color}40` }} />
-                      {/* Head */}
-                      <div style={{ width: 26, height: 26, background: `radial-gradient(circle at 38% 35%,${p.color}dd,${p.color})`, borderRadius: '50%', margin: '-8px auto 0', boxShadow: `inset -3px -3px 8px rgba(0,0,0,0.15), inset 2px 2px 6px rgba(255,255,255,0.25)` }} />
-                    </div>
-                  ))}
-                  {/* Floating chat bubble */}
-                  <div className="float-3d-alt" style={{ position: 'absolute', top: -5, right: -10, animationDelay: '0.8s' }}>
-                    <div className="deco-card-3d" style={{ width: 44, height: 44 }}>
-                      <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
-                        <rect x="1" y="1" width="20" height="16" rx="5" fill="#4f46e5" opacity="0.9"/>
-                        <path d="M5 18l3-3h13" stroke="#4f46e5" strokeWidth="2" strokeLinecap="round" opacity="0.6"/>
-                        <circle cx="7" cy="9" r="1.5" fill="white"/>
-                        <circle cx="11" cy="9" r="1.5" fill="white"/>
-                        <circle cx="15" cy="9" r="1.5" fill="white"/>
-                      </svg>
-                    </div>
-                  </div>
-                  {/* Sparkle */}
-                  <div className="float-3d" style={{ position: 'absolute', top: 10, left: -8, animationDelay: '1.2s' }}>
-                    <SparkleIcon size={16} color="#818cf8" />
-                  </div>
                 </div>
               </div>
 
-              {/* Kanban board */}
-              <div style={{ flex: 1 }}>
-                <div className="glass-card" style={{ padding: 24, marginBottom: 20 }}>
-                  {/* Board header */}
+              {/* Kanban + tickets */}
+              <div style={{ flex: 1, minWidth: 0 }}>
+                {/* Kanban */}
+                <div style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: 16, padding: 20, marginBottom: 20 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
                     <div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                        <div style={{ width: 32, height: 32, borderRadius: 10, background: 'linear-gradient(135deg,#818cf8,#4f46e5)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="5" height="12" rx="2" fill="white" opacity="0.7" /><rect x="9" y="2" width="5" height="8" rx="2" fill="white" /></svg>
-                        </div>
-                        <div>
-                          <div style={{ fontSize: 11, color: '#94a3b8' }}>Project Workspace</div>
-                          <div style={{ fontSize: 16, fontWeight: 700, color: '#1a1d2e', display: 'flex', alignItems: 'center', gap: 8 }}>
-                            Website Redesign
-                            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 5.5l4 4 4-4" stroke="#94a3b8" strokeWidth="1.5" strokeLinecap="round" /></svg>
-                          </div>
-                        </div>
-                      </div>
+                      <div style={{ fontSize: 11, color: '#94a3b8', marginBottom: 2 }}>Project Workspace</div>
+                      <div style={{ fontSize: 16, fontWeight: 700, color: '#0f172a' }}>Website Redesign</div>
                     </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                      <div style={{ display: 'flex', background: '#e8fdf5', borderRadius: 100, padding: '4px 12px', fontSize: 12, fontWeight: 700, color: '#10b981', border: '1px solid #d1fae5' }}>In Progress</div>
-                      <div style={{ display: 'flex' }}>
-                        {['#4f46e5','#7c3aed','#ec4899'].map((c, i) => (
-                          <div key={i} style={{ width: 28, height: 28, borderRadius: '50%', background: c, border: '2px solid #fff', marginLeft: i > 0 ? -8 : 0 }} />
-                        ))}
-                        <div style={{ width: 28, height: 28, borderRadius: '50%', background: '#f1f3ff', border: '2px solid #fff', marginLeft: -8, fontSize: 10, fontWeight: 700, color: '#94a3b8', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>+3</div>
-                      </div>
+                    <div style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '4px 10px', borderRadius: 100, background: '#f0fdf4', border: '1px solid #bbf7d0', fontSize: 11, fontWeight: 700, color: '#16a34a' }}>
+                      In Progress
                     </div>
                   </div>
 
-                  {/* Tab bar */}
-                  <div style={{ display: 'flex', gap: 0, borderBottom: '1px solid #eef0ff', marginBottom: 20 }}>
-                    {['Overview', 'Tasks', 'Chat', 'Files', 'Tickets', 'Reports'].map((t, i) => (
-                      <button key={t} style={{
-                        padding: '8px 16px', fontSize: 13, fontWeight: i === 1 ? 700 : 500,
-                        color: i === 1 ? '#4f46e5' : '#94a3b8', background: 'none', border: 'none', cursor: 'pointer',
-                        borderBottom: i === 1 ? '2px solid #4f46e5' : '2px solid transparent',
-                        transition: 'all 0.2s',
-                      }}>{t}</button>
-                    ))}
-                  </div>
-
-                  {/* Kanban columns */}
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 16 }}>
-                    {[
-                      {
-                        title: 'To Do', count: 5, color: '#94a3b8',
-                        cards: [
-                          { title: 'Create wireframes for landing page', date: 'May 20', prio: 'High', prios: '#ef4444' },
-                          { title: 'Set up analytics events', date: 'May 21', prio: 'Medium', prios: '#f59e0b' },
-                          { title: 'Prepare UI style guide', date: 'May 22', prio: 'Low', prios: '#10b981' },
-                          { title: 'Competitor research', date: 'May 23', prio: 'Low', prios: '#10b981' },
-                        ],
-                      },
-                      {
-                        title: 'In Progress', count: 3, color: '#f59e0b',
-                        cards: [
-                          { title: 'Design homepage UI', date: 'May 18', prio: 'High', prios: '#ef4444', progress: 60 },
-                          { title: 'Develop API integration', date: 'May 19', prio: 'Medium', prios: '#f59e0b', progress: 40 },
-                          { title: 'Build responsive components', date: 'May 21', prio: 'Medium', prios: '#f59e0b', progress: 70 },
-                        ],
-                      },
-                      {
-                        title: 'Review', count: 2, color: '#8b5cf6',
-                        cards: [
-                          { title: 'Review homepage design', date: 'May 17', prio: 'High', prios: '#ef4444' },
-                          { title: 'Code review & refactoring', date: 'May 20', prio: 'Medium', prios: '#f59e0b' },
-                        ],
-                      },
-                      {
-                        title: 'Done', count: 4, color: '#10b981',
-                        cards: [
-                          { title: 'Project kickoff meeting', date: 'May 10', done: true },
-                          { title: 'Market & user research', date: 'May 11', done: true },
-                          { title: 'Information architecture', date: 'May 12', done: true },
-                          { title: 'Brand guidelines review', date: 'May 13', done: true },
-                        ],
-                      },
-                    ].map((col, ci) => (
-                      <div key={ci}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                            <span style={{ fontSize: 13, fontWeight: 700, color: '#1a1d2e' }}>{col.title}</span>
-                            <div style={{ width: 20, height: 20, borderRadius: '50%', background: '#f1f3ff', fontSize: 11, fontWeight: 700, color: '#94a3b8', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{col.count}</div>
-                          </div>
-                          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="3" r="1.5" fill="#94a3b8" /><circle cx="8" cy="8" r="1.5" fill="#94a3b8" /><circle cx="8" cy="13" r="1.5" fill="#94a3b8" /></svg>
-                        </div>
-                        {col.cards.slice(0, 3).map((card, ki) => (
-                          <div key={ki} className="kanban-card">
-                            <div style={{ fontSize: 12, fontWeight: 600, color: '#1a1d2e', marginBottom: 8, lineHeight: 1.4 }}>{card.title}</div>
-                            {'done' in card && card.done ? (
-                              <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, color: '#10b981' }}>
-                                <CheckIcon size={12} color="#10b981" /> <span style={{ color: '#94a3b8' }}>{card.date}</span>
-                              </div>
-                            ) : (
-                              <div>
-                                {(card as any).progress !== undefined && (
-                                  <div style={{ height: 4, background: '#f1f3ff', borderRadius: 2, marginBottom: 8, overflow: 'hidden' }}>
-                                    <div style={{ height: '100%', width: `${(card as any).progress}%`, background: 'linear-gradient(90deg,#4f46e5,#7c3aed)', borderRadius: 2 }} />
-                                  </div>
-                                )}
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                  <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                                    <div style={{ width: 20, height: 20, borderRadius: '50%', background: 'linear-gradient(135deg,#818cf8,#4f46e5)' }} />
-                                    <span style={{ fontSize: 10, color: '#94a3b8' }}>{card.date}</span>
-                                  </div>
-                                  {(card as any).prio && (
-                                    <div style={{ padding: '2px 7px', borderRadius: 100, fontSize: 9, fontWeight: 700, background: `${(card as any).prios}15`, color: (card as any).prios }}>{(card as any).prio}</div>
-                                  )}
-                                </div>
-                              </div>
-                            )}
-                          </div>
-                        ))}
-                        <button style={{ width: '100%', padding: '8px', fontSize: 12, color: '#94a3b8', background: 'none', border: 'none', cursor: 'pointer', textAlign: 'center' }}>+ Add Task</button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* ── Tickets section ── */}
-                <div className="glass-card" style={{ padding: 24 }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-                    <h4 style={{ fontSize: 16, fontWeight: 700, color: '#1a1d2e' }}>Raise & Track Tickets</h4>
-                    <button className="btn-primary" style={{ padding: '8px 16px', fontSize: 13 }}>+ New Ticket</button>
-                  </div>
-
-                  {/* Ticket tabs */}
-                  <div style={{ display: 'flex', gap: 4, marginBottom: 16 }}>
-                    {['All Tickets', 'Bug', 'Feature', 'Improvement', 'Support'].map(t => (
+                  {/* Tabs */}
+                  <div style={{ display: 'flex', gap: 4, borderBottom: '1px solid #f1f5f9', marginBottom: 16 }}>
+                    {['Overview', 'Tasks', 'Chat', 'Files', 'Tickets', 'Reports'].map((t) => (
                       <button
                         key={t}
-                        onClick={() => setActiveTicketTab(t)}
+                        onClick={() => setActiveCollabTab(t as any)}
                         style={{
-                          padding: '6px 14px', fontSize: 12, fontWeight: 600, borderRadius: 8, border: 'none', cursor: 'pointer',
-                          background: activeTicketTab === t ? '#4f46e5' : '#f1f3ff',
-                          color: activeTicketTab === t ? '#fff' : '#64748b',
-                          transition: 'all 0.2s',
+                          padding: '7px 14px', fontSize: 12, fontWeight: activeCollabTab === t ? 700 : 500,
+                          color: activeCollabTab === t ? '#4f46e5' : '#94a3b8',
+                          background: 'none', border: 'none',
+                          borderBottom: activeCollabTab === t ? '2px solid #4f46e5' : '2px solid transparent',
+                          cursor: 'pointer', marginBottom: -1
                         }}
-                      >{t}</button>
-                    ))}
-                    <div style={{ flex: 1 }} />
-                    <button style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '6px 14px', fontSize: 12, fontWeight: 600, background: '#f1f3ff', border: 'none', borderRadius: 8, cursor: 'pointer', color: '#64748b' }}>
-                      <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M1 4h10M2 8h8M4 11h4" stroke="#64748b" strokeWidth="1.2" strokeLinecap="round" /></svg>
-                      Filters
-                    </button>
-                    <button style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '6px 14px', fontSize: 12, fontWeight: 600, background: '#f1f3ff', border: 'none', borderRadius: 8, cursor: 'pointer', color: '#64748b' }}>
-                      <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1v10M1 6l5-5 5 5" stroke="#64748b" strokeWidth="1.2" strokeLinecap="round" /></svg>
-                      Sort
-                    </button>
-                  </div>
-
-                  {/* Ticket cards */}
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5,1fr)', gap: 12 }}>
-                    {[
-                      { type: 'BUG', id: '#TK-1249', title: 'Mobile menu not working on Safari', proj: 'Website Redesign', person: 'John D.', prio: 'High', prios: '#ef4444', status: 'In Progress', statc: '#f59e0b' },
-                      { type: 'FEATURE', id: '#TK-1247', title: 'Add dark mode support', proj: 'Website Redesign', person: 'Emily R.', prio: 'Medium', prios: '#f59e0b', status: 'To Do', statc: '#94a3b8' },
-                      { type: 'BUG', id: '#TK-1248', title: 'Form validation error messages', proj: 'Website Redesign', person: 'Mike L.', prio: 'Medium', prios: '#f59e0b', status: 'In Progress', statc: '#f59e0b' },
-                      { type: 'SUPPORT', id: '#TK-1245', title: 'Server error on file upload', proj: 'Website Redesign', person: 'Sarah K.', prio: 'High', prios: '#ef4444', status: 'Open', statc: '#3b82f6' },
-                      { type: 'IMPROVEMENT', id: '#TK-1244', title: 'Improve page loading speed', proj: 'Website Redesign', person: 'Alex P.', prio: 'Low', prios: '#10b981', status: 'Review', statc: '#8b5cf6' },
-                    ].map((ticket, i) => (
-                      <div key={i} style={{ background: '#fff', borderRadius: 14, padding: '16px', border: '1px solid #eef0ff', transition: 'all 0.25s', cursor: 'pointer' }}
-                        onMouseEnter={e => { (e.currentTarget as HTMLElement).style.transform = 'translateY(-3px)'; (e.currentTarget as HTMLElement).style.boxShadow = '0 12px 30px rgba(99,102,241,0.1)'; }}
-                        onMouseLeave={e => { (e.currentTarget as HTMLElement).style.transform = ''; (e.currentTarget as HTMLElement).style.boxShadow = ''; }}
                       >
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 }}>
-                          <div className="ticket-tag" style={{
-                            background: ticket.type === 'BUG' ? '#fee2e2' : ticket.type === 'FEATURE' ? '#e0fdf4' : ticket.type === 'SUPPORT' ? '#eff6ff' : '#f5f0ff',
-                            color: ticket.type === 'BUG' ? '#dc2626' : ticket.type === 'FEATURE' ? '#10b981' : ticket.type === 'SUPPORT' ? '#3b82f6' : '#8b5cf6',
-                          }}>
-                            {ticket.type}
-                          </div>
-                          <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="3" r="1.2" fill="#94a3b8" /><circle cx="7" cy="7" r="1.2" fill="#94a3b8" /><circle cx="7" cy="11" r="1.2" fill="#94a3b8" /></svg>
+                        {t}
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Tab Contents */}
+                  {activeCollabTab === 'Overview' && (
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
+                      <div>
+                        <h4 style={{ fontSize: 14, fontWeight: 700, color: '#0f172a', marginBottom: 8 }}>Project Overview</h4>
+                        <p style={{ fontSize: 12, color: '#64748b', lineHeight: 1.6, marginBottom: 12 }}>
+                          This project focuses on redesigning the main e-commerce portal to improve conversion rates and integrate with Quotiq.
+                        </p>
+                        <div style={{ fontSize: 11, fontWeight: 600, color: '#94a3b8', marginBottom: 4 }}>Overall Milestone Progress</div>
+                        <div className="progress-track" style={{ height: 8 }}>
+                          <div className="progress-fill" style={{ width: '65%' }} />
                         </div>
-                        <div style={{ fontSize: 10, color: '#94a3b8', marginBottom: 6 }}>{ticket.id}</div>
-                        <div style={{ fontSize: 13, fontWeight: 700, color: '#1a1d2e', lineHeight: 1.4, marginBottom: 8 }}>{ticket.title}</div>
-                        <div style={{ fontSize: 11, color: '#94a3b8', marginBottom: 12 }}>{ticket.proj}</div>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-                            <div style={{ width: 20, height: 20, borderRadius: '50%', background: 'linear-gradient(135deg,#818cf8,#4f46e5)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 8, fontWeight: 700, color: '#fff' }}>
-                              {ticket.person.split(' ')[0]![0]}
+                        <span style={{ fontSize: 11, color: '#64748b' }}>65% Complete</span>
+                      </div>
+                      <div>
+                        <h4 style={{ fontSize: 14, fontWeight: 700, color: '#0f172a', marginBottom: 8 }}>Team Directory</h4>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                          {[
+                            { name: 'Alice Johnson', role: 'Design Lead' },
+                            { name: 'Bob Smith', role: 'Core Engineer' },
+                            { name: 'Charlie Brown', role: 'Product Manager' }
+                          ].map((u) => (
+                            <div key={u.name} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                              <div style={{ width: 24, height: 24, borderRadius: '50%', background: '#f1f5f9', border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, fontWeight: 700, color: '#4f46e5' }}>
+                                {u.name.split(' ')[0]![0]}
+                              </div>
+                              <div>
+                                <div style={{ fontSize: 11, fontWeight: 600, color: '#374151' }}>{u.name}</div>
+                                <div style={{ fontSize: 9, color: '#94a3b8' }}>{u.role}</div>
+                              </div>
                             </div>
-                            <span style={{ fontSize: 10, color: '#64748b' }}>{ticket.person}</span>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {activeCollabTab === 'Tasks' && (
+                    <div className="kanban-layout">
+                      <div className="kanban-inner" style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 16 }}>
+                        {['todo', 'progress', 'review', 'done'].map((columnKey) => {
+                          const columnTitle = columnKey === 'todo' ? 'To Do' : columnKey === 'progress' ? 'In Progress' : columnKey === 'review' ? 'Review' : 'Done';
+                          const columnTasks = kanbanTasks.filter(t => t.column === columnKey);
+                          return (
+                            <div key={columnKey} className="kanban-col">
+                              <div className="kanban-col-header">
+                                {columnTitle}
+                                <span className="kanban-count">{columnTasks.length}</span>
+                              </div>
+
+                              {columnTasks.map((card) => (
+                                <div key={card.id} className="kanban-card" onClick={() => handleMoveTask(card.id)} title="Click to move to next column">
+                                  <div style={{ fontSize: 12, fontWeight: 600, color: '#374151', marginBottom: 8, lineHeight: 1.4 }}>{card.title}</div>
+                                  {columnKey === 'done' ? (
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, color: '#10b981' }}>
+                                      <Icon name="check" size={13} color="#10b981" /> <span style={{ fontSize: 10, color: '#94a3b8' }}>Completed</span>
+                                    </div>
+                                  ) : (
+                                    <div>
+                                      {card.prog !== undefined && (
+                                        <div className="progress-track" style={{ marginBottom: 8 }}>
+                                          <div className="progress-fill" style={{ width: `${card.prog}%` }} />
+                                        </div>
+                                      )}
+                                      {card.prio && (
+                                        <span className="priority" style={{ background: `${card.pc}12`, color: card.pc }}>
+                                          {card.prio}
+                                        </span>
+                                      )}
+                                    </div>
+                                  )}
+                                </div>
+                              ))}
+
+                              {showAddTaskInput === columnKey ? (
+                                <div style={{ background: '#f8fafc', padding: 8, borderRadius: 8, border: '1px solid #e2e8f0', marginTop: 8 }}>
+                                  <input
+                                    className="lp-input"
+                                    placeholder="Task title..."
+                                    value={addTaskTitle}
+                                    onChange={(e) => setAddTaskTitle(e.target.value)}
+                                    style={{ fontSize: 11, padding: '4px 8px', marginBottom: 6 }}
+                                  />
+                                  <div style={{ display: 'flex', gap: 4 }}>
+                                    <button className="btn-primary" onClick={() => handleAddTask(columnKey)} style={{ fontSize: 10, padding: '4px 8px' }}>Add</button>
+                                    <button className="btn-secondary" onClick={() => { setShowAddTaskInput(null); setAddTaskTitle(''); }} style={{ fontSize: 10, padding: '4px 8px' }}>Cancel</button>
+                                  </div>
+                                </div>
+                              ) : (
+                                <button
+                                  onClick={() => setShowAddTaskInput(columnKey)}
+                                  style={{ fontSize: 12, color: '#94a3b8', background: 'none', border: 'none', cursor: 'pointer', padding: '6px 0', width: '100%', textAlign: 'left' }}
+                                >
+                                  + Add Task
+                                </button>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+
+                  {activeCollabTab === 'Chat' && (
+                    <div>
+                      <div style={{ height: 200, overflowY: 'auto', border: '1px solid #e2e8f0', borderRadius: 8, padding: 12, marginBottom: 12, background: '#f8fafc' }}>
+                        {chatMessages.map((msg, i) => (
+                          <div key={i} style={{ display: 'flex', gap: 8, marginBottom: 12, alignSelf: msg.sender === 'You' ? 'flex-end' : 'flex-start' }}>
+                            <div style={{
+                              width: 24, height: 24, borderRadius: '50%',
+                              background: msg.sender === 'You' ? '#4f46e5' : '#7c3aed',
+                              color: '#fff', fontSize: 10, fontWeight: 700,
+                              display: 'flex', alignItems: 'center', justifyContent: 'center'
+                            }}>
+                              {msg.avatar}
+                            </div>
+                            <div>
+                              <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                                <span style={{ fontSize: 11, fontWeight: 700, color: '#0f172a' }}>{msg.sender}</span>
+                                <span style={{ fontSize: 8, color: '#94a3b8' }}>{msg.time}</span>
+                              </div>
+                              <p style={{ fontSize: 12, color: '#374151', marginTop: 2, background: '#fff', padding: '6px 10px', borderRadius: '0 8px 8px 8px', border: '1px solid #e2e8f0' }}>{msg.msg}</p>
+                            </div>
                           </div>
-                          <div style={{ fontSize: 9, fontWeight: 700, color: ticket.prios, background: `${ticket.prios}15`, padding: '2px 6px', borderRadius: 100 }}>● {ticket.prio}</div>
+                        ))}
+                      </div>
+                      <form onSubmit={handleSendChatMessage} style={{ display: 'flex', gap: 8 }}>
+                        <input className="lp-input" placeholder="Type a message..." value={chatInput} onChange={(e) => setChatInput(e.target.value)} style={{ fontSize: 12 }} />
+                        <button className="btn-primary" type="submit">Send</button>
+                      </form>
+                    </div>
+                  )}
+
+                  {activeCollabTab === 'Files' && (
+                    <div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+                        <span style={{ fontSize: 12, fontWeight: 600, color: '#94a3b8' }}>Uploaded Project Files</span>
+                        <button className="btn-primary" onClick={handleFileUploadSimulation} disabled={isUploading} style={{ fontSize: 11, padding: '5px 12px' }}>
+                          {isUploading ? 'Uploading...' : 'Upload File'}
+                        </button>
+                      </div>
+                      <table className="q-table">
+                        <thead>
+                          <tr><th>File Name</th><th>Size</th><th>Date</th><th>Uploaded By</th></tr>
+                        </thead>
+                        <tbody>
+                          {sharedFiles.map((file, idx) => (
+                            <tr key={idx}>
+                              <td style={{ fontWeight: 600, color: '#4f46e5', cursor: 'pointer' }}>📁 {file.name}</td>
+                              <td>{file.size}</td>
+                              <td>{file.date}</td>
+                              <td>{file.by}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+
+                  {activeCollabTab === 'Tickets' && (
+                    <div>
+                      <h4 style={{ fontSize: 14, fontWeight: 700, color: '#0f172a', marginBottom: 10 }}>Active Tickets for this Workspace</h4>
+                      <table className="q-table">
+                        <thead>
+                          <tr><th>Ticket ID</th><th>Type</th><th>Title</th><th>Priority</th><th>Status</th></tr>
+                        </thead>
+                        <tbody>
+                          {tickets.slice(0, 3).map((tk) => (
+                            <tr key={tk.id}>
+                              <td style={{ fontWeight: 600 }}>{tk.id}</td>
+                              <td><span style={{ fontSize: 9, background: '#fee2e2', color: '#dc2626', padding: '2px 6px', borderRadius: 4, fontWeight: 700 }}>{tk.type}</span></td>
+                              <td>{tk.title}</td>
+                              <td>{tk.prio}</td>
+                              <td style={{ fontWeight: 700, color: '#f59e0b' }}>{tk.status}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+
+                  {activeCollabTab === 'Reports' && (
+                    <div>
+                      <h4 style={{ fontSize: 14, fontWeight: 700, color: '#0f172a', marginBottom: 10 }}>Workspace Productivity Metrics</h4>
+                      <div style={{ background: '#f8fafc', padding: 12, borderRadius: 8, border: '1px solid #e2e8f0', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+                        <div>
+                          <div style={{ fontSize: 10, color: '#94a3b8', fontWeight: 600 }}>Milestone Completion Rate</div>
+                          <div style={{ fontSize: 20, fontWeight: 800, color: '#0f172a' }}>88%</div>
                         </div>
-                        <div style={{ marginTop: 10, padding: '5px 10px', borderRadius: 8, background: `${ticket.statc}15`, fontSize: 11, fontWeight: 700, color: ticket.statc, textAlign: 'center' }}>
-                          {ticket.status}
+                        <div>
+                          <div style={{ fontSize: 10, color: '#94a3b8', fontWeight: 600 }}>Average Tasks Done / Wk</div>
+                          <div style={{ fontSize: 20, fontWeight: 800, color: '#4f46e5' }}>14.2</div>
                         </div>
                       </div>
-                    ))}
-                  </div>
+                    </div>
+                  )}
                 </div>
-              </div>
 
-              {/* Project chat panel */}
-              <div style={{ flex: '0 0 220px', display: 'flex', flexDirection: 'column' }}>
-                <div className="glass-card" style={{ flex: 1, padding: 20, display: 'flex', flexDirection: 'column' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-                    <span style={{ fontSize: 14, fontWeight: 700, color: '#1a1d2e' }}>Project Chat</span>
-                    <div style={{ display: 'flex', gap: 8 }}>
-                      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 4h12M2 8h12M2 12h12" stroke="#94a3b8" strokeWidth="1.5" strokeLinecap="round" /></svg>
-                      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="3" cy="8" r="1.5" fill="#94a3b8" /><circle cx="8" cy="8" r="1.5" fill="#94a3b8" /><circle cx="13" cy="8" r="1.5" fill="#94a3b8" /></svg>
-                    </div>
+                {/* Tickets Tracker Section */}
+                <div style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: 16, padding: 20, marginTop: 20 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
+                    <span style={{ fontSize: 15, fontWeight: 700, color: '#0f172a' }}>Raise &amp; Track Tickets</span>
+                    <button className="btn-primary" onClick={() => setShowCreateTicketModal(true)} style={{ padding: '7px 14px', fontSize: 13 }}>
+                      + New Ticket
+                    </button>
                   </div>
-                  <div style={{ fontSize: 10, fontWeight: 700, color: '#94a3b8', letterSpacing: '0.1em', marginBottom: 8 }}>CHANNELS</div>
-                  {['# Client Chat', '# Team Updates', '# Design Team', '# Dev Team', '# General'].map((ch, i) => (
-                    <div key={ch} style={{ padding: '7px 10px', borderRadius: 8, fontSize: 12, fontWeight: i === 0 ? 700 : 500, color: i === 0 ? '#4f46e5' : '#64748b', background: i === 0 ? '#f0f2ff' : 'transparent', marginBottom: 2, cursor: 'pointer' }}>
-                      {ch}
-                    </div>
-                  ))}
-
-                  <div style={{ flex: 1, overflowY: 'auto', marginTop: 12, paddingTop: 12, borderTop: '1px solid #eef0ff' }}>
-                    {[
-                      { name: 'Sarah (Client)', time: '10:30 AM', msg: 'Hey team! The new homepage looks amazing. Can we add one more section for testimonials?', color: '#ec4899', mine: false },
-                      { name: 'Alex (You)', time: '10:32 AM', msg: "Sure! We'll add that section and share the update by EOD.", color: '#4f46e5', mine: true },
-                      { name: 'Mike (Designer)', time: '10:33 AM', msg: "On it! Sharing the wireframe shortly.", color: '#10b981', mine: false },
-                    ].map((msg, i) => (
-                      <div key={i} style={{ marginBottom: 14 }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
-                          <span style={{ fontSize: 11, fontWeight: 700, color: msg.color }}>{msg.name}</span>
-                          <span style={{ fontSize: 10, color: '#94a3b8' }}>{msg.time}</span>
-                        </div>
-                        <div style={{ fontSize: 11, color: '#374151', lineHeight: 1.5, background: msg.mine ? '#f0f2ff' : '#f8f9ff', padding: '8px 10px', borderRadius: 10, border: `1px solid ${msg.mine ? '#e0e4ff' : '#eef0ff'}` }}>
-                          {msg.msg}
-                        </div>
-                      </div>
+                  <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', marginBottom: 16 }}>
+                    {['All Tickets','Bug','Feature','Improvement','Support'].map(t => (
+                      <button
+                        key={t}
+                        onClick={() => setActiveTicket(t)}
+                        style={{
+                          padding: '5px 12px', fontSize: 12, fontWeight: 600, borderRadius: 7, border: 'none', cursor: 'pointer',
+                          background: activeTicket === t ? '#4f46e5' : '#f1f5f9',
+                          color: activeTicket === t ? '#fff' : '#64748b',
+                          transition: 'all 0.15s'
+                        }}
+                      >
+                        {t}
+                      </button>
                     ))}
                   </div>
 
-                  <div style={{ display: 'flex', gap: 8, paddingTop: 12, borderTop: '1px solid #eef0ff', marginTop: 8 }}>
-                    <input className="input-field" placeholder="Type a message..." style={{ flex: 1, padding: '8px 12px', fontSize: 12 }} />
-                    <button style={{ width: 34, height: 34, borderRadius: 10, background: 'linear-gradient(135deg,#4f46e5,#7c3aed)', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M13 7L1 1l4 6-4 6 12-6z" fill="white" /></svg>
-                    </button>
+                  <div className="ticket-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(5,1fr)', gap: 12 }}>
+                    {filteredTickets.map((ticket, i) => (
+                      <div key={i} className="ticket-card">
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 }}>
+                          <span className="ticket-type" style={{
+                            background: ticket.type === 'BUG' ? '#fee2e2' : ticket.type === 'FEATURE' ? '#d1fae5' : ticket.type === 'SUPPORT' ? '#dbeafe' : '#ede9fe',
+                            color: ticket.type === 'BUG' ? '#dc2626' : ticket.type === 'FEATURE' ? '#059669' : ticket.type === 'SUPPORT' ? '#2563eb' : '#7c3aed',
+                          }}>{ticket.type}</span>
+                        </div>
+                        <div style={{ fontSize: 9, color: '#94a3b8', marginBottom: 6 }}>{ticket.id}</div>
+                        <div style={{ fontSize: 12, fontWeight: 700, color: '#374151', lineHeight: 1.4, marginBottom: 8 }}>{ticket.title}</div>
+                        <span className="priority" style={{ background: `${ticket.pc}12`, color: ticket.pc }}>● {ticket.prio}</span>
+                        <div className="ticket-status" style={{ background: `${ticket.sc}12`, color: ticket.sc }}>{ticket.status}</div>
+                      </div>
+                    ))}
                   </div>
                 </div>
               </div>
@@ -1774,86 +2134,55 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* ══════════════════════════════════════════════════════════════
-            CTA SECTION
-        ══════════════════════════════════════════════════════════════ */}
-        <section style={{ padding: '60px 32px', background: '#f8f9ff' }}>
-          <div style={{ maxWidth: 1200, margin: '0 auto' }}>
-            <div style={{ background: 'linear-gradient(135deg,#f0f2ff,#ede9ff,#f5f0ff)', borderRadius: 32, padding: '64px 48px', position: 'relative', overflow: 'hidden', border: '1px solid #e0e4ff' }}>
-              {/* Background decorations */}
-              <div className="blob-sphere blob-purple float-3d-alt" style={{ position: 'absolute', top: '10%', left: '2%', width: 80, height: 80, opacity: 0.2 }} />
-              <div className="blob-sphere blob-blue float-3d" style={{ position: 'absolute', bottom: '10%', right: '25%', width: 50, height: 50, opacity: 0.2, animationDelay: '1s' }} />
-
-              <div style={{ display: 'flex', alignItems: 'center', gap: 48 }}>
-                {/* Rocket 3D */}
-                <div className="rocket-fly" style={{ flexShrink: 0 }}>
-                  <div style={{ width: 160, height: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
-                    <div style={{ fontSize: 90, filter: 'drop-shadow(0 20px 40px rgba(79,70,229,0.3))', transform: 'rotate(-10deg)' }}>🚀</div>
-                    {/* Cloud puffs */}
-                    <div style={{ position: 'absolute', bottom: 0, left: '50%', transform: 'translateX(-50%)', display: 'flex', gap: 4 }}>
-                      {[40, 55, 45].map((w, i) => (
-                        <div key={i} className="float-3d" style={{ width: w, height: w * 0.6, background: 'rgba(255,255,255,0.8)', borderRadius: '50%', backdropFilter: 'blur(4px)', animationDelay: `${i * 0.3}s` }} />
-                      ))}
-                    </div>
-                    {/* Stars */}
-                    {[[-30, 30], [35, 20], [-20, -20]].map(([x, y], i) => (
-                      <div key={i} className="float-3d" style={{ position: 'absolute', top: `calc(30% + ${y}px)`, left: `calc(50% + ${x}px)`, animationDelay: `${i * 0.4}s` }}>
-                        <StarIcon size={12} color="#c7d2fe" />
-                      </div>
-                    ))}
-                  </div>
+        {/* ══════ CTA ══════ */}
+        <section className="lp-section">
+          <div className="lp-container">
+            <div className="cta-box">
+              <div>
+                <div className="section-label"><Icon name="bolt" size={14} color="#4f46e5" /> Ready to Grow Your Business?</div>
+                <h2 className="cta-title">Ready to simplify your quoting and <span>win more deals?</span></h2>
+                <p className="cta-desc">
+                  Join thousands of businesses using Quotiq to create quotes, manage projects, and get paid faster — all in one powerful workspace.
+                </p>
+                <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+                  <Link to="/register" className="btn-primary btn-primary-lg">Start Free Trial <Icon name="arrow" size={17} color="white" /></Link>
+                  <button className="btn-secondary btn-secondary-lg"><Icon name="play" size={17} color="#374151" /> Watch Demo</button>
                 </div>
-
-                {/* Text */}
-                <div style={{ flex: 1 }}>
-                  <div className="badge-pill" style={{ marginBottom: 16 }}>
-                    <BoltIcon size={11} />
-                    <span style={{ color: '#4f46e5' }}>Ready to Grow Your Business?</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginTop: 16, flexWrap: 'wrap' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 12, color: '#64748b' }}>
+                    <Icon name="check" size={14} color="#10b981" /> No credit card required
                   </div>
-                  <h2 style={{ fontSize: 36, fontWeight: 800, lineHeight: 1.15, letterSpacing: '-0.02em', fontFamily: "'Plus Jakarta Sans',sans-serif", color: '#0f172a', marginBottom: 14 }}>
-                    Ready to simplify your quoting<br />
-                    and <span style={{ background: 'linear-gradient(135deg,#4f46e5,#7c3aed)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>win more deals?</span>
-                  </h2>
-                  <p style={{ fontSize: 15, color: '#64748b', lineHeight: 1.7, maxWidth: 460 }}>
-                    Join thousands of businesses using Quotiq to create quotes, manage projects, and get paid faster — all in one powerful workspace.
-                  </p>
+                  <div style={{ fontSize: 12, color: '#94a3b8' }}>·</div>
+                  <div style={{ fontSize: 12, color: '#64748b' }}>14-day free trial</div>
                 </div>
-
-                {/* Buttons */}
-                <div style={{ flexShrink: 0, display: 'flex', flexDirection: 'column', gap: 12, minWidth: 220 }}>
-                  <button className="btn-primary" style={{ width: '100%', justifyContent: 'center', padding: '15px 28px', fontSize: 15 }}>
-                    Start Free Trial <ArrowRightIcon size={18} />
-                  </button>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 16, fontSize: 11, color: '#94a3b8', fontWeight: 500 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-                      <CheckIcon size={12} color="#10b981" /> No credit card required
-                    </div>
-                    <span>•</span>
-                    <span>14-day free trial</span>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+                {[
+                  { val: '10K+', label: 'Teams worldwide' },
+                  { val: '2M+', label: 'Quotes generated' },
+                  { val: '99.9%', label: 'Uptime SLA' },
+                ].map((s, i) => (
+                  <div key={i} style={{ textAlign: 'center', padding: '20px 32px', background: '#fff', border: '1px solid #e2e8f0', borderRadius: 14 }}>
+                    <div style={{ fontSize: 28, fontWeight: 800, color: '#4f46e5', fontFamily: "'Plus Jakarta Sans',sans-serif", letterSpacing: '-0.03em' }}>{s.val}</div>
+                    <div style={{ fontSize: 12, color: '#64748b', marginTop: 2 }}>{s.label}</div>
                   </div>
-                  <button className="btn-secondary" style={{ width: '100%', justifyContent: 'center', padding: '12px 28px', fontSize: 15 }}>
-                    <PlayIcon size={18} /> Watch Demo
-                  </button>
-                </div>
-
-                {/* Target 3D */}
-                <div className="float-3d-alt" style={{ flexShrink: 0, fontSize: 80, filter: 'drop-shadow(0 20px 40px rgba(79,70,229,0.25))' }}>🎯</div>
+                ))}
               </div>
             </div>
 
-            {/* Trust badges */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5,1fr)', gap: 20, marginTop: 24 }}>
+            {/* Trust row */}
+            <div className="trust-row" style={{ marginTop: 24 }}>
               {[
-                { icon: '🛡', title: '14-Day Free Trial', sub: 'No credit card required' },
-                { icon: '🔒', title: 'Bank-Level Security', sub: 'Your data is always safe' },
-                { icon: '☁', title: '99.9% Uptime', sub: 'Reliable, always available' },
-                { icon: '🎧', title: '24/7 Customer Support', sub: "We're here to help" },
-                { icon: '❤', title: 'Loved by 10,000+ Teams', sub: 'Across the globe' },
+                { icon: 'shield', label: '14-Day Free Trial', sub: 'No credit card required' },
+                { icon: 'lock', label: 'Bank-Level Security', sub: 'Your data is always safe' },
+                { icon: 'cloud', label: '99.9% Uptime', sub: 'Reliable, always available' },
+                { icon: 'headphone', label: '24/7 Support', sub: "We're here to help" },
+                { icon: 'heart', label: 'Loved by 10,000+ Teams', sub: 'Across the globe' },
               ].map((b, i) => (
-                <div key={i} style={{ background: '#fff', borderRadius: 16, padding: '20px 16px', border: '1px solid #eef0ff', display: 'flex', alignItems: 'center', gap: 12, boxShadow: '0 2px 8px rgba(0,0,0,0.03)', transition: 'all 0.25s' }}>
-                  <div style={{ width: 40, height: 40, borderRadius: 12, background: '#f0f2ff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, flexShrink: 0 }}>{b.icon}</div>
+                <div key={i} className="trust-item">
+                  <div className="trust-icon"><Icon name={b.icon} size={18} color="#4f46e5" /></div>
                   <div>
-                    <div style={{ fontSize: 13, fontWeight: 700, color: '#1a1d2e' }}>{b.title}</div>
+                    <div style={{ fontSize: 13, fontWeight: 700, color: '#0f172a' }}>{b.label}</div>
                     <div style={{ fontSize: 11, color: '#94a3b8' }}>{b.sub}</div>
                   </div>
                 </div>
@@ -1862,100 +2191,97 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* ══════════════════════════════════════════════════════════════
-            FOOTER
-        ══════════════════════════════════════════════════════════════ */}
-        <footer style={{ background: '#fff', borderTop: '1px solid #eef0ff', padding: '60px 32px 0' }}>
-          <div style={{ maxWidth: 1200, margin: '0 auto' }}>
-            <div style={{ display: 'grid', gridTemplateColumns: '220px 1fr 1fr 1fr 1fr 1fr 280px', gap: 32, paddingBottom: 48, borderBottom: '1px solid #eef0ff' }}>
+        {/* ══════ FOOTER ══════ */}
+        <footer className="footer">
+          <div className="footer-inner">
+            <div className="footer-grid">
               {/* Brand */}
-              <div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
-                  <QuotiqLogo size={30} />
-                  <span style={{ fontSize: 18, fontWeight: 800, color: '#1a1d2e', fontFamily: "'Plus Jakarta Sans',sans-serif" }}>Quotiq</span>
+              <div style={{ maxWidth: 360, flex: 1, minWidth: 260 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+                  <Logo size={28} />
+                  <span style={{ fontSize: 17, fontWeight: 800, color: '#0f172a', fontFamily: "'Plus Jakarta Sans',sans-serif" }}>Quotiq</span>
                 </div>
-                <p style={{ fontSize: 12, color: '#94a3b8', lineHeight: 1.7, marginBottom: 20 }}>AI-powered quotation generator for modern businesses. Create, manage, and close deals faster than ever.</p>
-                <div style={{ display: 'flex', gap: 12 }}>
-                  {['in', '𝕏', '▶', '◉'].map((icon, i) => (
-                    <div key={i} style={{ width: 32, height: 32, borderRadius: 8, background: '#f0f2ff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, color: '#4f46e5', cursor: 'pointer', transition: 'all 0.2s' }}>
-                      {icon}
-                    </div>
+                <p style={{ fontSize: 12, color: '#64748b', lineHeight: 1.7, marginBottom: 18 }}>AI-powered quotation generator for modern businesses. Create, manage, and close deals faster.</p>
+                <div style={{ display: 'flex', gap: 8 }}>
+                  {['in','𝕏','▶'].map((icon, i) => (
+                    <div key={i} style={{ width: 30, height: 30, borderRadius: 7, background: '#f8fafc', border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, color: '#64748b', cursor: 'pointer', transition: 'border-color 0.15s' }}>{icon}</div>
                   ))}
                 </div>
               </div>
 
-              {/* Footer columns */}
-              {[
-                {
-                  title: 'Product',
-                  links: ['Features', 'Templates', 'Integrations', 'Pricing', 'Updates', 'Roadmap'],
-                },
-                {
-                  title: 'Use Cases',
-                  links: ['Freelancers', 'Agencies', 'Software Companies', 'Consultants', 'Startups', 'Enterprises'],
-                },
-                {
-                  title: 'Resources',
-                  links: ['Documentation', 'Help Center', 'Guides & Tutorials', 'Blog', 'API Reference', 'Community'],
-                },
-                {
-                  title: 'Company',
-                  links: ['About Us', 'Careers  🔴Hiring', 'Contact Us', 'Partners', 'Affiliates', 'Press Kit'],
-                },
-                {
-                  title: 'Legal',
-                  links: ['Terms of Service', 'Privacy Policy', 'Cookie Policy', 'Refund Policy', 'Security', 'GDPR'],
-                },
-              ].map((col, ci) => (
-                <div key={ci}>
-                  <div style={{ fontSize: 13, fontWeight: 700, color: '#1a1d2e', marginBottom: 16 }}>{col.title}</div>
-                  {col.links.map((link, li) => {
-                    const isHiring = link.includes('🔴Hiring');
-                    const [text, badge] = isHiring ? link.split('  ') : [link, null];
-                    return (
-                      <div key={li} style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10 }}>
-                        <a href="#" className="footer-link" style={{ marginBottom: 0 }}>{text}</a>
-                        {badge && <span style={{ fontSize: 9, fontWeight: 700, color: '#fff', background: '#ef4444', padding: '2px 6px', borderRadius: 100 }}>Hiring</span>}
-                      </div>
-                    );
-                  })}
-                </div>
-              ))}
-
               {/* Newsletter */}
-              <div>
-                <div style={{ fontSize: 13, fontWeight: 700, color: '#1a1d2e', marginBottom: 8 }}>Stay Updated</div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 12 }}>
-                  <div className="float-3d" style={{ fontSize: 24 }}>✉️</div>
-                  <p style={{ fontSize: 12, color: '#94a3b8', lineHeight: 1.6 }}>Get product updates, tips, and exclusive offers straight to your inbox.</p>
-                </div>
-                <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
-                  <input className="input-field" placeholder="Enter your email" style={{ fontSize: 13, padding: '10px 14px' }} />
-                  <button style={{ width: 42, height: 42, borderRadius: 10, background: 'linear-gradient(135deg,#4f46e5,#7c3aed)', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M15 8L1 1l4 7-4 7 14-7z" fill="white" /></svg>
+              <div style={{ maxWidth: 320, flex: 1, minWidth: 260 }}>
+                <div className="footer-col-title">Stay Updated</div>
+                <p style={{ fontSize: 12, color: '#64748b', lineHeight: 1.6, marginBottom: 14 }}>Get product updates, tips, and exclusive offers straight to your inbox.</p>
+                <div style={{ display: 'flex', gap: 8 }}>
+                  <input className="lp-input" placeholder="Enter your email" style={{ fontSize: 13 }} />
+                  <button className="btn-primary" style={{ padding: '10px 12px', flexShrink: 0 }}>
+                    <Icon name="send" size={16} color="white" />
                   </button>
                 </div>
               </div>
             </div>
 
-            {/* Footer bottom */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px 0', flexWrap: 'wrap', gap: 12 }}>
-              <span style={{ fontSize: 12, color: '#94a3b8' }}>© 2024 Quotiq. All rights reserved.</span>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#10b981', animation: 'pulse-dot 2s ease-in-out infinite' }} />
-                <span style={{ fontSize: 12, color: '#94a3b8' }}>All systems operational</span>
-              </div>
+            {/* Bottom bar */}
+            <div className="footer-bottom">
+              <span className="footer-bottom-text">© 2024 Quotiq. All rights reserved.</span>
+              <span className="footer-bottom-text">
+                <span className="status-dot" />
+                All systems operational
+              </span>
               <div style={{ display: 'flex', gap: 20 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: '#94a3b8', cursor: 'pointer' }}>
-                  🌍 English (US) ▾
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: '#94a3b8', cursor: 'pointer' }}>
-                  🌙 Dark Mode
-                </div>
+                <span className="footer-bottom-text" style={{ cursor: 'pointer' }}>🌍 English (US)</span>
+                <span className="footer-bottom-text" style={{ cursor: 'pointer' }}>🌙 Dark Mode</span>
               </div>
             </div>
           </div>
         </footer>
+
+        {/* ── CREATE TICKET MODAL ── */}
+        {showCreateTicketModal && (
+          <div style={{ position: 'fixed', inset: 0, background: 'rgba(15,23,42,0.4)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
+            <div style={{ background: '#fff', borderRadius: 16, border: '1px solid #e2e8f0', padding: 24, width: '100%', maxWidth: 440, boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+                <h3 style={{ fontSize: 16, fontWeight: 700, color: '#0f172a' }}>Raise New Ticket</h3>
+                <button onClick={() => setShowCreateTicketModal(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4 }}><Icon name="close" size={20} color="#64748b" /></button>
+              </div>
+              <form onSubmit={handleCreateTicket} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                <div>
+                  <div style={{ fontSize: 11, color: '#64748b', marginBottom: 4 }}>Ticket Title</div>
+                  <input className="lp-input" value={newTicketTitle} onChange={(e) => setNewTicketTitle(e.target.value)} placeholder="Describe the issue..." required />
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                  <div>
+                    <div style={{ fontSize: 11, color: '#64748b', marginBottom: 4 }}>Type</div>
+                    <select className="lp-input" value={newTicketType} onChange={(e) => setNewTicketType(e.target.value)}>
+                      <option value="BUG">Bug</option>
+                      <option value="FEATURE">Feature</option>
+                      <option value="IMPROVEMENT">Improvement</option>
+                      <option value="SUPPORT">Support</option>
+                    </select>
+                  </div>
+                  <div>
+                    <div style={{ fontSize: 11, color: '#64748b', marginBottom: 4 }}>Priority</div>
+                    <select className="lp-input" value={newTicketPrio} onChange={(e) => setNewTicketPrio(e.target.value)}>
+                      <option value="High">High</option>
+                      <option value="Medium">Medium</option>
+                      <option value="Low">Low</option>
+                    </select>
+                  </div>
+                </div>
+                <button className="btn-primary" type="submit" style={{ marginTop: 10, justifyContent: 'center' }}>Submit Ticket</button>
+              </form>
+            </div>
+          </div>
+        )}
+
+        {/* ── TOAST SYSTEM ── */}
+        {toast && (
+          <div className="toast">
+            <Icon name="check" size={16} color="white" />
+            <span>{toast.message}</span>
+          </div>
+        )}
 
       </div>
     </>

@@ -403,7 +403,7 @@ export default function CustomersPage() {
           <div className="flex flex-col items-center justify-center py-20 text-center">
             <Users size={48} className="text-outline-variant mb-4" />
             <h3 className="text-body-md font-bold text-on-surface">No customers found</h3>
-            <p className="text-body-sm text-secondary max-w-xs leading-relaxed mt-1">
+            <p className="text-body-sm text-secondary max-w-[320px] leading-relaxed mt-1">
               Add client profiles to store billing details and generate transactions.
             </p>
           </div>

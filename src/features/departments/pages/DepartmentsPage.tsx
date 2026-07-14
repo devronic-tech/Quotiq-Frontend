@@ -121,7 +121,7 @@ export default function DepartmentsPage() {
             <Building size={24} />
           </div>
           <h3 className="text-sm font-bold text-on-surface">No departments found</h3>
-          <p className="text-xs text-on-surface-variant max-w-xs leading-relaxed mt-1">
+          <p className="text-xs text-on-surface-variant max-w-[320px] leading-relaxed mt-1">
             Create departments to categorize quotations and manage team permissions.
           </p>
           <Button variant="outline" size="sm" className="mt-6" icon={<Plus size={14} />} onClick={() => setIsOpen(true)}>
